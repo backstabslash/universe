@@ -1,12 +1,16 @@
-import { Box } from "@chakra-ui/react";
-import UserProfile from "./UserProfile";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import MainContent from '../pages/UniversePage'
+import UserProfile from './UserProfile'
 
 const App = () => {
   return (
-    <Box padding="5" bg="gray.200">
-      <UserProfile />
-    </Box>
-  );
-};
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainContent />} />
+        <Route path="/user" element={<UserProfile />} />
+      </Routes>
+    </Router>
+  )
+}
 
-export default App;
+export default App
