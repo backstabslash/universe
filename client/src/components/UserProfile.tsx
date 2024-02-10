@@ -93,6 +93,29 @@ function UserProfile() {
                   </MenuList>
                 </Menu>
               </Box>
+              <Box>
+                <Menu placement="bottom-end">
+                  <MenuButton
+                    width="100%"
+                    as={Button}
+                    backgroundColor="#1a1d21"
+                    color="white"
+                    border="1px solid #57595d"
+                    _hover={{ backgroundColor: "#2a2d31" }}
+                    _active={{ borderColor: "#cccccc" }}
+                  >
+                    ⋮
+                  </MenuButton>
+                  <MenuList backgroundColor="#222529">
+                    <MenuItem backgroundColor="#222529" _hover={{ backgroundColor: "#1264a3" }}>
+                      A coworker at Universe
+                    </MenuItem>
+                    <MenuItem backgroundColor="#222529" _hover={{ backgroundColor: "#1264a3" }}>
+                      A contact from other organizations
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </Box>
             </HStack>
           </VStack>
           <VStack width="100%" align="start" borderBottom="1px solid #57595d" spacing={4} p={3}>
