@@ -8,7 +8,5 @@ const App = () => {
         <Route path="/" element={<MainContent />} />
       </Routes>
     </Router>
-  );
-};
-
+    
 export default App;
