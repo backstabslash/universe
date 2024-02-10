@@ -6,22 +6,22 @@ import {
   Input,
   Button,
   Divider,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react'
 
-const channels = ["general", "random", "team-1", "team-2"];
-const directMessages = ["user1", "user2", "user3"];
+const channels = ['general', 'random', 'team-1', 'team-2']
+const directMessages = ['user1', 'user2', 'user3']
 
 const contentData = [
-  "This is a message",
-  "Another message",
-  "Yet another message",
-  "This is a message",
-  "Another message",
-  "Yet another message",
-  "This is a message",
-  "Another message",
-  "Yet another message",
-];
+  'This is a message',
+  'Another message',
+  'Yet another message',
+  'This is a message',
+  'Another message',
+  'Yet another message',
+  'This is a message',
+  'Another message',
+  'Yet another message',
+]
 
 const Sidebar = () => (
   <VStack
@@ -42,7 +42,7 @@ const Sidebar = () => (
         borderRadius="md"
         bg="zinc900"
         color="zinc300"
-        _hover={{ bg: "zinc800" }}
+        _hover={{ bg: 'zinc800' }}
         width="100%"
       >{`#${channel}`}</Box>
     ))}
@@ -57,13 +57,13 @@ const Sidebar = () => (
         borderRadius="md"
         bg="zinc900"
         color="zinc300"
-        _hover={{ bg: "zinc800" }}
+        _hover={{ bg: 'zinc800' }}
         width="100%"
       >{`@${user}`}</Box>
     ))}
     <Divider my="1" />
   </VStack>
-);
+)
 
 const MainContent = () => (
   <Box flex="1" flexDirection="column" h="100vh">
@@ -73,9 +73,9 @@ const MainContent = () => (
       p="4"
       height="60px"
       gap="10px"
-      alignItems={"center"}
-      borderBottom={"1px"}
-      borderColor={"zinc600"}
+      alignItems={'center'}
+      borderBottom={'1px'}
+      borderColor={'zinc600'}
     >
       <Heading
         flex="1"
@@ -95,10 +95,10 @@ const MainContent = () => (
         bg="zinc800"
         borderRadius="md"
         borderColor="transparent"
-        _focusVisible={{ borderColor: "zinc600" }}
-        _hover={{ borderColor: "zinc600", bg: "zinc900" }}
+        _focusVisible={{ borderColor: 'zinc600' }}
+        _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
       />
-      <Button bg="zinc800" color="zinc300" _hover={{ bg: "zinc700" }}>
+      <Button bg="zinc800" color="zinc300" _hover={{ bg: 'zinc700' }}>
         ?
       </Button>
     </Flex>
@@ -144,8 +144,8 @@ const MainContent = () => (
             bg="zinc800"
             borderRadius="md"
             borderColor="zinc600"
-            _focusVisible={{ borderColor: "zinc600" }}
-            _hover={{ borderColor: "zinc600", bg: "zinc900" }}
+            _focusVisible={{ borderColor: 'zinc600' }}
+            _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
             h="60px"
           />
 
@@ -153,7 +153,7 @@ const MainContent = () => (
             ml="4"
             bg="zinc800"
             color="zinc300"
-            _hover={{ bg: "zinc700" }}
+            _hover={{ bg: 'zinc700' }}
           >
             Send
           </Button>
@@ -161,6 +161,6 @@ const MainContent = () => (
       </Box>
     </Flex>
   </Box>
-);
+)
 
-export default MainContent;
+export default MainContent

@@ -11,8 +11,8 @@ import {
   HStack,
   Link,
   Spacer,
-} from "@chakra-ui/react";
-import { CloseIcon, AddIcon, ChevronDownIcon } from "@chakra-ui/icons";
+} from '@chakra-ui/react'
+import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons'
 
 const UserProfile = () => (
   <Box backgroundColor="#1a1d21" color="white" p={1}>
@@ -25,8 +25,8 @@ const UserProfile = () => (
         <Button
           backgroundColor="#1a1d21"
           color="white"
-          _hover={{ backgroundColor: "#2a2d31" }}
-          _active={{ backgroundColor: "#313438" }}
+          _hover={{ backgroundColor: '#2a2d31' }}
+          _active={{ backgroundColor: '#313438' }}
         >
           <CloseIcon />
         </Button>
@@ -49,13 +49,16 @@ const UserProfile = () => (
               <Spacer />
               <Link
                 color="#1d9bd1"
-                _hover={{ color: "#23bdff", textDecoration: "underline" }}
+                _hover={{
+                  color: '#23bdff',
+                  textDecoration: 'underline',
+                }}
               >
                 Edit
               </Link>
             </HStack>
             <Text>Мальчик like чел</Text>
-            <Link color="#1d9bd1" _hover={{ color: "#23bdff" }}>
+            <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
               <HStack>
                 <AddIcon fontSize="small" />
                 <Text>Add name pronunciation</Text>
@@ -72,8 +75,8 @@ const UserProfile = () => (
               backgroundColor="#1a1d21"
               color="white"
               border="1px solid #57595d"
-              _hover={{ backgroundColor: "#2a2d31" }}
-              _active={{ borderColor: "#cccccc" }}
+              _hover={{ backgroundColor: '#2a2d31' }}
+              _active={{ borderColor: '#cccccc' }}
             >
               Set a status
             </Button>
@@ -86,21 +89,21 @@ const UserProfile = () => (
                   backgroundColor="#1a1d21"
                   color="white"
                   border="1px solid #57595d"
-                  _hover={{ backgroundColor: "#2a2d31" }}
-                  _active={{ borderColor: "#cccccc" }}
+                  _hover={{ backgroundColor: '#2a2d31' }}
+                  _active={{ borderColor: '#cccccc' }}
                 >
                   View as
                 </MenuButton>
                 <MenuList backgroundColor="#222529">
                   <MenuItem
                     backgroundColor="#222529"
-                    _hover={{ backgroundColor: "#1264a3" }}
+                    _hover={{ backgroundColor: '#1264a3' }}
                   >
                     A coworker at Universe
                   </MenuItem>
                   <MenuItem
                     backgroundColor="#222529"
-                    _hover={{ backgroundColor: "#1264a3" }}
+                    _hover={{ backgroundColor: '#1264a3' }}
                   >
                     A contact from other organizations
                   </MenuItem>
@@ -115,21 +118,21 @@ const UserProfile = () => (
                   backgroundColor="#1a1d21"
                   color="white"
                   border="1px solid #57595d"
-                  _hover={{ backgroundColor: "#2a2d31" }}
-                  _active={{ borderColor: "#cccccc" }}
+                  _hover={{ backgroundColor: '#2a2d31' }}
+                  _active={{ borderColor: '#cccccc' }}
                 >
                   ⋮
                 </MenuButton>
                 <MenuList backgroundColor="#222529">
                   <MenuItem
                     backgroundColor="#222529"
-                    _hover={{ backgroundColor: "#1264a3" }}
+                    _hover={{ backgroundColor: '#1264a3' }}
                   >
                     A coworker at Universe
                   </MenuItem>
                   <MenuItem
                     backgroundColor="#222529"
-                    _hover={{ backgroundColor: "#1264a3" }}
+                    _hover={{ backgroundColor: '#1264a3' }}
                   >
                     A contact from other organizations
                   </MenuItem>
@@ -149,7 +152,10 @@ const UserProfile = () => (
             <Text fontWeight="bold">Contact information</Text>
             <Link
               color="#1d9bd1"
-              _hover={{ color: "#23bdff", textDecoration: "underline" }}
+              _hover={{
+                color: '#23bdff',
+                textDecoration: 'underline',
+              }}
             >
               Edit
             </Link>
@@ -160,12 +166,15 @@ const UserProfile = () => (
             </Text>
             <Link
               color="#1d9bd1"
-              _hover={{ color: "#23bdff", textDecoration: "underline" }}
+              _hover={{
+                color: '#23bdff',
+                textDecoration: 'underline',
+              }}
             >
               vladislav.rupets@gmail.com
             </Link>
           </VStack>
-          <Link color="#1d9bd1" _hover={{ color: "#23bdff" }}>
+          <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
             <HStack>
               <AddIcon fontSize="small" />
               <Text>Add phone</Text>
@@ -183,12 +192,15 @@ const UserProfile = () => (
             <Text fontWeight="bold">About me</Text>
             <Link
               color="#1d9bd1"
-              _hover={{ color: "#23bdff", textDecoration: "underline" }}
+              _hover={{
+                color: '#23bdff',
+                textDecoration: 'underline',
+              }}
             >
               Edit
             </Link>
           </HStack>
-          <Link color="#1d9bd1" _hover={{ color: "#23bdff" }}>
+          <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
             <HStack>
               <AddIcon fontSize="small" />
               <Text>Add start date</Text>
@@ -198,6 +210,6 @@ const UserProfile = () => (
       </VStack>
     </Box>
   </Box>
-);
+)
 
-export default UserProfile;
+export default UserProfile
