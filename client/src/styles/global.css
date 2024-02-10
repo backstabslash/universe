@@ -1,16 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600&display=swap");
-
 html,
 body {
-  font-family: "Epilogue", -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-    Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   height: 100vh;
   width: 100vw;
-}
-
-html {
-  font-size: 62.5%;
-  font-weight: 400;
+  scroll-behavior: smooth;
 }
 
 a {
@@ -22,4 +14,40 @@ a {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3c3f42 transparent;
+}
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+}
+*::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-track:hover {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-track:active {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background-color: #3c3f42;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #3c3f42;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: #3c3f42;
 }
