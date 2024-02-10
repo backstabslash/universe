@@ -1,9 +1,10 @@
-import { Box, Button } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
+import UserProfile from "./UserProfile";
 
 const App = () => {
   return (
     <Box padding="5" bg="gray.200">
-      <Button colorScheme="red">Test</Button>
+      <UserProfile />
     </Box>
   );
 };
