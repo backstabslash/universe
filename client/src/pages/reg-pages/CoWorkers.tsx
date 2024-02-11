@@ -61,7 +61,7 @@ const Sidebar = (): JSX.Element => (
   </VStack>
 )
 
-const CoWorkers = (): JSX.Element => {
+const Coworkers = (): JSX.Element => {
   const organisationName = 'Your Organisation Name'
   const isLoadingMock = false
 
@@ -154,4 +154,4 @@ const CoWorkers = (): JSX.Element => {
   )
 }
 
-export default CoWorkers
+export default Coworkers

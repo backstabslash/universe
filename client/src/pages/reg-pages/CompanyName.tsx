@@ -56,7 +56,7 @@ const Sidebar = (): JSX.Element => (
   </VStack>
 )
 
-const Companyname = (): JSX.Element => {
+const CompanyName = (): JSX.Element => {
   const navigate = useNavigate()
 
   return (
@@ -114,4 +114,4 @@ const Companyname = (): JSX.Element => {
     </Box>
   )
 }
-export default Companyname
+export default CompanyName
