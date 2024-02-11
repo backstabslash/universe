@@ -18,39 +18,10 @@ import {
 import MainpageSvg from "../../public/svg/mainpageSvg";
 import { BsArrowRightShort } from "react-icons/bs";
 import { useNavigate } from 'react-router-dom';
-// import { useMutation, useQuery } from "react-query";
-// import { useRouter } from "next/router";
 
 
 const MainPage = () => {
-//   const router = useRouter()
-//   const [email, setEmail] = React.useState('')
-//   const setData = {}
 
-//   const mutation = useMutation({
-//     mutationFn: () => {
-//       return axios.post('/organisation')
-//     },
-//     onError(error: ApiError) {
-//       notifications.show({
-//         message: error?.response?.data?.data?.name,
-//         color: 'red',
-//         p: '1.6rem',
-//       })
-//     },
-//     onSuccess(data) {
-//       router.push(`${data?.data?.data?._id}`)
-//     },
-//   })
-
-//   const query = useQuery(
-//     ['workspaces'],
-//     () => axios.get(`/organisation/workspaces`),
-//     {
-//       refetchOnMount: false,
-//       enabled: !!email,
-//     }
-//   )
 
   const organisations = [
 			{
@@ -86,32 +57,6 @@ const MainPage = () => {
 
   const navigate = useNavigate();
 
-  
-
-//   function handleOpenWorkspace(organisation: Data) {
-//     setData(undefined)
-//     localStorage.setItem('organisationId', organisation?._id)
-//     router.push(`/c/${organisation?.channels?.[0]?._id}`)
-//     localStorage.setItem('channel', 'true')
-//   }
-
-//   React.useEffect(() => {
-//     if (router.query.token) {
-//       setEmail(router.query.email as string)
-//       localStorage.setItem('signUpEmail', router.query?.email as string)
-//       localStorage.setItem('access-token', router?.query?.token as string)
-//     }
-//   }, [router.query.token])
-//   React.useEffect(() => {
-//     if (typeof window !== 'undefined') {
-//       setEmail(localStorage.getItem('signUpEmail') as string)
-
-//       const signUpEmail = localStorage.getItem('signUpEmail')
-//       if (!signUpEmail) {
-//         // router.push('/signin')
-//       }
-//     }
-//   }, [])
 	return (
     <VStack h="100vh" w="100vw" bg="zinc900">
       <Text fontSize="4rem" fontWeight={600} color="white">
