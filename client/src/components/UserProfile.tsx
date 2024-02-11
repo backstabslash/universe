@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react'
 import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons'
 
-const UserProfile = () => (
+const UserProfile = (): JSX.Element => (
   <Box backgroundColor="#1a1d21" color="white" p={1}>
     <Box border="1px solid #57595d" borderTopRightRadius="md">
       <HStack borderBottom="1px solid #57595d" p={3}>
