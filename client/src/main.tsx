@@ -1,9 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import App from './components/App'
 import './styles/global.css'
-
 const theme = extendTheme({
   colors: {
     zinc950: '#09090b',
@@ -25,11 +24,22 @@ const theme = extendTheme({
   },
 })
 
-ReactDOM.render(
-  <React.StrictMode>
+function Main() {
+  useEffect(() => {
+    localStorage.setItem('chakra-ui-color-mode', 'dark')
+  }, [])
+
+  return (
     <ChakraProvider theme={theme}>
       <App />
     </ChakraProvider>
+  )
+}
+
+ReactDOM.render(
+  <React.StrictMode>
+    <Main />
   </React.StrictMode>,
   document.getElementById('root')
 )
+

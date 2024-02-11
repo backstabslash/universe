@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainContent from '../pages/UniversePage'
 import UserProfile from './UserProfile'
+import MainPage from '../pages/MainPage'
 
 const App = () => {
   return (
@@ -8,6 +9,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<MainContent />} />
         <Route path="/user" element={<UserProfile />} />
+        <Route path="/main" element={<MainPage />} />
       </Routes>
     </Router>
   )
