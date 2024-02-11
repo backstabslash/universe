@@ -59,13 +59,8 @@ const MainPage = () => {
 
 	return (
     <VStack h="100vh" w="100vw" bg="zinc900">
-      <Text fontSize="4rem" fontWeight={600} color="white">
-        Universe
-      </Text>
-      <Spacer></Spacer>
-      <Spacer></Spacer>
-      <VStack spacing="2rem" mb="100rem">
-        <HStack mb="5rem">
+      <VStack spacing="2rem" mb="100rem" mt="6rem">
+        <HStack mb="2rem">
           <Flex justify="end">
             <Stack align="start" w="70%" justify="center" mr="1rm">
               <Text fontSize="3rem" fontWeight={600} color="white">
@@ -182,6 +177,7 @@ const MainPage = () => {
                       _hover={{ bg: 'zinc700' }}
                       rightIcon={<BsArrowRightShort />}
                       variant="outline"
+                      mr="1rem"
                     >
                       Open
                     </Button>
