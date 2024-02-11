@@ -3,7 +3,7 @@ import MainContent from '../pages/UniversePage'
 import UserProfile from './UserProfile'
 import MainPage from '../pages/MainPage'
 
-const App = () => {
+const App = (): JSX.Element => {
   return (
     <Router>
       <Routes>

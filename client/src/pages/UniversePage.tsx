@@ -23,7 +23,7 @@ const contentData = [
   'Yet another message',
 ]
 
-const Sidebar = () => (
+const Sidebar = (): JSX.Element => (
   <VStack
     padding="5"
     bg="zinc900"
@@ -65,7 +65,7 @@ const Sidebar = () => (
   </VStack>
 )
 
-const MainContent = () => (
+const MainContent = (): JSX.Element => (
   <Box flex="1" flexDirection="column" h="100vh">
     <Flex
       bg="zinc900"
