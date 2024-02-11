@@ -4,9 +4,7 @@ import {
   Button,
   Flex,
   Input,
-  VStack,
   Heading,
-  Divider,
   HStack,
   Tag,
   TagLabel,
@@ -14,52 +12,7 @@ import {
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-const channels = ['general', 'random', 'team-1', 'team-2']
-const directMessages = ['user1', 'user2', 'user3']
-
-const Sidebar = (): JSX.Element => (
-  <VStack
-    padding="5"
-    bg="zinc900"
-    color="zinc300"
-    width="300px"
-    borderRight="1px"
-    borderColor="zinc600"
-    height={'100vh'}
-  >
-    <Heading mb="2" fontSize="lg" width="100%">
-      Channels
-    </Heading>
-    {channels.map((channel) => (
-      <Box
-        key={channel}
-        p="2"
-        borderRadius="md"
-        bg="zinc900"
-        color="zinc300"
-        _hover={{ bg: 'zinc800' }}
-        width="100%"
-      >{`#${channel}`}</Box>
-    ))}
-    <Divider my="1" />
-    <Heading mb="2" mt="2" fontSize="lg" width="100%">
-      Direct Messages
-    </Heading>
-    {directMessages.map((user) => (
-      <Box
-        key={user}
-        p="2"
-        borderRadius="md"
-        bg="zinc900"
-        color="zinc300"
-        _hover={{ bg: 'zinc800' }}
-        width="100%"
-      >{`@${user}`}</Box>
-    ))}
-    <Divider my="1" />
-  </VStack>
-)
+import Sidebar from '../../components/RegSidebar'
 
 const Coworkers = (): JSX.Element => {
   const organisationName = 'Your Organisation Name'
@@ -84,7 +37,7 @@ const Coworkers = (): JSX.Element => {
     <Box flexDirection="column" height="100vh" bg="zinc900">
       <HStack mr={'200px'} alignItems="flex-start">
         <Sidebar />
-        <VStack mb="50vh" ml="80px" align={'left'}>
+        <Flex ml="80px" flexDirection="column" alignItems="flex-start">
           <Text fontSize="15px" color="zinc300" mb="40px" mt="25px">
             Step 2 of 3
           </Text>
@@ -96,6 +49,7 @@ const Coworkers = (): JSX.Element => {
             textAlign="left"
             mr="640px"
             mb="10px"
+            color="zinc300"
           >
             Who else is on the <br /> {organisationName} team?
           </Heading>
@@ -108,9 +62,10 @@ const Coworkers = (): JSX.Element => {
             _focusVisible={{ borderColor: 'zinc600' }}
             w="460px"
             mb="10px"
+            color="zinc300"
           >
             {tags.map((tag, index) => (
-              <Tag key={index} m="2" w="fit-content">
+              <Tag key={index} m="2" w="fit-content" color="zinc300">
                 <TagLabel>{tag}</TagLabel>
                 <TagCloseButton
                   onClick={() => {
@@ -129,6 +84,7 @@ const Coworkers = (): JSX.Element => {
               _focusVisible={{ borderColor: 'zinc600' }}
               w="460px"
               mb="10px"
+              color="zinc300"
               value={input}
               onChange={(e) => {
                 setInput(e.target.value)
@@ -139,6 +95,9 @@ const Coworkers = (): JSX.Element => {
 
           <Flex align="center" gap="md" mt="lg">
             <Button
+              bg="zinc800"
+              color="zinc300"
+              _hover={{ bg: 'zinc700' }}
               w="80px"
               onClick={() => {
                 navigate('/reg/channels')
@@ -148,7 +107,7 @@ const Coworkers = (): JSX.Element => {
               {isLoadingMock ? '' : 'Next'}
             </Button>
           </Flex>
-        </VStack>
+        </Flex>
       </HStack>
     </Box>
   )
