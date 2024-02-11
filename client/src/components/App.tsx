@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainContent from '../pages/UniversePage'
 import UserProfile from './UserProfile'
 import MainPage from '../pages/MainPage'
+import CompanyName from '../pages/reg-pages/CompanyName'
+import Coworkers from '../pages/reg-pages/Coworkers'
+import Channels from '../pages/reg-pages/Channels'
 
 const App = (): JSX.Element => {
   return (
@@ -10,6 +13,9 @@ const App = (): JSX.Element => {
         <Route path="/" element={<MainContent />} />
         <Route path="/user" element={<UserProfile />} />
         <Route path="/main" element={<MainPage />} />
+        <Route path="/reg/companyname" element={<CompanyName />} />
+        <Route path="/reg/coworkers" element={<Coworkers />} />
+        <Route path="/reg/channels" element={<Channels />} />
       </Routes>
     </Router>
   )
