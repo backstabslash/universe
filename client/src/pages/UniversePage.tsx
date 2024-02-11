@@ -49,7 +49,7 @@ const MainContent = (): JSX.Element => (
         <Box
           h="calc(100vh - 180px)"
           overflowY="auto"
-          bgImage="url('https://web.telegram.org/a/chat-bg-pattern-dark.ad38368a9e8140d0ac7d.png')"
+          bgImage="../../public/chat-bg-pattern-dark.png"
           bgSize="cover"
           bgRepeat="no-repeat"
           bgPosition="center"
