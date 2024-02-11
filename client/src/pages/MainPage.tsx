@@ -63,10 +63,10 @@ const MainPage = () => {
         <HStack mb="2rem">
           <Flex justify="end">
             <Stack align="start" w="70%" justify="center" mr="1rm">
-              <Text fontSize="3rem" fontWeight={600} color="white">
+              <Text fontSize="3rem" fontWeight={600} color="zinc300">
                 Get started on Universe
               </Text>
-              <Text fontSize="1rem" mt="1.2rem" w="75%">
+              <Text fontSize="1rem" mt="1.2rem" w="75%" color="zinc300">
                 it's a new way to communicate with everyone you work with. it's
                 faster, better organized, and more secure than email - and it's
                 free to try.
@@ -97,6 +97,7 @@ const MainPage = () => {
 
         <Box
           borderRadius="1.2rem"
+          borderColor={"zinc700"}
           p="1.4rem"
           border="1px"
           mt="1rem"
@@ -106,25 +107,41 @@ const MainPage = () => {
         >
           {isLoading && (
             <Flex align="center" gap="2">
-              <SkeletonCircle size="55" />
+              <SkeletonCircle size="55" color="zinc800" />
               <Stack spacing="1">
-                <Skeleton height="5" width="330px" borderRadius="lg" />
-                <Skeleton height="5" width="150px" borderRadius="lg" />
+                <Skeleton
+                  height="5"
+                  width="330px"
+                  borderRadius="lg"
+                  color="zinc800"
+                />
+                <Skeleton
+                  height="5"
+                  width="150px"
+                  borderRadius="lg"
+                  color="zinc800"
+                />
               </Stack>
             </Flex>
           )}
           {!isLoading && organisations?.length >= 1 && (
-            <Text fontWeight="bold" color="white" mb="1.2rem">
+            <Text fontWeight="bold" color="zinc300" mb="1.2rem">
               Open a workspace
             </Text>
           )}
           {!isLoading && organisations?.length === 0 ? (
             <Center>
               <Flex direction="column" align="center" justify="center">
-                <Text fontSize="1rem" fontWeight={600} color="white">
+                <Text fontSize="1rem" fontWeight={600} color="zinc300">
                   is your team already on Slack?
                 </Text>
-                <Text fontSize=".8rem" mt=".6rem" w="75%" align="center">
+                <Text
+                  fontSize=".8rem"
+                  mt=".6rem"
+                  w="75%"
+                  align="center"
+                  color="zinc300"
+                >
                   We coudn't find any existing workspaces for the email address{' '}
                   {email}
                 </Text>
@@ -136,6 +153,7 @@ const MainPage = () => {
                   bg="zinc800"
                   color="zinc300"
                   _hover={{ bg: 'zinc700' }}
+                  borderColor="zinc300"
                 >
                   Try a Different Email
                 </Button>
@@ -158,14 +176,23 @@ const MainPage = () => {
                     }}
                   >
                     <Flex align="center" gap=".5rem">
-                      <Avatar size="md" name={userName} borderRadius="1.4rem">
+                      <Avatar
+                        size="md"
+                        name={userName}
+                        borderRadius="1.4rem"
+                        color="zinc300"
+                      >
                         {organisation.name[0].toUpperCase()}
                       </Avatar>
                       <Flex direction="column">
-                        <Text color="white" textTransform="capitalize">
+                        <Text color="zinc300" textTransform="capitalize">
                           {organisation.name}
                         </Text>
-                        <Text fontSize=".8rem" textTransform="capitalize">
+                        <Text
+                          fontSize=".8rem"
+                          textTransform="capitalize"
+                          color="zinc300"
+                        >
                           {organisation.coWorkers.length} members
                         </Text>
                       </Flex>
@@ -175,6 +202,7 @@ const MainPage = () => {
                       bg="zinc800"
                       color="zinc300"
                       _hover={{ bg: 'zinc700' }}
+                      borderColor="zinc600"
                       rightIcon={<BsArrowRightShort />}
                       variant="outline"
                       mr="1rem"
