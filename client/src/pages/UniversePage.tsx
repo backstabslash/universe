@@ -1,22 +1,15 @@
-import {
-  AddIcon,
-  ChatIcon,
-  LinkIcon,
-  QuestionOutlineIcon,
-  TimeIcon,
-} from '@chakra-ui/icons'
+import { AddIcon, ChatIcon, LinkIcon, TimeIcon } from '@chakra-ui/icons'
 import {
   Box,
-  VStack,
   Heading,
   Flex,
   Input,
   Button,
   Divider,
+  type ButtonProps,
 } from '@chakra-ui/react'
-
-const channels = ['general', 'random', 'team-1', 'team-2']
-const directMessages = ['user1', 'user2', 'user3']
+import Sidebar from '../components/Sidebar'
+import Header from '../components/Header'
 
 const contentData = [
   'This is a message',
@@ -30,85 +23,26 @@ const contentData = [
   'Yet another message',
 ]
 
-const Sidebar = (): JSX.Element => (
-  <VStack
-    padding="5"
-    bg="zinc900"
+interface IconButtonProps extends ButtonProps {
+  label: string | JSX.Element
+}
+
+const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
+  <Button
+    size="xs"
+    mr="2"
+    bg="zinc800"
     color="zinc300"
-    width="300px"
-    borderRight="1px"
-    borderColor="zinc600"
+    _hover={{ bg: 'zinc700' }}
+    {...props}
   >
-    <Heading mb="2" fontSize="lg" width="100%">
-      Channels
-    </Heading>
-    {channels.map((channel) => (
-      <Box
-        key={channel}
-        p="2"
-        borderRadius="md"
-        bg="zinc900"
-        color="zinc300"
-        _hover={{ bg: 'zinc800' }}
-        width="100%"
-      >{`#${channel}`}</Box>
-    ))}
-    <Divider my="1" />
-    <Heading mb="2" mt="2" fontSize="lg" width="100%">
-      Direct Messages
-    </Heading>
-    {directMessages.map((user) => (
-      <Box
-        key={user}
-        p="2"
-        borderRadius="md"
-        bg="zinc900"
-        color="zinc300"
-        _hover={{ bg: 'zinc800' }}
-        width="100%"
-      >{`@${user}`}</Box>
-    ))}
-    <Divider my="1" />
-  </VStack>
+    {label}
+  </Button>
 )
 
 const MainContent = (): JSX.Element => (
   <Box flex="1" flexDirection="column" h="100vh">
-    <Flex
-      bg="zinc900"
-      color="zinc300"
-      p="4"
-      height="60px"
-      gap="10px"
-      alignItems={'center'}
-      borderBottom={'1px'}
-      borderColor={'zinc600'}
-    >
-      <Heading
-        flex="1"
-        fontSize="2xl"
-        borderColor="zinc600"
-        bg="zinc800"
-        padding="5px"
-        borderRadius="md"
-        width="200px"
-        textAlign="center"
-      >
-        Universe
-      </Heading>
-      <Input
-        flex="2"
-        placeholder="Search Universe"
-        bg="zinc800"
-        borderRadius="md"
-        borderColor="transparent"
-        _focusVisible={{ borderColor: 'zinc600' }}
-        _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
-      />
-      <Button bg="zinc800" color="zinc300" _hover={{ bg: 'zinc700' }}>
-        <QuestionOutlineIcon boxSize={'5'} />
-      </Button>
-    </Flex>
+    <Header />
     <Flex>
       <Sidebar />
       <Box bg="zinc900" w="100vw" h="calc(100vh - 60px)" color="zinc300">
@@ -167,43 +101,11 @@ const MainContent = (): JSX.Element => (
               justifyContent="left"
               width="100%"
             >
-              <Button
-                size="xs"
-                mr="2"
-                bg="zinc800"
-                color="zinc300"
-                _hover={{ bg: 'zinc700' }}
-              >
-                <b>B</b>
-              </Button>
-              <Button
-                size="xs"
-                mr="2"
-                bg="zinc800"
-                color="zinc300"
-                _hover={{ bg: 'zinc700' }}
-              >
-                <i>I</i>
-              </Button>
-              <Button
-                size="xs"
-                mr="2"
-                bg="zinc800"
-                color="zinc300"
-                _hover={{ bg: 'zinc700' }}
-              >
-                <del>S</del>
-              </Button>
-              <Divider orientation="vertical" h="12px" m="0" p="0" mr="2" />
-              <Button
-                size="xs"
-                mr="2"
-                bg="zinc800"
-                color="zinc300"
-                _hover={{ bg: 'zinc700' }}
-              >
-                <LinkIcon boxSize={'3'} />
-              </Button>
+              <IconButton label={<b>B</b>} />
+              <IconButton label={<i>I</i>} />
+              <IconButton label={<del>S</del>} />
+              <Divider orientation="vertical" h="12px" m="0" p="0" />
+              <IconButton label={<LinkIcon boxSize={'3'} />} />
             </Flex>
             <Input
               flex="1"
@@ -221,41 +123,24 @@ const MainContent = (): JSX.Element => (
               ml="20px"
             >
               <Box>
-                <Button
+                <IconButton
+                  label={<AddIcon boxSize={'2'} />}
                   mb="5px"
                   mt="5px"
-                  mr="2"
-                  size="xs"
-                  bg="zinc800"
-                  color="zinc300"
-                  _hover={{ bg: 'zinc700' }}
-                >
-                  <AddIcon boxSize={'2'} />
-                </Button>
-                <Button
+                />
+                <IconButton
+                  label={<TimeIcon boxSize={'3'} />}
                   mb="5px"
-                  mr="2"
                   mt="5px"
-                  size="xs"
-                  bg="zinc800"
-                  color="zinc300"
-                  _hover={{ bg: 'zinc700' }}
-                >
-                  <TimeIcon boxSize={'3'} />
-                </Button>
+                />
               </Box>
               <Box>
-                <Button
-                  size="xs"
+                <IconButton
+                  label={<ChatIcon boxSize={'3'} />}
                   mb="5px"
                   mr="30px"
                   mt="5px"
-                  bg="zinc800"
-                  color="zinc300"
-                  _hover={{ bg: 'zinc700' }}
-                >
-                  <ChatIcon boxSize={'3'} />
-                </Button>
+                />
               </Box>
             </Flex>
           </Flex>
