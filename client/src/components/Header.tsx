@@ -1,39 +1,35 @@
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
-import { Heading, Flex, Input, Button } from '@chakra-ui/react'
+import { Flex, Input, Button } from '@chakra-ui/react'
 
 const Header = (): JSX.Element => (
   <Flex
-    bg="zinc900"
     color="zinc300"
-    p="4"
-    height="60px"
+    p="1"
+    mt="1"
+    height="30px"
     gap="10px"
+    width="40vw"
+    borderTopLeftRadius={'10px'}
     alignItems={'center'}
-    borderBottom={'1px'}
-    borderColor={'zinc600'}
+    justifyContent={'center'}
   >
-    <Heading
-      flex="1"
-      fontSize="2xl"
-      borderColor="zinc600"
-      bg="zinc800"
-      padding="5px"
-      borderRadius="md"
-      width="200px"
-      textAlign="center"
-    >
-      Universe
-    </Heading>
     <Input
       flex="2"
       placeholder="Search Universe"
-      bg="zinc800"
+      background="rgba(0, 0, 0, 0.4)"
       borderRadius="md"
       borderColor="transparent"
-      _focusVisible={{ borderColor: 'zinc600' }}
-      _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
+      height="30px"
+      _placeholder={{ color: 'zinc300' }}
+      _focusVisible={{ borderColor: '' }}
+      _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
     />
-    <Button bg="zinc800" color="zinc300" _hover={{ bg: 'zinc700' }}>
+    <Button
+      size={'sm'}
+      bg="transparent"
+      color="zinc300"
+      _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+    >
       <QuestionOutlineIcon boxSize={'5'} />
     </Button>
   </Flex>

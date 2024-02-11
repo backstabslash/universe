@@ -6,11 +6,14 @@ const directMessages = ['user1', 'user2', 'user3']
 const Sidebar = (): JSX.Element => (
   <VStack
     padding="5"
-    bg="zinc900"
+    bg="transparent"
+    background="rgba(0, 0, 0, 0.6)"
     color="zinc300"
     width="300px"
     borderRight="1px"
     borderColor="zinc600"
+    borderTopLeftRadius="10px"
+    borderBottomLeftRadius="10px"
   >
     <Heading mb="2" fontSize="lg" width="100%">
       Channels
@@ -20,9 +23,10 @@ const Sidebar = (): JSX.Element => (
         key={channel}
         p="2"
         borderRadius="md"
-        bg="zinc900"
+        bg="transparent"
+        background="rgba(0, 0, 0, 0.2)"
         color="zinc300"
-        _hover={{ bg: 'zinc800' }}
+        _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
         width="100%"
       >{`#${channel}`}</Box>
     ))}
@@ -35,9 +39,10 @@ const Sidebar = (): JSX.Element => (
         key={user}
         p="2"
         borderRadius="md"
-        bg="zinc900"
+        bg="transparent"
+        background="rgba(0, 0, 0, 0.2)"
         color="zinc300"
-        _hover={{ bg: 'zinc800' }}
+        _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
         width="100%"
       >{`@${user}`}</Box>
     ))}
