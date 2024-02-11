@@ -1,4 +1,10 @@
-import { AddIcon, ChatIcon, LinkIcon, TimeIcon } from '@chakra-ui/icons'
+import {
+  AddIcon,
+  ChatIcon,
+  EditIcon,
+  LinkIcon,
+  TimeIcon,
+} from '@chakra-ui/icons'
 import {
   Box,
   Heading,
@@ -7,6 +13,7 @@ import {
   Button,
   Divider,
   type ButtonProps,
+  Text,
 } from '@chakra-ui/react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
@@ -29,7 +36,7 @@ interface IconButtonProps extends ButtonProps {
 
 const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
   <Button
-    size="xs"
+    size="sm"
     mr="2"
     bg="zinc800"
     color="zinc300"
@@ -58,11 +65,34 @@ const MainContent = (): JSX.Element => (
           h="calc(100vh - 46px)"
           color="zinc300"
           borderBottomRightRadius="10px"
-          borderTopRightRadius="10px"
         >
+          <Flex
+            fontSize="lg"
+            width="100%"
+            bg="transparent"
+            background="rgba(0, 0, 0, 0.6)"
+            borderBottom="1px"
+            borderColor="zinc600"
+            p="15px"
+            h="60px"
+            borderTopRightRadius="10px"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Text>#general</Text>
+            <Button
+              size="md"
+              mr="2"
+              bg="transparent"
+              color="zinc300"
+              _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+            >
+              <EditIcon boxSize={'4'} /> &nbsp; Canvas
+            </Button>
+          </Flex>
           <Box
             bg="zinc900"
-            h="calc(100vh - 196px)"
+            h="calc(100vh - 256px)"
             overflowY="auto"
             bgImage="../../public/chat-bg-pattern-dark.png"
             bgSize="cover"
@@ -104,7 +134,7 @@ const MainContent = (): JSX.Element => (
               _hover={{ borderColor: 'zinc600' }}
               _focusVisible={{ borderColor: 'zinc600' }}
               width="100%"
-              h="100px"
+              h="120px"
               alignItems="center"
               justifyContent="center"
               flexDirection={'column'}
@@ -120,7 +150,7 @@ const MainContent = (): JSX.Element => (
                 <IconButton label={<b>B</b>} />
                 <IconButton label={<i>I</i>} />
                 <IconButton label={<del>S</del>} />
-                <Divider orientation="vertical" h="12px" m="0" p="0" />
+                <Divider orientation="vertical" h="12px" m="0" p="0" mr="8px" />
                 <IconButton label={<LinkIcon boxSize={'3'} />} />
               </Flex>
               <Input
@@ -130,7 +160,7 @@ const MainContent = (): JSX.Element => (
                 border="0"
                 _focusVisible={{ borderColor: '' }}
                 _hover={{ borderColor: '', bg: '' }}
-                h="7vh"
+                h="10vh"
               />
               <Flex
                 alignItems="center"
@@ -140,7 +170,7 @@ const MainContent = (): JSX.Element => (
               >
                 <Box>
                   <IconButton
-                    label={<AddIcon boxSize={'2'} />}
+                    label={<AddIcon boxSize={'3'} />}
                     mb="5px"
                     mt="5px"
                   />
@@ -152,7 +182,7 @@ const MainContent = (): JSX.Element => (
                 </Box>
                 <Box>
                   <IconButton
-                    label={<ChatIcon boxSize={'3'} />}
+                    label={<ChatIcon boxSize={'4'} />}
                     mb="5px"
                     mr="30px"
                     mt="5px"
