@@ -22,6 +22,11 @@ module.exports = {
     project: './tsconfig.json',
     tsconfigRootDir: __dirname,
   },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
   plugins: ['react'],
   ignorePatterns: ['.eslintrc.cjs', 'vite.config.ts'],
   rules: {
