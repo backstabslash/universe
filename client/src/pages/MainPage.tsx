@@ -78,7 +78,7 @@ const MainPage = (): JSX.Element => {
                   color="zinc300"
                   _hover={{ bg: 'zinc700' }}
                   onClick={() => {
-                    navigate('/')
+                    navigate('/reg/companyname')
                   }}
                 >
                   {'Create Workspace'}
