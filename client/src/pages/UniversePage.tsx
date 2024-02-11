@@ -1,4 +1,11 @@
 import {
+  AddIcon,
+  ChatIcon,
+  LinkIcon,
+  QuestionOutlineIcon,
+  TimeIcon,
+} from '@chakra-ui/icons'
+import {
   Box,
   VStack,
   Heading,
@@ -99,14 +106,14 @@ const MainContent = (): JSX.Element => (
         _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
       />
       <Button bg="zinc800" color="zinc300" _hover={{ bg: 'zinc700' }}>
-        ?
+        <QuestionOutlineIcon boxSize={'5'} />
       </Button>
     </Flex>
     <Flex>
       <Sidebar />
       <Box bg="zinc900" w="100vw" h="calc(100vh - 60px)" color="zinc300">
         <Box
-          h="calc(95% - 60px)"
+          h="calc(100vh - 180px)"
           overflowY="auto"
           bgImage="url('https://web.telegram.org/a/chat-bg-pattern-dark.ad38368a9e8140d0ac7d.png')"
           bgSize="cover"
@@ -137,26 +144,121 @@ const MainContent = (): JSX.Element => (
           borderColor="zinc600"
           p="4"
           alignItems="center"
+          h="120px"
         >
-          <Input
-            flex="1"
-            placeholder="Type a message..."
+          <Flex
             bg="zinc800"
+            border="1px"
+            borderColor="zinc800"
             borderRadius="md"
-            borderColor="zinc600"
+            _hover={{ borderColor: 'zinc600' }}
             _focusVisible={{ borderColor: 'zinc600' }}
-            _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
-            h="60px"
-          />
-
-          <Button
-            ml="4"
-            bg="zinc800"
-            color="zinc300"
-            _hover={{ bg: 'zinc700' }}
+            width="100%"
+            h="90px"
+            alignItems="center"
+            justifyContent="center"
+            flexDirection={'column'}
           >
-            Send
-          </Button>
+            <Flex
+              mt="5px"
+              ml="20px"
+              mb="5px"
+              alignItems="center"
+              justifyContent="left"
+              width="100%"
+            >
+              <Button
+                size="xs"
+                mr="2"
+                bg="zinc800"
+                color="zinc300"
+                _hover={{ bg: 'zinc700' }}
+              >
+                <b>B</b>
+              </Button>
+              <Button
+                size="xs"
+                mr="2"
+                bg="zinc800"
+                color="zinc300"
+                _hover={{ bg: 'zinc700' }}
+              >
+                <i>I</i>
+              </Button>
+              <Button
+                size="xs"
+                mr="2"
+                bg="zinc800"
+                color="zinc300"
+                _hover={{ bg: 'zinc700' }}
+              >
+                <del>S</del>
+              </Button>
+              <Divider orientation="vertical" h="12px" m="0" p="0" mr="2" />
+              <Button
+                size="xs"
+                mr="2"
+                bg="zinc800"
+                color="zinc300"
+                _hover={{ bg: 'zinc700' }}
+              >
+                <LinkIcon boxSize={'3'} />
+              </Button>
+            </Flex>
+            <Input
+              flex="1"
+              placeholder="Type a message..."
+              bg="zinc800"
+              border="0"
+              _focusVisible={{ borderColor: '' }}
+              _hover={{ borderColor: '', bg: '' }}
+              h="7vh"
+            />
+            <Flex
+              alignItems="center"
+              justifyContent="space-between"
+              width="100%"
+              ml="20px"
+            >
+              <Box>
+                <Button
+                  mb="5px"
+                  mt="5px"
+                  mr="2"
+                  size="xs"
+                  bg="zinc800"
+                  color="zinc300"
+                  _hover={{ bg: 'zinc700' }}
+                >
+                  <AddIcon boxSize={'2'} />
+                </Button>
+                <Button
+                  mb="5px"
+                  mr="2"
+                  mt="5px"
+                  size="xs"
+                  bg="zinc800"
+                  color="zinc300"
+                  _hover={{ bg: 'zinc700' }}
+                >
+                  <TimeIcon boxSize={'3'} />
+                </Button>
+              </Box>
+              <Box>
+                <Button
+                  size="xs"
+                  mb="5px"
+                  mr="30px"
+                  mt="5px"
+                  bg="zinc800"
+                  color="zinc300"
+                  _hover={{ bg: 'zinc700' }}
+                >
+                  <ChatIcon boxSize={'3'} />
+                </Button>
+              </Box>
+            </Flex>
+          </Flex>
         </Flex>
       </Box>
     </Flex>
