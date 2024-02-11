@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import App from './components/App'
 import './styles/global.css'
-
 const theme = extendTheme({
   colors: {
     zinc950: '#09090b',
@@ -31,7 +30,7 @@ const root = createRoot(domNode ?? document.createElement('div'))
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <App />
+    <App />
     </ChakraProvider>
   </React.StrictMode>
 )

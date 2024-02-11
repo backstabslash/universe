@@ -28,9 +28,10 @@ module.exports = {
     },
   },
   plugins: ['react'],
-  ignorePatterns: ['.eslintrc.cjs', 'vite.config.ts'],
+  ignorePatterns: ['.eslintrc.cjs', 'vite.config.ts', 'public/svg/*'],
   rules: {
     '@typescript-eslint/comma-dangle': 'off',
     'react/react-in-jsx-scope': 'off',
+    'multiline-ternary': 'off',
   },
 }
