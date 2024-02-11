@@ -1,15 +1,22 @@
 import {
+  AddIcon,
+  ChatIcon,
+  EditIcon,
+  LinkIcon,
+  TimeIcon,
+} from '@chakra-ui/icons'
+import {
   Box,
-  VStack,
   Heading,
   Flex,
   Input,
   Button,
   Divider,
+  type ButtonProps,
+  Text,
 } from '@chakra-ui/react'
-
-const channels = ['general', 'random', 'team-1', 'team-2']
-const directMessages = ['user1', 'user2', 'user3']
+import Sidebar from '../components/Sidebar'
+import Header from '../components/Header'
 
 const contentData = [
   'This is a message',
@@ -23,144 +30,174 @@ const contentData = [
   'Yet another message',
 ]
 
-const Sidebar = (): JSX.Element => (
-  <VStack
-    padding="5"
-    bg="zinc900"
+interface IconButtonProps extends ButtonProps {
+  label: string | JSX.Element
+}
+
+const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
+  <Button
+    size="sm"
+    mr="2"
+    background="rgba(0, 0, 0, 0)"
     color="zinc300"
-    width="300px"
-    borderRight="1px"
-    borderColor="zinc600"
+    _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+    {...props}
   >
-    <Heading mb="2" fontSize="lg" width="100%">
-      Channels
-    </Heading>
-    {channels.map((channel) => (
-      <Box
-        key={channel}
-        p="2"
-        borderRadius="md"
-        bg="zinc900"
-        color="zinc300"
-        _hover={{ bg: 'zinc800' }}
-        width="100%"
-      >{`#${channel}`}</Box>
-    ))}
-    <Divider my="1" />
-    <Heading mb="2" mt="2" fontSize="lg" width="100%">
-      Direct Messages
-    </Heading>
-    {directMessages.map((user) => (
-      <Box
-        key={user}
-        p="2"
-        borderRadius="md"
-        bg="zinc900"
-        color="zinc300"
-        _hover={{ bg: 'zinc800' }}
-        width="100%"
-      >{`@${user}`}</Box>
-    ))}
-    <Divider my="1" />
-  </VStack>
+    {label}
+  </Button>
 )
 
 const MainContent = (): JSX.Element => (
-  <Box flex="1" flexDirection="column" h="100vh">
-    <Flex
-      bg="zinc900"
-      color="zinc300"
-      p="4"
-      height="60px"
-      gap="10px"
-      alignItems={'center'}
-      borderBottom={'1px'}
-      borderColor={'zinc600'}
+  <Flex flexDirection={'column'} alignItems={'center'}>
+    <Header />
+    <Box
+      flex="1"
+      flexDirection="column"
+      h="calc(100vh - 46px)"
+      w="calc(100vw - 8px)"
+      m="1"
+      borderRadius="10px"
     >
-      <Heading
-        flex="1"
-        fontSize="2xl"
-        borderColor="zinc600"
-        bg="zinc800"
-        padding="5px"
-        borderRadius="md"
-        width="200px"
-        textAlign="center"
-      >
-        Universe
-      </Heading>
-      <Input
-        flex="2"
-        placeholder="Search Universe"
-        bg="zinc800"
-        borderRadius="md"
-        borderColor="transparent"
-        _focusVisible={{ borderColor: 'zinc600' }}
-        _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
-      />
-      <Button bg="zinc800" color="zinc300" _hover={{ bg: 'zinc700' }}>
-        ?
-      </Button>
-    </Flex>
-    <Flex>
-      <Sidebar />
-      <Box bg="zinc900" w="100vw" h="calc(100vh - 60px)" color="zinc300">
+      <Flex>
+        <Sidebar />
         <Box
-          h="calc(95% - 60px)"
-          overflowY="auto"
-          bgImage="url('https://web.telegram.org/a/chat-bg-pattern-dark.ad38368a9e8140d0ac7d.png')"
-          bgSize="cover"
-          bgRepeat="no-repeat"
-          bgPosition="center"
+          w="calc(100vw - 8px)"
+          h="calc(100vh - 46px)"
+          color="zinc300"
+          borderBottomRightRadius="10px"
         >
-          <Heading p="4" mb="5" fontSize="xl">
-            Welcome to #general
-          </Heading>
-          {contentData.map((content, index) => (
-            <Box
-              key={index}
-              p="3"
-              bg="zinc800"
-              borderRadius="md"
-              boxShadow="md"
-              mb="4"
-              ml="4"
-              width="fit-content"
-            >
-              {content}
-            </Box>
-          ))}
-        </Box>
-        <Flex
-          bg="zinc900"
-          borderTop="1px"
-          borderColor="zinc600"
-          p="4"
-          alignItems="center"
-        >
-          <Input
-            flex="1"
-            placeholder="Type a message..."
-            bg="zinc800"
-            borderRadius="md"
+          <Flex
+            fontSize="lg"
+            width="100%"
+            background="rgba(0, 0, 0, 0.6)"
+            borderBottom="1px"
             borderColor="zinc600"
-            _focusVisible={{ borderColor: 'zinc600' }}
-            _hover={{ borderColor: 'zinc600', bg: 'zinc900' }}
+            p="15px"
             h="60px"
-          />
-
-          <Button
-            ml="4"
-            bg="zinc800"
-            color="zinc300"
-            _hover={{ bg: 'zinc700' }}
+            borderTopRightRadius="10px"
+            alignItems="center"
+            justifyContent="space-between"
           >
-            Send
-          </Button>
-        </Flex>
-      </Box>
-    </Flex>
-  </Box>
+            <Text>#general</Text>
+            <Button
+              size="md"
+              mr="2"
+              bg="transparent"
+              color="zinc300"
+              _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+            >
+              <EditIcon boxSize={'4'} /> &nbsp; Canvas
+            </Button>
+          </Flex>
+          <Box
+            bg="rgba(0, 0, 0, 0.6)"
+            h="calc(100vh - 256px)"
+            overflowY="auto"
+            bgImage="../../public/chat-bg-pattern-dark.png"
+            bgSize="cover"
+            bgRepeat="no-repeat"
+            bgPosition="center"
+          >
+            <Heading p="4" mb="5" fontSize="xl">
+              Welcome to #general
+            </Heading>
+            {contentData.map((content, index) => (
+              <Box
+                key={index}
+                p="3"
+                bg="rgba(0, 0, 0, 0.4)"
+                borderRadius="md"
+                boxShadow="md"
+                color="zinc300"
+                mb="4"
+                ml="4"
+                width="fit-content"
+              >
+                {content}
+              </Box>
+            ))}
+          </Box>
+          <Flex
+            background="rgba(0, 0, 0, 0.6)"
+            borderTop="1px"
+            borderColor="zinc600"
+            p="4"
+            alignItems="center"
+            borderBottomRightRadius="10px"
+            h="150px"
+          >
+            <Flex
+              background="rgba(0, 0, 0, 0.2)"
+              border="1px"
+              borderColor="zinc800"
+              borderRadius="10px"
+              _hover={{ borderColor: 'zinc600' }}
+              _focusVisible={{ borderColor: 'zinc600' }}
+              width="100%"
+              h="120px"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection={'column'}
+            >
+              <Flex
+                mt="5px"
+                ml="20px"
+                mb="5px"
+                alignItems="center"
+                justifyContent="left"
+                width="100%"
+              >
+                <IconButton label={<b>B</b>} />
+                <IconButton label={<i>I</i>} />
+                <IconButton label={<del>S</del>} />
+                <Divider orientation="vertical" h="12px" m="0" p="0" mr="8px" />
+                <IconButton label={<LinkIcon boxSize={'3'} />} />
+              </Flex>
+              <Input
+                flex="1"
+                placeholder="Type a message..."
+                background="rgba(0, 0, 0, 0)"
+                border="0"
+                _placeholder={{
+                  color: 'zinc300',
+                }}
+                _focusVisible={{ borderColor: '' }}
+                _hover={{ borderColor: '', bg: '' }}
+                h="10vh"
+              />
+              <Flex
+                alignItems="center"
+                justifyContent="space-between"
+                width="100%"
+                ml="20px"
+              >
+                <Box>
+                  <IconButton
+                    label={<AddIcon boxSize={'3'} />}
+                    mb="5px"
+                    mt="5px"
+                  />
+                  <IconButton
+                    label={<TimeIcon boxSize={'3'} />}
+                    mb="5px"
+                    mt="5px"
+                  />
+                </Box>
+                <Box>
+                  <IconButton
+                    label={<ChatIcon boxSize={'4'} />}
+                    mb="5px"
+                    mr="30px"
+                    mt="5px"
+                  />
+                </Box>
+              </Flex>
+            </Flex>
+          </Flex>
+        </Box>
+      </Flex>
+    </Box>
+  </Flex>
 )
 
 export default MainContent

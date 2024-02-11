@@ -28,7 +28,12 @@ module.exports = {
     },
   },
   plugins: ['react'],
-  ignorePatterns: ['.eslintrc.cjs', 'vite.config.ts', 'public/svg/*'],
+  ignorePatterns: [
+    '.eslintrc.cjs',
+    'vite.config.ts',
+    'prettier.config.js',
+    'public/svg/*',
+  ],
   rules: {
     '@typescript-eslint/comma-dangle': 'off',
     'react/react-in-jsx-scope': 'off',
