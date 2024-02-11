@@ -7,6 +7,7 @@ import {
   Text,
   Divider,
   HStack,
+  Flex,
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 
@@ -63,7 +64,7 @@ const CompanyName = (): JSX.Element => {
     <Box flexDirection="column" height="100vh" bg="zinc900">
       <HStack mr={'30px'} alignItems="flex-start">
         <Sidebar />
-        <VStack mb="45vh" ml="80px" align={'left'}>
+        <Flex ml="80px" flexDirection="column" alignItems="flex-start">
           <Text fontSize="15px" color="zinc300" mb="40px" mt="25px">
             Step 1 of 3
           </Text>
@@ -81,7 +82,7 @@ const CompanyName = (): JSX.Element => {
             This will be the name of your Slack workspace - choose something
             that your team will recognize.
           </Text>
-          <Text fontSize="lg" mt="1.2rem" w="75%" color="zinc300">
+          <Text fontSize="lg" mt="1.2rem" w="75%" color="zinc300" mb="10px">
             Name{' '}
             <Text as="span" color="red">
               *
@@ -93,6 +94,7 @@ const CompanyName = (): JSX.Element => {
             fontSize="lg"
             bg="zinc800"
             borderRadius="md"
+            border={'0'}
             _focusVisible={{ borderColor: 'zinc600' }}
             w="680px"
             minH="50px"
@@ -109,7 +111,7 @@ const CompanyName = (): JSX.Element => {
           >
             Next
           </Button>
-        </VStack>
+        </Flex>
       </HStack>
     </Box>
   )

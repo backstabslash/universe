@@ -97,6 +97,7 @@ const Channels = (): JSX.Element => {
             textAlign="left"
             mr="640px"
             mb="10px"
+            mt="10px"
           >
             What&apos;s your team working on right now?
           </Heading>

@@ -84,7 +84,7 @@ const Coworkers = (): JSX.Element => {
     <Box flexDirection="column" height="100vh" bg="zinc900">
       <HStack mr={'200px'} alignItems="flex-start">
         <Sidebar />
-        <VStack mb="50vh" ml="80px" align={'left'}>
+        <Flex ml="80px" flexDirection="column" alignItems="flex-start">
           <Text fontSize="15px" color="zinc300" mb="40px" mt="25px">
             Step 2 of 3
           </Text>
@@ -148,7 +148,7 @@ const Coworkers = (): JSX.Element => {
               {isLoadingMock ? '' : 'Next'}
             </Button>
           </Flex>
-        </VStack>
+        </Flex>
       </HStack>
     </Box>
   )
