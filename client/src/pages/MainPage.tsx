@@ -1,63 +1,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-	Button,
-	Center,
-	Flex,
-	Stack,
-	Text,
-	VStack,
-	HStack,
-	Box,
-	Skeleton,
-	Avatar,
-	Spacer,
-	SkeletonCircle,
-} from "@chakra-ui/react";
+  Button,
+  Center,
+  Flex,
+  Stack,
+  Text,
+  VStack,
+  HStack,
+  Box,
+  Skeleton,
+  Avatar,
+  Spacer,
+  SkeletonCircle,
+} from '@chakra-ui/react'
 
-
-import MainpageSvg from "../../public/svg/mainpageSvg";
-import { BsArrowRightShort } from "react-icons/bs";
-import { useNavigate } from 'react-router-dom';
-
+import MainpageSvg from '../../public/svg/mainpageSvg'
+import { BsArrowRightShort } from 'react-icons/bs'
+import { useNavigate } from 'react-router-dom'
 
 const MainPage = () => {
-
-
   const organisations = [
-			{
-				_id: "org1",
-				name: "Organisation 1",
-				coWorkers: ["worker1", "worker2", "worker3"],
-			},
-			{
-				_id: "org2",
-				name: "Organisation 2",
-				coWorkers: ["worker4", "worker5"],
-			},
-			{
-				_id: "org3",
-				name: "Organisation 3",
-				coWorkers: ["worker6", "worker7", "worker8", "worker9"],
-			},
-			{
-				_id: "org4",
-				name: "Organisation 4",
-				coWorkers: ["worker6", "worker7", "worker8", "worker9"],
-			},
-			{
-				_id: "org5",
-				name: "Organisation 5",
-				coWorkers: ["worker6", "worker7", "worker8", "worker9"],
-			},
-	];
+    {
+      _id: 'org1',
+      name: 'Organisation 1',
+      coWorkers: ['worker1', 'worker2', 'worker3'],
+    },
+    {
+      _id: 'org2',
+      name: 'Organisation 2',
+      coWorkers: ['worker4', 'worker5'],
+    },
+    {
+      _id: 'org3',
+      name: 'Organisation 3',
+      coWorkers: ['worker6', 'worker7', 'worker8', 'worker9'],
+    },
+    {
+      _id: 'org4',
+      name: 'Organisation 4',
+      coWorkers: ['worker6', 'worker7', 'worker8', 'worker9'],
+    },
+    {
+      _id: 'org5',
+      name: 'Organisation 5',
+      coWorkers: ['worker6', 'worker7', 'worker8', 'worker9'],
+    },
+  ]
 
-  const userName = "Alex Faltin";
-  const email ="viperr@onu.edu.ua"
-  const isLoading = false;
+  const userName = 'Alex Faltin'
+  const email = 'viperr@onu.edu.ua'
+  const isLoading = false
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-	return (
+  return (
     <VStack h="100vh" w="100vw" bg="zinc900">
       <VStack spacing="2rem" mb="100rem" mt="6rem">
         <HStack mb="2rem">
@@ -97,9 +93,9 @@ const MainPage = () => {
 
         <Box
           borderRadius="1.2rem"
-          borderColor={"zinc700"}
-          p="1.4rem"
           border="1px"
+          borderColor="zinc700"
+          p="1.4rem"
           mt="1rem"
           w="40%"
           mx="auto"
@@ -217,7 +213,6 @@ const MainPage = () => {
       </VStack>
     </VStack>
   )
+}
 
-};
-
-export default MainPage;
+export default MainPage
