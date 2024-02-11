@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Button,
   Center,
@@ -18,7 +17,7 @@ import MainpageSvg from '../../public/svg/mainpageSvg'
 import { BsArrowRightShort } from 'react-icons/bs'
 import { useNavigate } from 'react-router-dom'
 
-const MainPage = () => {
+const MainPage = (): JSX.Element => {
   const organisations = [
     {
       _id: 'org1',
@@ -63,9 +62,9 @@ const MainPage = () => {
                 Get started on Universe
               </Text>
               <Text fontSize="1rem" mt="1.2rem" w="75%" color="zinc300">
-                it's a new way to communicate with everyone you work with. it's
-                faster, better organized, and more secure than email - and it's
-                free to try.
+                It&apos;s a new way to communicate with everyone you work with.
+                It&apos;s faster, better organized, and more secure than email -
+                and it&apos;s free to try.
               </Text>
               <Spacer></Spacer>
               <Spacer></Spacer>
@@ -78,7 +77,9 @@ const MainPage = () => {
                   bg="zinc800"
                   color="zinc300"
                   _hover={{ bg: 'zinc700' }}
-                  onClick={() => navigate('/')}
+                  onClick={() => {
+                    navigate('/')
+                  }}
                 >
                   {'Create Workspace'}
                 </Button>
@@ -138,8 +139,8 @@ const MainPage = () => {
                   align="center"
                   color="zinc300"
                 >
-                  We coudn't find any existing workspaces for the email address{' '}
-                  {email}
+                  We couldn&apos;t find any existing workspaces for the email
+                  address {email}
                 </Text>
                 <Button
                   colorScheme="blue"
@@ -194,7 +195,9 @@ const MainPage = () => {
                       </Flex>
                     </Flex>
                     <Button
-                      onClick={() => navigate('/')}
+                      onClick={() => {
+                        navigate('/')
+                      }}
                       bg="zinc800"
                       color="zinc300"
                       _hover={{ bg: 'zinc700' }}

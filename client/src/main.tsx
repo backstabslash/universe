@@ -34,4 +34,3 @@ root.render(
     </ChakraProvider>
   </React.StrictMode>
 )
-
