@@ -3,7 +3,7 @@ import MainContent from '../pages/UniversePage'
 import UserProfile from './UserProfile'
 import MainPage from '../pages/MainPage'
 import CompanyName from '../pages/reg-pages/CompanyName'
-import Coworkers from '../pages/reg-pages/Coworkers'
+import Coworkers from '../pages/reg-pages/CoWorkers'
 import Channels from '../pages/reg-pages/Channels'
 
 const App = (): JSX.Element => {

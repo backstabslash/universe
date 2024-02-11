@@ -78,7 +78,9 @@ const MainContent = (): JSX.Element => (
             alignItems="center"
             justifyContent="space-between"
           >
-            <Text>#general</Text>
+            <Text>
+              <b>#general</b>
+            </Text>
             <Button
               size="md"
               mr="2"
