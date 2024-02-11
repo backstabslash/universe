@@ -38,9 +38,9 @@ const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
   <Button
     size="sm"
     mr="2"
-    bg="zinc800"
+    background="rgba(0, 0, 0, 0)"
     color="zinc300"
-    _hover={{ bg: 'zinc700' }}
+    _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
     {...props}
   >
     {label}
@@ -69,7 +69,6 @@ const MainContent = (): JSX.Element => (
           <Flex
             fontSize="lg"
             width="100%"
-            bg="transparent"
             background="rgba(0, 0, 0, 0.6)"
             borderBottom="1px"
             borderColor="zinc600"
@@ -91,7 +90,7 @@ const MainContent = (): JSX.Element => (
             </Button>
           </Flex>
           <Box
-            bg="zinc900"
+            bg="rgba(0, 0, 0, 0.6)"
             h="calc(100vh - 256px)"
             overflowY="auto"
             bgImage="../../public/chat-bg-pattern-dark.png"
@@ -106,9 +105,10 @@ const MainContent = (): JSX.Element => (
               <Box
                 key={index}
                 p="3"
-                bg="zinc800"
+                bg="rgba(0, 0, 0, 0.4)"
                 borderRadius="md"
                 boxShadow="md"
+                color="zinc300"
                 mb="4"
                 ml="4"
                 width="fit-content"
@@ -127,7 +127,7 @@ const MainContent = (): JSX.Element => (
             h="150px"
           >
             <Flex
-              bg="zinc800"
+              background="rgba(0, 0, 0, 0.2)"
               border="1px"
               borderColor="zinc800"
               borderRadius="10px"
@@ -156,8 +156,11 @@ const MainContent = (): JSX.Element => (
               <Input
                 flex="1"
                 placeholder="Type a message..."
-                bg="zinc800"
+                background="rgba(0, 0, 0, 0)"
                 border="0"
+                _placeholder={{
+                  color: 'zinc300',
+                }}
                 _focusVisible={{ borderColor: '' }}
                 _hover={{ borderColor: '', bg: '' }}
                 h="10vh"

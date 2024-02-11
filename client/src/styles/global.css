@@ -4,10 +4,20 @@ body {
   width: 100vw;
   scroll-behavior: smooth;
   body {
-    background-image: radial-gradient(
-      circle farthest-corner at 83.7% 4.3%,
-      rgba(173, 0, 171, 1) 0%,
-      rgba(15, 51, 92, 1) 90%
+    background-image: linear-gradient(
+      to right top,
+      #845ec2,
+      #7a59ac,
+      #6f5596,
+      #655081,
+      #5a4b6d,
+      #5d506c,
+      #60566c,
+      #635b6b,
+      #756d7e,
+      #898091,
+      #9c94a5,
+      #b0a8b9
     );
   }
 }

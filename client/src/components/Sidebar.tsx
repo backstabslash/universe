@@ -5,7 +5,6 @@ const directMessages = ['user1', 'user2', 'user3']
 
 const Sidebar = (): JSX.Element => (
   <VStack
-    bg="transparent"
     background="rgba(0, 0, 0, 0.6)"
     color="zinc300"
     width="300px"
@@ -37,7 +36,6 @@ const Sidebar = (): JSX.Element => (
         pr="15px"
         pl="15px"
         borderRadius="md"
-        bg="transparent"
         background="rgba(0, 0, 0, 0.2)"
         color="zinc300"
         _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
@@ -53,7 +51,6 @@ const Sidebar = (): JSX.Element => (
         key={user}
         p="2"
         borderRadius="md"
-        bg="transparent"
         background="rgba(0, 0, 0, 0.2)"
         color="zinc300"
         _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
