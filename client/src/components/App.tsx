@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MainContent from '../pages/UniversePage'
 import UserProfile from './UserProfile'
 
-const App = () => {
+const App = (): JSX.Element => {
   return (
     <Router>
       <Routes>
