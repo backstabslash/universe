@@ -15,8 +15,8 @@ const theme = extendTheme({
     zinc50: '#fafafa',
   },
   fonts: {
-    body: 'Kanit, system-ui, sans-serif',
-    heading: 'Kanit, system-ui, sans-serif',
+    body: 'Noto Sans, system-ui, sans-serif',
+    heading: 'Noto Sans, system-ui, sans-serif',
     mono: 'Menlo, monospace',
   },
 })

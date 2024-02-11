@@ -15,16 +15,16 @@ const Sidebar = (): JSX.Element => (
   >
     <Heading
       mb="2"
-      fontSize="lg"
+      fontSize="xl"
       width="100%"
       borderBottom="1px"
       borderColor="zinc600"
       p="15px"
-      pt="20px"
+      pt="18px"
       textAlign="center"
       h="60px"
     >
-      Universe
+      <b>Universe</b>
     </Heading>
     <Heading mb="2" fontSize="lg" width="100%" pr="15px" pl="15px">
       Channels
