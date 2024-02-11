@@ -18,8 +18,8 @@ const theme = extendTheme({
     zinc50: '#fafafa',
   },
   fonts: {
-    body: 'Poppins, system-ui, sans-serif',
-    heading: 'Poppins, system-ui, sans-serif',
+    body: 'Kanit, system-ui, sans-serif',
+    heading: 'Kanit, system-ui, sans-serif',
     mono: 'Menlo, monospace',
   },
 })
@@ -30,7 +30,7 @@ const root = createRoot(domNode ?? document.createElement('div'))
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-    <App />
+      <App />
     </ChakraProvider>
   </React.StrictMode>
 )
