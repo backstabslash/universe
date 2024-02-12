@@ -10,19 +10,26 @@ import {
   VStack,
   HStack,
   Link,
-  Spacer,
   Heading,
   Flex,
+  Icon,
 } from '@chakra-ui/react'
 import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { AiOutlineEdit } from 'react-icons/ai'
 import IconButton from './IconButton'
 import profileImage from '../../public/profile-image-test.png'
 
-const UserProfile = (): JSX.Element => (
+interface UserProfileProps {
+  setisUserProfileVisible: (visible: boolean) => void
+}
+
+const UserProfile = ({
+  setisUserProfileVisible,
+}: UserProfileProps): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
     color="zinc300"
-    width="600px"
+    width="700px"
     h="calc(100vh - 46px)"
     borderLeft="1px"
     borderColor="zinc600"
@@ -40,11 +47,16 @@ const UserProfile = (): JSX.Element => (
     >
       <Flex justifyContent="space-between">
         <b>My profile</b>
-        <IconButton label={<CloseIcon boxSize={'3'} />} />
+        <IconButton
+          label={<CloseIcon boxSize={'3'} />}
+          onClick={() => setisUserProfileVisible(false)}
+        />
       </Flex>
     </Heading>
-    <VStack align="start">
+    <VStack width="100%">
       <Image
+        w="260"
+        h="260"
         src={profileImage}
         alt="Profile banner"
         alignSelf="center"
@@ -55,30 +67,34 @@ const UserProfile = (): JSX.Element => (
         align="start"
         borderBottom="1px solid #57595d"
         spacing={4}
-        p={3}
+        pr="15px"
+        pl="15px"
+        pb="14px"
       >
         <VStack width="100%" align="start" spacing={1}>
-          <HStack width="100%">
-            <Text fontSize="2xl" fontWeight="bold">
+          <HStack width="100%" justifyContent="space-between">
+            <Text fontSize="xl" fontWeight="bold">
               sherpak /
             </Text>
-            <Spacer />
-            <Link
-              color="#1d9bd1"
-              _hover={{
-                color: '#23bdff',
-                textDecoration: 'underline',
-              }}
+            <Button
+              size="md"
+              bg="transparent"
+              color="zinc300"
+              _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
             >
-              Edit
-            </Link>
+              <Icon as={AiOutlineEdit} /> &nbsp; Edit
+            </Button>
           </HStack>
-          <Text>Мальчик like чел</Text>
+          <Text>Alias</Text>
           <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-            <HStack>
-              <AddIcon fontSize="small" />
-              <Text>Add name pronunciation</Text>
-            </HStack>
+            <Button
+              size="md"
+              background="rgba(0, 0, 0, 0.2)"
+              _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+              color="zinc300"
+            >
+              <AddIcon fontSize="13px" /> &nbsp; Add name pronunciation
+            </Button>
           </Link>
         </VStack>
         <VStack align="start" spacing={1}>
@@ -88,11 +104,9 @@ const UserProfile = (): JSX.Element => (
         <HStack width="100%">
           <Button
             flex={1}
-            backgroundColor="#1a1d21"
-            color="white"
-            border="1px solid #57595d"
-            _hover={{ backgroundColor: '#2a2d31' }}
-            _active={{ borderColor: '#cccccc' }}
+            background="rgba(0, 0, 0, 0.2)"
+            _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+            color="zinc300"
           >
             Set a status
           </Button>
@@ -102,24 +116,24 @@ const UserProfile = (): JSX.Element => (
                 width="100%"
                 as={Button}
                 rightIcon={<ChevronDownIcon />}
-                backgroundColor="#1a1d21"
-                color="white"
-                border="1px solid #57595d"
-                _hover={{ backgroundColor: '#2a2d31' }}
-                _active={{ borderColor: '#cccccc' }}
+                background="rgba(0, 0, 0, 0.2)"
+                color="zinc300"
+                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               >
                 View as
               </MenuButton>
-              <MenuList backgroundColor="#222529">
+              <MenuList background="rgba(0, 0, 0, 0.2)" border="none">
                 <MenuItem
-                  backgroundColor="#222529"
-                  _hover={{ backgroundColor: '#1264a3' }}
+                  background="rgba(0, 0, 0, 0.2)"
+                  color="zinc300"
+                  _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   A coworker at Universe
                 </MenuItem>
                 <MenuItem
-                  backgroundColor="#222529"
-                  _hover={{ backgroundColor: '#1264a3' }}
+                  background="rgba(0, 0, 0, 0.2)"
+                  color="zinc300"
+                  _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   A contact from other organizations
                 </MenuItem>
@@ -131,24 +145,24 @@ const UserProfile = (): JSX.Element => (
               <MenuButton
                 width="100%"
                 as={Button}
-                backgroundColor="#1a1d21"
-                color="white"
-                border="1px solid #57595d"
-                _hover={{ backgroundColor: '#2a2d31' }}
-                _active={{ borderColor: '#cccccc' }}
+                color="zinc300"
+                background="rgba(0, 0, 0, 0.2)"
+                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               >
                 ⋮
               </MenuButton>
-              <MenuList backgroundColor="#222529">
+              <MenuList background="rgba(0, 0, 0, 0.2)" border="none">
                 <MenuItem
-                  backgroundColor="#222529"
-                  _hover={{ backgroundColor: '#1264a3' }}
+                  background="rgba(0, 0, 0, 0.2)"
+                  color="zinc300"
+                  _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   A coworker at Universe
                 </MenuItem>
                 <MenuItem
-                  backgroundColor="#222529"
-                  _hover={{ backgroundColor: '#1264a3' }}
+                  background="rgba(0, 0, 0, 0.2)"
+                  color="zinc300"
+                  _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   A contact from other organizations
                 </MenuItem>
@@ -162,19 +176,20 @@ const UserProfile = (): JSX.Element => (
         align="start"
         borderBottom="1px solid #57595d"
         spacing={4}
-        p={3}
+        pr="15px"
+        pl="15px"
+        pb="14px"
       >
         <HStack width="100%" justifyContent="space-between">
           <Text fontWeight="bold">Contact information</Text>
-          <Link
-            color="#1d9bd1"
-            _hover={{
-              color: '#23bdff',
-              textDecoration: 'underline',
-            }}
+          <Button
+            size="md"
+            bg="transparent"
+            color="zinc300"
+            _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
           >
-            Edit
-          </Link>
+            <Icon as={AiOutlineEdit} /> &nbsp; Edit
+          </Button>
         </HStack>
         <VStack align="start" spacing={1}>
           <Text fontSize="small" color="#9e9fa1">
@@ -191,30 +206,44 @@ const UserProfile = (): JSX.Element => (
           </Link>
         </VStack>
         <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-          <HStack>
-            <AddIcon fontSize="small" />
-            <Text>Add phone</Text>
-          </HStack>
+          <Button
+            size="md"
+            background="rgba(0, 0, 0, 0.2)"
+            _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+            color="zinc300"
+          >
+            <AddIcon fontSize="13px" /> &nbsp; Add phone
+          </Button>
         </Link>
       </VStack>
-      <VStack width="100%" align="start" spacing={4} p={3}>
+      <VStack
+        width="100%"
+        align="start"
+        spacing={4}
+        pr="15px"
+        pl="15px"
+        pb="14px"
+      >
         <HStack width="100%" justifyContent="space-between">
           <Text fontWeight="bold">About me</Text>
-          <Link
-            color="#1d9bd1"
-            _hover={{
-              color: '#23bdff',
-              textDecoration: 'underline',
-            }}
+          <Button
+            size="md"
+            bg="transparent"
+            color="zinc300"
+            _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
           >
-            Edit
-          </Link>
+            <Icon as={AiOutlineEdit} /> &nbsp; Edit
+          </Button>
         </HStack>
         <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-          <HStack>
-            <AddIcon fontSize="small" />
-            <Text>Add start date</Text>
-          </HStack>
+          <Button
+            size="md"
+            background="rgba(0, 0, 0, 0.2)"
+            _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+            color="zinc300"
+          >
+            <AddIcon fontSize="13px" /> &nbsp; Add start date
+          </Button>
         </Link>
       </VStack>
     </VStack>

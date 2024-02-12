@@ -1,13 +1,17 @@
-import { Box, VStack, Heading } from '@chakra-ui/react'
+import { Box, VStack, Heading, Button } from '@chakra-ui/react'
 
 const channels = ['general', 'random', 'team-1', 'team-2']
 const directMessages = ['user1', 'user2', 'user3']
 
-const Sidebar = (): JSX.Element => (
+interface SidebarProps {
+  setisUserProfileVisible: (visible: boolean) => void
+}
+
+const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
     color="zinc300"
-    w="300px"
+    flex="0 0 300px"
     h="calc(100vh - 46px)"
     overflow="auto"
     borderRight="1px"
@@ -58,6 +62,15 @@ const Sidebar = (): JSX.Element => (
       >{`@${user}`}</Box>
     ))}
     {/* <Divider my="1" /> */}
+    <Button
+      size="md"
+      background="rgba(0, 0, 0, 0.2)"
+      _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+      color="zinc300"
+      onClick={() => setisUserProfileVisible(true)}
+    >
+      Profile test
+    </Button>
   </VStack>
 )
 
