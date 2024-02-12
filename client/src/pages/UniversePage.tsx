@@ -12,11 +12,11 @@ import {
   Input,
   Button,
   Divider,
-  type ButtonProps,
   Text,
 } from '@chakra-ui/react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
+import IconButton from '../components/IconButton'
 import UserProfile from '../components/UserProfile'
 
 const contentData = [
@@ -30,26 +30,6 @@ const contentData = [
   'Another message',
   'Yet another message',
 ]
-
-interface IconButtonProps extends ButtonProps {
-  label: string | JSX.Element
-}
-
-export const IconButton = ({
-  label,
-  ...props
-}: IconButtonProps): JSX.Element => (
-  <Button
-    size="sm"
-    mr="2"
-    background="rgba(0, 0, 0, 0)"
-    color="zinc300"
-    _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-    {...props}
-  >
-    {label}
-  </Button>
-)
 
 const MainContent = (): JSX.Element => (
   <Flex flexDirection={'column'} alignItems={'center'}>

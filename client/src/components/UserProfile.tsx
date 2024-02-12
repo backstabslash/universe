@@ -15,8 +15,7 @@ import {
   Flex,
 } from '@chakra-ui/react'
 import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons'
-
-import { IconButton } from '../pages/UniversePage'
+import IconButton from './IconButton'
 import profileImage from '../../public/profile-image-test.png'
 
 const UserProfile = (): JSX.Element => (
