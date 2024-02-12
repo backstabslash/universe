@@ -30,9 +30,9 @@ const UserProfile = ({
     background="rgba(0, 0, 0, 0.6)"
     color="zinc300"
     width="700px"
-    h="calc(100vh - 46px)"
+    h="calc(100vh - 42px)"
     borderLeft="1px"
-    borderColor="zinc600"
+    borderColor="rgba(20, 29, 64, 1)"
     overflowY="auto"
   >
     <Heading
@@ -40,7 +40,7 @@ const UserProfile = ({
       fontSize="xl"
       width="100%"
       borderBottom="1px"
-      borderColor="zinc600"
+      borderColor="rgba(20, 29, 64, 1)"
       p="15px"
       pt="18px"
       h="60px"
@@ -67,7 +67,8 @@ const UserProfile = ({
       <VStack
         width="100%"
         align="start"
-        borderBottom="1px solid #57595d"
+        borderBottom="1px"
+        borderColor="rgba(20, 29, 64, 1)"
         spacing={4}
         pr="15px"
         pl="15px"
@@ -109,6 +110,7 @@ const UserProfile = ({
             background="rgba(0, 0, 0, 0.2)"
             _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
             color="zinc300"
+            _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
           >
             Set a status
           </Button>
@@ -121,19 +123,20 @@ const UserProfile = ({
                 background="rgba(0, 0, 0, 0.2)"
                 color="zinc300"
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
               >
                 View as
               </MenuButton>
-              <MenuList background="rgba(0, 0, 0, 0.2)" border="none">
+              <MenuList bg="#1D212E" border="none">
                 <MenuItem
-                  background="rgba(0, 0, 0, 0.2)"
+                  background="rgba(0, 0, 0, 0)"
                   color="zinc300"
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   A coworker at Universe
                 </MenuItem>
                 <MenuItem
-                  background="rgba(0, 0, 0, 0.2)"
+                  background="rgba(0, 0, 0, 0)"
                   color="zinc300"
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
@@ -149,20 +152,21 @@ const UserProfile = ({
                 as={Button}
                 color="zinc300"
                 background="rgba(0, 0, 0, 0.2)"
+                _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               >
                 ⋮
               </MenuButton>
-              <MenuList background="rgba(0, 0, 0, 0.2)" border="none">
+              <MenuList bg="#1D212E" border="none">
                 <MenuItem
-                  background="rgba(0, 0, 0, 0.2)"
+                  background="rgba(0, 0, 0, 0)"
                   color="zinc300"
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   A coworker at Universe
                 </MenuItem>
                 <MenuItem
-                  background="rgba(0, 0, 0, 0.2)"
+                  background="rgba(0, 0, 0, 0)"
                   color="zinc300"
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
@@ -176,7 +180,8 @@ const UserProfile = ({
       <VStack
         width="100%"
         align="start"
-        borderBottom="1px solid #57595d"
+        borderBottom="1px"
+        borderColor="rgba(20, 29, 64, 1)"
         spacing={4}
         pr="15px"
         pl="15px"

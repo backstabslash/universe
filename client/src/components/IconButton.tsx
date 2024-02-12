@@ -11,6 +11,7 @@ const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
     background="rgba(0, 0, 0, 0)"
     color="zinc300"
     _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+    _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
     {...props}
   >
     {label}

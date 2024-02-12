@@ -30,6 +30,9 @@ const contentData = [
   'This is a message',
   'Another message',
   'Yet another message',
+  'This is a message',
+  'Another message',
+  'Yet another message',
 ]
 
 const MainContent = (): JSX.Element => {
@@ -49,13 +52,13 @@ const MainContent = (): JSX.Element => {
       >
         <Flex>
           <Sidebar setisUserProfileVisible={setisUserProfileVisible} />
-          <Box w="calc(100vw - 8px)" h="calc(100vh - 46px)" color="zinc300">
+          <Box w="calc(100vw - 8px)" h="calc(100vh - 42px)" color="zinc300">
             <Flex
               fontSize="lg"
               width="100%"
               background="rgba(0, 0, 0, 0.6)"
               borderBottom="1px"
-              borderColor="zinc600"
+              borderColor="rgba(20, 29, 64, 1)"
               p="15px"
               h="60px"
               alignItems="center"
@@ -76,7 +79,7 @@ const MainContent = (): JSX.Element => {
             </Flex>
             <Box
               bg="rgba(0, 0, 0, 0.6)"
-              h="calc(100vh - 256px)"
+              h="calc(100vh - 252px)"
               overflowY="auto"
               bgImage="../../public/chat-bg-pattern-dark.png"
               bgSize="cover"
@@ -90,7 +93,7 @@ const MainContent = (): JSX.Element => {
                 <Box
                   key={index}
                   p="3"
-                  bg="rgba(0, 0, 0, 0.4)"
+                  bg="#1D212E"
                   borderRadius="md"
                   boxShadow="md"
                   color="zinc300"
@@ -104,21 +107,21 @@ const MainContent = (): JSX.Element => {
             </Box>
             <Flex
               background="rgba(0, 0, 0, 0.6)"
-              borderTop="1px"
-              borderColor="zinc600"
-              p="4"
+              pr="4"
+              pl="4"
+              pb="4"
               alignItems="center"
               h="150px"
             >
               <Flex
                 background="rgba(0, 0, 0, 0.2)"
                 border="1px"
-                borderColor="zinc800"
+                borderColor="rgba(20, 29, 64, 1)"
                 borderRadius="10px"
                 _hover={{ borderColor: 'zinc600' }}
                 _focusVisible={{ borderColor: 'zinc600' }}
                 width="100%"
-                h="120px"
+                h="136px"
                 alignItems="center"
                 justifyContent="center"
                 flexDirection={'column'}
