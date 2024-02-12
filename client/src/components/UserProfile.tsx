@@ -49,7 +49,9 @@ const UserProfile = ({
         <b>My profile</b>
         <IconButton
           label={<CloseIcon boxSize={'3'} />}
-          onClick={() => setisUserProfileVisible(false)}
+          onClick={() => {
+            setisUserProfileVisible(false)
+          }}
         />
       </Flex>
     </Heading>

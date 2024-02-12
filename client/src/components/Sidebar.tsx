@@ -67,7 +67,9 @@ const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
       background="rgba(0, 0, 0, 0.2)"
       _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
       color="zinc300"
-      onClick={() => setisUserProfileVisible(true)}
+      onClick={() => {
+        setisUserProfileVisible(true)
+      }}
     >
       Profile test
     </Button>
