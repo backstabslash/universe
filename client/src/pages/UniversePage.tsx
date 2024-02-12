@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
+import UserProfile from '../components/UserProfile'
 
 const contentData = [
   'This is a message',
@@ -34,7 +35,10 @@ interface IconButtonProps extends ButtonProps {
   label: string | JSX.Element
 }
 
-const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
+export const IconButton = ({
+  label,
+  ...props
+}: IconButtonProps): JSX.Element => (
   <Button
     size="sm"
     mr="2"
@@ -53,19 +57,14 @@ const MainContent = (): JSX.Element => (
     <Box
       flex="1"
       flexDirection="column"
-      h="calc(100vh - 46px)"
       w="calc(100vw - 8px)"
       m="1"
       borderRadius="10px"
+      overflow="hidden"
     >
       <Flex>
         <Sidebar />
-        <Box
-          w="calc(100vw - 8px)"
-          h="calc(100vh - 46px)"
-          color="zinc300"
-          borderBottomRightRadius="10px"
-        >
+        <Box w="calc(100vw - 8px)" h="calc(100vh - 46px)" color="zinc300">
           <Flex
             fontSize="lg"
             width="100%"
@@ -74,7 +73,6 @@ const MainContent = (): JSX.Element => (
             borderColor="zinc600"
             p="15px"
             h="60px"
-            borderTopRightRadius="10px"
             alignItems="center"
             justifyContent="space-between"
           >
@@ -125,7 +123,6 @@ const MainContent = (): JSX.Element => (
             borderColor="zinc600"
             p="4"
             alignItems="center"
-            borderBottomRightRadius="10px"
             h="150px"
           >
             <Flex
@@ -197,6 +194,7 @@ const MainContent = (): JSX.Element => (
             </Flex>
           </Flex>
         </Box>
+        <UserProfile />
       </Flex>
     </Box>
   </Flex>

@@ -7,11 +7,11 @@ const Sidebar = (): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
     color="zinc300"
-    width="300px"
+    w="300px"
+    h="calc(100vh - 46px)"
+    overflow="auto"
     borderRight="1px"
     borderColor="zinc600"
-    borderTopLeftRadius="10px"
-    borderBottomLeftRadius="10px"
   >
     <Heading
       mb="2"
