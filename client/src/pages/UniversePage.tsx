@@ -1,32 +1,8 @@
 import { EditIcon } from '@chakra-ui/icons'
-import {
-  Box,
-  Heading,
-  Flex,
-  Input,
-  Button,
-  Divider,
-  type ButtonProps,
-  Text,
-} from '@chakra-ui/react'
+import { Box, Heading, Flex, Button, Text } from '@chakra-ui/react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
-import {
-  FormatBold,
-  FormatItalic,
-  StrikethroughS,
-  FormatListBulleted,
-  Code,
-  FormatListNumberedRounded,
-  Add,
-  Send,
-  AlternateEmail,
-  EmojiEmotions,
-  FormatColorText,
-  InsertLink,
-  DataArray,
-} from '@mui/icons-material/'
-import React from 'react'
+import TextEditor from '../components/TextEditor'
 
 const contentData = [
   'This is a message',
@@ -40,31 +16,7 @@ const contentData = [
   'Yet another message',
 ]
 
-interface IconButtonProps extends ButtonProps {
-  label: string | JSX.Element
-}
-
-const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
-  <Button
-    size="sm"
-    mr="2"
-    background="rgba(0, 0, 0, 0)"
-    color="zinc300"
-    p="1px"
-    _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-    {...props}
-  >
-    {label}
-  </Button>
-)
-
 const MainContent = (): JSX.Element => {
-  const [isBold, setIsBold] = React.useState(false)
-
-  const handleToggleBold = (): void => {
-    setIsBold(!isBold)
-  }
-
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
       <Header />
@@ -146,110 +98,7 @@ const MainContent = (): JSX.Element => {
               borderBottomRightRadius="10px"
               h="150px"
             >
-              <Flex
-                background="rgba(0, 0, 0, 0.2)"
-                border="1px"
-                borderColor="zinc800"
-                borderRadius="10px"
-                _hover={{ borderColor: 'zinc600' }}
-                _focusVisible={{ borderColor: 'zinc600' }}
-                width="100%"
-                h="120px"
-                alignItems="center"
-                justifyContent="center"
-                flexDirection={'column'}
-              >
-                <Flex
-                  mt="5px"
-                  ml="20px"
-                  mb="5px"
-                  alignItems="center"
-                  justifyContent="left"
-                  width="100%"
-                >
-                  <IconButton
-                    label={<FormatBold fontSize="small" />}
-                    onClick={handleToggleBold}
-                  />
-                  <IconButton label={<FormatItalic fontSize="small" />} />
-                  <IconButton label={<StrikethroughS fontSize="small" />} />
-                  <Divider
-                    orientation="vertical"
-                    h="20px"
-                    m="0"
-                    p="0"
-                    mr="8px"
-                  />
-                  <IconButton label={<InsertLink fontSize="small" />} />
-                  <Divider
-                    orientation="vertical"
-                    h="20px"
-                    m="0"
-                    p="0"
-                    mr="8px"
-                  />
-                  <IconButton
-                    label={<FormatListNumberedRounded fontSize="small" />}
-                  />
-                  <IconButton label={<FormatListBulleted fontSize="small" />} />
-                  <Divider
-                    orientation="vertical"
-                    h="20px"
-                    m="0"
-                    p="0"
-                    mr="8px"
-                  />
-                  <IconButton label={<Code fontSize="small" />} />
-                  <IconButton label={<DataArray fontSize="small" />} />
-                </Flex>
-                <Input
-                  flex="1"
-                  placeholder="Type a message..."
-                  background="rgba(0, 0, 0, 0)"
-                  border="0"
-                  _placeholder={{
-                    color: 'zinc300',
-                  }}
-                  _focusVisible={{ borderColor: '' }}
-                  _hover={{ borderColor: '', bg: '' }}
-                  h="10vh"
-                  ml="9px"
-                  fontWeight={isBold ? 'bold' : 'normal'}
-                />
-                <Flex
-                  alignItems="center"
-                  justifyContent="space-between"
-                  width="100%"
-                  ml="20px"
-                >
-                  <Box>
-                    <IconButton label={<Add />} mb="5px" mt="5px" />
-                    <IconButton
-                      label={<FormatColorText fontSize="small" />}
-                      mb="5px"
-                      mt="5px"
-                    />
-                    <IconButton
-                      label={<EmojiEmotions fontSize="small" />}
-                      mb="5px"
-                      mt="5px"
-                    />
-                    <IconButton
-                      label={<AlternateEmail fontSize="small" />}
-                      mb="5px"
-                      mt="5px"
-                    />
-                  </Box>
-                  <Box>
-                    <IconButton
-                      label={<Send fontSize="small" />}
-                      mb="5px"
-                      mr="30px"
-                      mt="5px"
-                    />
-                  </Box>
-                </Flex>
-              </Flex>
+              <TextEditor />
             </Flex>
           </Box>
         </Flex>
