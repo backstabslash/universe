@@ -5,15 +5,20 @@ body {
   scroll-behavior: smooth;
   font-weight: 500;
   body {
-    background: linear-gradient(
-      45deg,
-      rgba(4, 9, 40, 1) 0%,
-      rgba(11, 29, 97, 1) 17%,
-      rgba(13, 34, 119, 1) 34%,
-      rgba(9, 40, 139, 1) 50%,
-      rgba(13, 34, 119, 1) 67%,
-      rgba(11, 29, 97, 1) 84%,
-      rgba(4, 9, 40, 1) 100%
+    background-image: linear-gradient(
+      to right top,
+      #1f2124,
+      #1f2225,
+      #202226,
+      #202326,
+      #212327,
+      #212327,
+      #212327,
+      #212327,
+      #202326,
+      #202226,
+      #1f2225,
+      #1f2124
     );
   }
 }
@@ -32,7 +37,7 @@ a {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3c3f42 transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 }
 
 /* Chrome, Edge and Safari */
@@ -54,13 +59,13 @@ a {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 20px;
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-thumb:active {
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
