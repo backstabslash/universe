@@ -43,16 +43,21 @@ const MainContent = (): JSX.Element => {
     <Flex flexDirection={'column'} alignItems={'center'}>
       <Header />
       <Box
-        flex="1"
         flexDirection="column"
-        w="calc(100vw - 8px)"
+        w="calc(100vw - 78px)"
         m="1"
+        alignSelf={'flex-end'}
         borderRadius="10px"
         overflow="hidden"
       >
         <Flex>
           <Sidebar setisUserProfileVisible={setisUserProfileVisible} />
-          <Box w="calc(100vw - 8px)" h="calc(100vh - 42px)" color="zinc300">
+          <Box
+            w="calc(100vw - 8px)"
+            h="calc(100vh - 42px)"
+            color="zinc300"
+            flex="4"
+          >
             <Flex
               fontSize="lg"
               width="100%"
@@ -111,6 +116,7 @@ const MainContent = (): JSX.Element => {
               pl="4"
               pb="4"
               alignItems="center"
+              zIndex="-2"
               h="150px"
             >
               <Flex
@@ -125,6 +131,7 @@ const MainContent = (): JSX.Element => {
                 alignItems="center"
                 justifyContent="center"
                 flexDirection={'column'}
+                zIndex="0"
               >
                 <Flex
                   mt="5px"
@@ -147,7 +154,6 @@ const MainContent = (): JSX.Element => {
                   <IconButton label={<LinkIcon boxSize={'3'} />} />
                 </Flex>
                 <Input
-                  flex="1"
                   placeholder="Type a message..."
                   background="rgba(0, 0, 0, 0)"
                   border="0"

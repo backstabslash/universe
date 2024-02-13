@@ -32,7 +32,7 @@ a {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3c3f42 transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 }
 
 /* Chrome, Edge and Safari */
@@ -54,13 +54,13 @@ a {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 20px;
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-thumb:active {
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }

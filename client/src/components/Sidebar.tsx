@@ -10,8 +10,9 @@ interface SidebarProps {
 const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
+    w="200px"
+    flex="1"
     color="zinc300"
-    flex="0 0 300px"
     h="calc(100vh - 42px)"
     overflow="auto"
     borderRight="1px"
@@ -28,7 +29,7 @@ const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
       textAlign="center"
       h="60px"
     >
-      Universe
+      <b>Universe</b>
     </Heading>
     <Heading mb="2" fontSize="lg" width="100%" pr="15px" pl="15px">
       Channels
