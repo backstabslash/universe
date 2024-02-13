@@ -1,4 +1,8 @@
-import { Box, VStack, Heading } from '@chakra-ui/react'
+import { VStack, Heading, Flex, Box } from '@chakra-ui/react'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import TagIcon from '@mui/icons-material/Tag'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import PersonIcon from '@mui/icons-material/Person'
 
 const channels = ['general', 'random', 'team-1', 'team-2']
 const directMessages = ['user1', 'user2', 'user3']
@@ -6,56 +10,79 @@ const directMessages = ['user1', 'user2', 'user3']
 const Sidebar = (): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
-    color="zinc300"
-    width="300px"
+    w="200px"
+    flex="1"
+    color="zinc400"
+    h="calc(100vh - 42px)"
+    overflow="auto"
     borderRight="1px"
-    borderColor="zinc600"
-    borderTopLeftRadius="10px"
-    borderBottomLeftRadius="10px"
+    borderColor="rgba(27, 28, 31, 1)"
   >
-    <Heading
+    <Flex
       mb="2"
       fontSize="xl"
       width="100%"
       borderBottom="1px"
-      borderColor="zinc600"
+      borderColor="rgba(27, 28, 31, 1)"
+      color="zinc300"
       p="15px"
       pt="18px"
-      textAlign="center"
+      justifyContent={'space-between'}
+      alignItems={'center'}
       h="60px"
     >
-      <b>Universe</b>
-    </Heading>
-    <Heading mb="2" fontSize="lg" width="100%" pr="15px" pl="15px">
+      <Flex>
+        <b>Universe</b>
+        <Box mt="2px">
+          <KeyboardArrowDownIcon fontSize="small" />
+        </Box>
+      </Flex>
+      <FilterListIcon />
+    </Flex>
+    <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
       Channels
     </Heading>
     {channels.map((channel) => (
-      <Box
+      <Flex
         key={channel}
         p="2"
         pr="15px"
         pl="15px"
         borderRadius="md"
         background="rgba(0, 0, 0, 0.2)"
-        color="zinc300"
+        color="zinc400"
         _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
         width="90%"
-      >{`#${channel}`}</Box>
+        gap="5px"
+        alignItems={'center'}
+        justifyContent={'flex-start'}
+      >
+        <TagIcon fontSize="small" />
+        {`${channel}`}
+      </Flex>
     ))}
     {/* <Divider my="1" /> */}
-    <Heading mb="2" mt="2" fontSize="lg" width="100%" pr="15px" pl="15px">
+    <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
       Direct Messages
     </Heading>
     {directMessages.map((user) => (
-      <Box
+      <Flex
         key={user}
         p="2"
         borderRadius="md"
         background="rgba(0, 0, 0, 0.2)"
-        color="zinc300"
+        color="zinc400"
         _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
         width="90%"
-      >{`@${user}`}</Box>
+        pr="15px"
+        pl="15px"
+        alignItems={'center'}
+        justifyContent={'flex-start'}
+        gap="5px"
+      >
+        <PersonIcon fontSize="small" />
+        {`${user}`}
+      </Flex>
     ))}
     {/* <Divider my="1" /> */}
   </VStack>

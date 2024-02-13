@@ -7,18 +7,18 @@ body {
   body {
     background-image: linear-gradient(
       to right top,
-      #845ec2,
-      #7a59ac,
-      #6f5596,
-      #655081,
-      #5a4b6d,
-      #5d506c,
-      #60566c,
-      #635b6b,
-      #756d7e,
-      #898091,
-      #9c94a5,
-      #b0a8b9
+      #1f2124,
+      #1f2225,
+      #202226,
+      #202326,
+      #212327,
+      #212327,
+      #212327,
+      #212327,
+      #202326,
+      #202226,
+      #1f2225,
+      #1f2124
     );
   }
 }
@@ -37,7 +37,7 @@ a {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3c3f42 transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 }
 
 /* Chrome, Edge and Safari */
@@ -59,13 +59,13 @@ a {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 20px;
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 *::-webkit-scrollbar-thumb:active {
-  background-color: #3c3f42;
+  background-color: rgba(0, 0, 0, 0.1);
 }
