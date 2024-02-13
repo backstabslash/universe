@@ -15,16 +15,17 @@ import {
   Text,
   Image,
 } from '@chakra-ui/react'
-import FaceIcon from '@mui/icons-material/Face'
 import CottageIcon from '@mui/icons-material/Cottage'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import InboxIcon from '@mui/icons-material/Inbox'
+import AddMuiIcon from '@mui/icons-material/Add'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import IconButton from '../components/IconButton'
 import UserProfile from '../components/UserProfile'
 import { useState } from 'react'
 import orgImage from '../../public/org-placeholder.png'
+import profileImage from '../../public/profile-image-test.png'
 
 const contentData = [
   'This is a message',
@@ -56,7 +57,7 @@ const MainContent = (): JSX.Element => {
           justifyContent={'space-between'}
           color={'zinc300'}
         >
-          <Flex pt="15px" pl="4px" flexDirection={'column'} gap="20px">
+          <Flex pt="15px" pl="4px" flexDirection={'column'} gap="10px">
             <Button
               p="1"
               color={'zinc300'}
@@ -65,8 +66,8 @@ const MainContent = (): JSX.Element => {
               _active={{ background: 'transparent' }}
             >
               <Image
-                w="55px"
-                h="55px"
+                w="50px"
+                h="50px"
                 src={orgImage}
                 alt="Organization banner"
                 alignSelf="center"
@@ -74,6 +75,7 @@ const MainContent = (): JSX.Element => {
               />
             </Button>
             <Flex
+              mt="20px"
               flexDirection={'column'}
               justifyContent={'center'}
               alignItems={'center'}
@@ -124,16 +126,16 @@ const MainContent = (): JSX.Element => {
           </Flex>
           <Flex pb="15px" pl="4px" flexDirection={'column'} gap="10px">
             <Button
-              p="1px"
+              padding={'1px'}
               color={'zinc300'}
               background={'rgba(0,0,0,0.3)'}
-              _hover={{ background: 'rgba(0, 0, 0, 0)' }}
-              _active={{ background: 'rgba(0, 0, 0, 0)' }}
+              _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+              _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
             >
-              <AddIcon boxSize={'4'} />
+              <AddMuiIcon fontSize="medium" />
             </Button>
             <Button
-              p="1"
+              p="1px"
               color={'zinc300'}
               bg="rgba(33,35,38,1)"
               _hover={{ background: 'rgba(0, 0, 0, 0)' }}
@@ -142,7 +144,14 @@ const MainContent = (): JSX.Element => {
                 setisUserProfileVisible(true)
               }}
             >
-              <FaceIcon fontSize="large" />
+              <Image
+                w="50px"
+                h="50px"
+                src={profileImage}
+                alt="Profile banner"
+                alignSelf="center"
+                borderRadius="10px"
+              />
             </Button>
           </Flex>
         </Flex>
@@ -159,7 +168,7 @@ const MainContent = (): JSX.Element => {
               w="calc(100vw - 8px)"
               h="calc(100vh - 42px)"
               color="zinc300"
-              flex="4"
+              flex="6"
             >
               <Flex
                 fontSize="lg"

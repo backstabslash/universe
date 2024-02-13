@@ -24,7 +24,7 @@ interface UserProfileProps {
 const UserProfile = ({
   setisUserProfileVisible,
 }: UserProfileProps): JSX.Element => (
-  <Flex flexDirection={'column'} flex="2">
+  <Flex flexDirection={'column'} flex="3">
     <Heading
       background="rgba(0, 0, 0, 0.6)"
       color="zinc300"
