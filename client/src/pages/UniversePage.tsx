@@ -13,8 +13,8 @@ import {
   Button,
   Divider,
   Text,
+  Image,
 } from '@chakra-ui/react'
-import ApartmentIcon from '@mui/icons-material/Apartment'
 import FaceIcon from '@mui/icons-material/Face'
 import CottageIcon from '@mui/icons-material/Cottage'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
@@ -24,6 +24,7 @@ import Header from '../components/Header'
 import IconButton from '../components/IconButton'
 import UserProfile from '../components/UserProfile'
 import { useState } from 'react'
+import orgImage from '../../public/org-placeholder.png'
 
 const contentData = [
   'This is a message',
@@ -59,39 +60,67 @@ const MainContent = (): JSX.Element => {
             <Button
               p="1"
               color={'zinc300'}
-              bg="rgba(0,0,0,0.3)"
-              _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
-            >
-              <ApartmentIcon fontSize="large" />
-            </Button>
-            <Button
-              p="1"
-              color={'zinc300'}
               bg="transparent"
-              _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              _hover={{ background: 'transparent' }}
+              _active={{ background: 'transparent' }}
             >
-              <CottageIcon fontSize="medium" />
+              <Image
+                w="55px"
+                h="55px"
+                src={orgImage}
+                alt="Organization banner"
+                alignSelf="center"
+                borderRadius="10px"
+              />
             </Button>
-            <Button
-              p="1"
-              color={'zinc300'}
-              bg="transparent"
-              _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+            <Flex
+              flexDirection={'column'}
+              justifyContent={'center'}
+              alignItems={'center'}
             >
-              <InboxIcon fontSize="medium" />
-            </Button>
-            <Button
-              p="1"
-              color={'zinc300'}
-              bg="transparent"
-              _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              <Button
+                p="1"
+                color={'zinc300'}
+                bg="rgba(0, 0, 0, 0.3)"
+                _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              >
+                <CottageIcon fontSize="medium" />
+              </Button>
+              <Text fontSize={'xs'}>Home</Text>
+            </Flex>
+            <Flex
+              flexDirection={'column'}
+              justifyContent={'center'}
+              alignItems={'center'}
             >
-              <BookmarkIcon fontSize="medium" />
-            </Button>
+              <Button
+                p="1"
+                color={'zinc300'}
+                bg="transparent"
+                _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              >
+                <InboxIcon fontSize="medium" />
+              </Button>
+              <Text fontSize={'xs'}>Activity</Text>
+            </Flex>
+            <Flex
+              flexDirection={'column'}
+              justifyContent={'center'}
+              alignItems={'center'}
+            >
+              <Button
+                p="1"
+                color={'zinc300'}
+                bg="transparent"
+                _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              >
+                <BookmarkIcon fontSize="medium" />
+              </Button>
+              <Text fontSize={'xs'}>Later</Text>
+            </Flex>
           </Flex>
           <Flex pb="15px" pl="4px" flexDirection={'column'} gap="10px">
             <Button
@@ -199,7 +228,7 @@ const MainContent = (): JSX.Element => {
                   borderRadius="10px"
                   _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
                   width="100%"
-                  h="136px"
+                  h="130px"
                   alignItems="center"
                   justifyContent="center"
                   flexDirection={'column'}
