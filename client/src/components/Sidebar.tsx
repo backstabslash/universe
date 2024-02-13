@@ -11,7 +11,7 @@ const Sidebar = (): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
     w="200px"
-    flex="1"
+    flex="2"
     color="zinc400"
     h="calc(100vh - 42px)"
     overflow="auto"
