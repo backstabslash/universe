@@ -12,7 +12,6 @@ import {
   EmojiEmotions,
   FormatColorText,
   InsertLink,
-  DataArray,
   LinkOff,
 } from '@mui/icons-material/'
 import { useCallback, useMemo } from 'react'
@@ -32,7 +31,6 @@ import {
   Range,
   Element as SlateElement,
 } from 'slate'
-import isUrl from 'is-url'
 import type { BaseEditor, BaseElement, Descendant } from 'slate'
 import { withHistory } from 'slate-history'
 import { css } from '@emotion/css'
@@ -45,6 +43,13 @@ const HOTKEYS: Hotkeys = {
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
+
+const initialValue: any[] = [
+  {
+    type: 'paragraph',
+    children: [{ text: '' }],
+  },
+]
 
 interface IconButtonProps extends ButtonProps {
   label: string | JSX.Element
@@ -96,7 +101,7 @@ const TextEditor = (): JSX.Element => {
   const editor = useMemo(() => {
     const withPlugins = (editor: BaseEditor): BaseEditor => {
       withInlines(editor)
-      withMentions(editor)
+      // withMentions(editor)
       return editor
     }
     return withPlugins(withReact(withHistory(createEditor())))
@@ -147,7 +152,6 @@ const TextEditor = (): JSX.Element => {
           />
           <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
           <MarkButton format="code" label={<Code fontSize="small" />} />
-          <IconButton label={<DataArray fontSize="small" />} />
         </Flex>
         <Editable
           style={{
@@ -332,52 +336,12 @@ const Element = (props: ElementProps): JSX.Element => {
 }
 
 const withInlines = (editor: BaseEditor): BaseEditor => {
-  const { insertData, insertText, isInline, isElementReadOnly, isSelectable } =
-    editor
+  const { isInline } = editor
 
   editor.isInline = (element: MyElement) =>
-    ['link', 'button', 'badge'].includes(element.type) || isInline(element)
-
-  editor.isElementReadOnly = (element: MyElement) =>
-    element.type === 'badge' || isElementReadOnly(element)
-
-  editor.isSelectable = (element: MyElement) =>
-    element.type !== 'badge' && isSelectable(element)
-
-  editor.insertText = (text) => {
-    if (text && isUrl(text)) {
-      wrapLink(editor, text)
-    } else {
-      insertText(text)
-    }
-  }
-
-  editor.insertData = (data) => {
-    const text = data.getData('text/plain')
-
-    if (text && isUrl(text)) {
-      wrapLink(editor, text)
-    } else {
-      insertData(data)
-    }
-  }
-
-  return editor
-}
-const withMentions = (editor: BaseEditor): BaseEditor => {
-  const { isInline, isVoid, markableVoid } = editor
-
-  editor.isInline = (element: MyElement) => {
-    return element.type === 'mention' ? true : isInline(element)
-  }
-
-  editor.isVoid = (element: MyElement) => {
-    return element.type === 'mention' ? true : isVoid(element)
-  }
-
-  editor.markableVoid = (element: MyElement) => {
-    return element.type === 'mention' || markableVoid(element)
-  }
+    (element.type !== undefined &&
+      ['link', 'button', 'badge'].includes(element.type)) ||
+    isInline(element)
 
   return editor
 }
@@ -402,7 +366,7 @@ const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
 }
 
 const insertLink = (editor: BaseEditor, url: string): void => {
-  if (editor.selection) {
+  if (editor.selection !== null) {
     wrapLink(editor, url)
   }
 }
@@ -432,7 +396,7 @@ const wrapLink = (editor: BaseEditor, url: string): void => {
   }
 
   const { selection } = editor
-  const isCollapsed = selection && Range.isCollapsed(selection)
+  const isCollapsed = selection !== null && Range.isCollapsed(selection)
   const link: LinkElement = {
     type: 'link',
     url,
@@ -528,7 +492,7 @@ const AddLinkButton = (): JSX.Element => {
       onMouseDown={(event) => {
         event.preventDefault()
         const url = window.prompt('Enter the URL of the link:')
-        if (!url) return
+        if (url === null || url === undefined || url.trim() === '') return
         insertLink(editor, url)
       }}
     >
@@ -583,12 +547,5 @@ const MarkButton = ({
     </Button>
   )
 }
-
-const initialValue: any[] = [
-  {
-    type: 'paragraph',
-    children: [{ text: '' }],
-  },
-]
 
 export default TextEditor

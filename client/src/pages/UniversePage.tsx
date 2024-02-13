@@ -1,6 +1,5 @@
-
-import { EditIcon } from '@chakra-ui/icons'
-import { Box, Heading, Flex, Button, Text, Image, } from '@chakra-ui/react'
+import { AddIcon, EditIcon } from '@chakra-ui/icons'
+import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import TextEditor from '../components/TextEditor'
@@ -8,11 +7,9 @@ import FaceIcon from '@mui/icons-material/Face'
 import CottageIcon from '@mui/icons-material/Cottage'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import InboxIcon from '@mui/icons-material/Inbox'
-import IconButton from '../components/IconButton'
 import UserProfile from '../components/UserProfile'
 import { useState } from 'react'
 import orgImage from '../../public/org-placeholder.png'
-
 
 const contentData = [
   'This is a message',
