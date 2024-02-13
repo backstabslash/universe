@@ -16,14 +16,14 @@ const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
     h="calc(100vh - 42px)"
     overflow="auto"
     borderRight="1px"
-    borderColor="rgba(20, 29, 64, 1)"
+    borderColor="rgba(27, 28, 31, 1)"
   >
     <Heading
       mb="2"
       fontSize="xl"
       width="100%"
       borderBottom="1px"
-      borderColor="rgba(20, 29, 64, 1)"
+      borderColor="rgba(27, 28, 31, 1)"
       p="15px"
       pt="18px"
       textAlign="center"

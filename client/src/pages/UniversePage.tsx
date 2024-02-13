@@ -63,7 +63,7 @@ const MainContent = (): JSX.Element => {
               width="100%"
               background="rgba(0, 0, 0, 0.6)"
               borderBottom="1px"
-              borderColor="rgba(20, 29, 64, 1)"
+              borderColor="rgba(27, 28, 31, 1)"
               p="15px"
               h="60px"
               alignItems="center"
@@ -98,7 +98,7 @@ const MainContent = (): JSX.Element => {
                 <Box
                   key={index}
                   p="3"
-                  bg="#1D212E"
+                  bg="rgba(33,35,38,1)"
                   borderRadius="md"
                   boxShadow="md"
                   color="zinc300"
@@ -116,22 +116,19 @@ const MainContent = (): JSX.Element => {
               pl="4"
               pb="4"
               alignItems="center"
-              zIndex="-2"
               h="150px"
             >
               <Flex
                 background="rgba(0, 0, 0, 0.2)"
                 border="1px"
-                borderColor="rgba(20, 29, 64, 1)"
+                borderColor="rgba(27, 28, 31, 1)"
                 borderRadius="10px"
-                _hover={{ borderColor: 'zinc600' }}
-                _focusVisible={{ borderColor: 'zinc600' }}
+                _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
                 width="100%"
                 h="136px"
                 alignItems="center"
                 justifyContent="center"
                 flexDirection={'column'}
-                zIndex="0"
               >
                 <Flex
                   mt="5px"

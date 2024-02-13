@@ -33,7 +33,7 @@ const UserProfile = ({
       fontSize="xl"
       borderBottom="1px"
       borderLeft={'1px'}
-      borderColor="rgba(20, 29, 64, 1)"
+      borderColor="rgba(27, 28, 31, 1)"
       p="15px"
       pt="18px"
       h="60px"
@@ -53,7 +53,7 @@ const UserProfile = ({
       color="zinc300"
       h="calc(100vh - 102px)"
       borderLeft="1px"
-      borderColor="rgba(20, 29, 64, 1)"
+      borderColor="rgba(27, 28, 31, 1)"
       overflowY="auto"
     >
       <VStack width="100%">
@@ -70,7 +70,7 @@ const UserProfile = ({
           width="100%"
           align="start"
           borderBottom="1px"
-          borderColor="rgba(20, 29, 64, 1)"
+          borderColor="rgba(27, 28, 31, 1)"
           spacing={4}
           pr="15px"
           pl="15px"
@@ -94,7 +94,7 @@ const UserProfile = ({
             <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
               <Button
                 size="md"
-                background="rgba(0, 0, 0, 0.2)"
+                bg="rgba(33,35,38,1)"
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 color="zinc300"
               >
@@ -109,7 +109,7 @@ const UserProfile = ({
           <HStack width="100%">
             <Button
               flex={1}
-              background="rgba(0, 0, 0, 0.2)"
+              bg="rgba(33,35,38,1)"
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               color="zinc300"
               _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
@@ -122,14 +122,14 @@ const UserProfile = ({
                   width="100%"
                   as={Button}
                   rightIcon={<ChevronDownIcon />}
-                  background="rgba(0, 0, 0, 0.2)"
+                  bg="rgba(33,35,38,1)"
                   color="zinc300"
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                   _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   View as
                 </MenuButton>
-                <MenuList bg="#1D212E" border="none">
+                <MenuList bg="rgba(33,35,38,1)" border="none">
                   <MenuItem
                     background="rgba(0, 0, 0, 0)"
                     color="zinc300"
@@ -153,13 +153,13 @@ const UserProfile = ({
                   width="100%"
                   as={Button}
                   color="zinc300"
-                  background="rgba(0, 0, 0, 0.2)"
+                  bg="rgba(33,35,38,1)"
                   _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   ⋮
                 </MenuButton>
-                <MenuList bg="#1D212E" border="none">
+                <MenuList bg="rgba(33,35,38,1)" border="none">
                   <MenuItem
                     background="rgba(0, 0, 0, 0)"
                     color="zinc300"
@@ -183,7 +183,7 @@ const UserProfile = ({
           width="100%"
           align="start"
           borderBottom="1px"
-          borderColor="rgba(20, 29, 64, 1)"
+          borderColor="rgba(27, 28, 31, 1)"
           spacing={4}
           pr="15px"
           pl="15px"
@@ -217,7 +217,7 @@ const UserProfile = ({
           <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
             <Button
               size="md"
-              background="rgba(0, 0, 0, 0.2)"
+              bg="rgba(33,35,38,1)"
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               color="zinc300"
             >
@@ -247,7 +247,7 @@ const UserProfile = ({
           <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
             <Button
               size="md"
-              background="rgba(0, 0, 0, 0.2)"
+              bg="rgba(33,35,38,1)"
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               color="zinc300"
             >
