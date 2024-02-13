@@ -1,4 +1,4 @@
-import { VStack, Heading, Button, Flex, Box } from '@chakra-ui/react'
+import { VStack, Heading, Flex, Box } from '@chakra-ui/react'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TagIcon from '@mui/icons-material/Tag'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
@@ -7,11 +7,7 @@ import PersonIcon from '@mui/icons-material/Person'
 const channels = ['general', 'random', 'team-1', 'team-2']
 const directMessages = ['user1', 'user2', 'user3']
 
-interface SidebarProps {
-  setisUserProfileVisible: (visible: boolean) => void
-}
-
-const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
+const Sidebar = (): JSX.Element => (
   <VStack
     background="rgba(0, 0, 0, 0.6)"
     w="200px"
@@ -89,18 +85,6 @@ const Sidebar = ({ setisUserProfileVisible }: SidebarProps): JSX.Element => (
       </Flex>
     ))}
     {/* <Divider my="1" /> */}
-    <Button
-      size="md"
-      background="rgba(0, 0, 0, 0.2)"
-      _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
-      _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
-      color="zinc300"
-      onClick={() => {
-        setisUserProfileVisible(true)
-      }}
-    >
-      Profile test
-    </Button>
   </VStack>
 )
 
