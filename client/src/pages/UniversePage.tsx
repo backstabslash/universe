@@ -76,7 +76,7 @@ const MainContent = (): JSX.Element => {
                 size="md"
                 mr="2"
                 bg="transparent"
-                color="zinc300"
+                color="zinc400"
                 _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
               >
                 <EditIcon boxSize={'4'} /> &nbsp; Canvas

@@ -12,10 +12,8 @@ import {
   Link,
   Heading,
   Flex,
-  Icon,
 } from '@chakra-ui/react'
 import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons'
-import { AiOutlineEdit } from 'react-icons/ai'
 import IconButton from './IconButton'
 import profileImage from '../../public/profile-image-test.png'
 
@@ -38,8 +36,8 @@ const UserProfile = ({
       pt="18px"
       h="60px"
     >
-      <Flex justifyContent="space-between">
-        <b>My profile</b>
+      <Flex justifyContent="space-between" alignItems={'center'}>
+        <b>Profile</b>
         <IconButton
           label={<CloseIcon boxSize={'3'} />}
           onClick={() => {
@@ -83,11 +81,12 @@ const UserProfile = ({
               </Text>
               <Button
                 size="md"
+                fontSize={'sm'}
                 bg="transparent"
-                color="zinc300"
+                color="#23bdff"
                 _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
               >
-                <Icon as={AiOutlineEdit} /> &nbsp; Edit
+                Edit
               </Button>
             </HStack>
             <Text>Alias</Text>
@@ -194,10 +193,11 @@ const UserProfile = ({
             <Button
               size="md"
               bg="transparent"
-              color="zinc300"
+              fontSize={'sm'}
+              color="#23bdff"
               _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
             >
-              <Icon as={AiOutlineEdit} /> &nbsp; Edit
+              Edit
             </Button>
           </HStack>
           <VStack align="start" spacing={1}>
@@ -238,10 +238,11 @@ const UserProfile = ({
             <Button
               size="md"
               bg="transparent"
-              color="zinc300"
+              color="#23bdff"
+              fontSize={'sm'}
               _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
             >
-              <Icon as={AiOutlineEdit} /> &nbsp; Edit
+              Edit
             </Button>
           </HStack>
           <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
