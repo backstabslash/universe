@@ -5,20 +5,15 @@ body {
   scroll-behavior: smooth;
   font-weight: 500;
   body {
-    background-image: linear-gradient(
-      to right top,
-      #845ec2,
-      #7a59ac,
-      #6f5596,
-      #655081,
-      #5a4b6d,
-      #5d506c,
-      #60566c,
-      #635b6b,
-      #756d7e,
-      #898091,
-      #9c94a5,
-      #b0a8b9
+    background: linear-gradient(
+      45deg,
+      rgba(4, 9, 40, 1) 0%,
+      rgba(11, 29, 97, 1) 17%,
+      rgba(13, 34, 119, 1) 34%,
+      rgba(9, 40, 139, 1) 50%,
+      rgba(13, 34, 119, 1) 67%,
+      rgba(11, 29, 97, 1) 84%,
+      rgba(4, 9, 40, 1) 100%
     );
   }
 }
