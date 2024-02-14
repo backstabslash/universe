@@ -14,7 +14,6 @@ import {
 } from '@chakra-ui/react'
 
 import MainpageSvg from '../../public/svg/mainpageSvg'
-import { BsArrowRightShort } from 'react-icons/bs'
 import { useNavigate } from 'react-router-dom'
 
 const MainPage = (): JSX.Element => {
@@ -71,15 +70,14 @@ const MainPage = (): JSX.Element => {
               <Stack>
                 <Button
                   type="submit"
-                  size="4rem"
-                  px="2.2rem"
-                  height="35px"
+                  height="40px"
                   bg="zinc800"
                   color="zinc300"
                   _hover={{ bg: 'zinc700' }}
                   onClick={() => {
                     navigate('/reg/companyname')
                   }}
+                  size="md"
                 >
                   {'Create Workspace'}
                 </Button>
@@ -100,7 +98,7 @@ const MainPage = (): JSX.Element => {
           mt="1rem"
           w="40%"
           mx="auto"
-          maxH="200px"
+          h="21vh"
         >
           {isLoading && (
             <Flex align="center" gap="2">
@@ -122,7 +120,7 @@ const MainPage = (): JSX.Element => {
             </Flex>
           )}
           {!isLoading && organisations?.length >= 1 && (
-            <Text fontWeight="bold" color="zinc300" mb="1.2rem">
+            <Text fontWeight="bold" color="zinc300" mb="1rem">
               Open a workspace
             </Text>
           )}
@@ -157,7 +155,7 @@ const MainPage = (): JSX.Element => {
               </Flex>
             </Center>
           ) : (
-            <Stack maxH="65px" overflowY="auto">
+            <Stack maxH="13vh" overflowY="auto">
               {!isLoading &&
                 organisations?.map((organisation: any, index: number) => (
                   <Flex
@@ -201,10 +199,10 @@ const MainPage = (): JSX.Element => {
                       bg="zinc800"
                       color="zinc300"
                       _hover={{ bg: 'zinc700' }}
-                      borderColor="zinc600"
-                      rightIcon={<BsArrowRightShort />}
+                      borderColor="transparent"
+                      // rightIcon={<BsArrowRightShort />}
                       variant="outline"
-                      mr="1rem"
+                      mr="10px"
                     >
                       Open
                     </Button>
