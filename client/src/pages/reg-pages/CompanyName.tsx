@@ -27,7 +27,7 @@ const CompanyName = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="640px"
+            mr="70vh"
             color="zinc300"
           >
             What&apos;s the name of your company or team
@@ -36,7 +36,7 @@ const CompanyName = (): JSX.Element => {
             This will be the name of your Slack workspace - choose something
             that your team will recognize.
           </Text>
-          <Text fontSize="lg" mt="1.2rem" w="75%" color="zinc300" mb="10px">
+          <Text fontSize="lg" mt="10px" w="75%" color="zinc300" mb="10px">
             Name{' '}
             <Text as="span" color="red">
               *
@@ -50,7 +50,7 @@ const CompanyName = (): JSX.Element => {
             borderRadius="md"
             border={'0'}
             _focusVisible={{ borderColor: 'zinc600' }}
-            w="680px"
+            w="400px"
             minH="50px"
             mb="10px"
             color="zinc300"

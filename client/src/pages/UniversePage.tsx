@@ -44,7 +44,7 @@ const contentData = [
 
 const MainContent = (): JSX.Element => {
   const [isUserProfileVisible, setisUserProfileVisible] =
-    useState<boolean>(false)
+    useState<boolean>(true)
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -173,9 +173,9 @@ const MainContent = (): JSX.Element => {
               <Flex
                 fontSize="lg"
                 width="100%"
-                background="rgba(0, 0, 0, 0.6)"
+                background="rgba(0, 0, 0, 0.5)"
                 borderBottom="1px"
-                borderColor="rgba(27, 28, 31, 1)"
+                borderColor="rgba(29, 29, 32, 1)"
                 p="15px"
                 h="60px"
                 alignItems="center"
@@ -195,7 +195,7 @@ const MainContent = (): JSX.Element => {
                 </Button>
               </Flex>
               <Box
-                bg="rgba(0, 0, 0, 0.6)"
+                background="rgba(0, 0, 0, 0.5)"
                 h="calc(100vh - 252px)"
                 overflowY="auto"
                 bgImage="../../public/chat-bg-pattern-dark.png"
@@ -210,7 +210,7 @@ const MainContent = (): JSX.Element => {
                   <Box
                     key={index}
                     p="3"
-                    bg="rgba(33,35,38,1)"
+                    bg="zinc800"
                     borderRadius="md"
                     boxShadow="md"
                     color="zinc300"
@@ -223,7 +223,7 @@ const MainContent = (): JSX.Element => {
                 ))}
               </Box>
               <Flex
-                background="rgba(0, 0, 0, 0.6)"
+                background="rgba(0, 0, 0, 0.5)"
                 pr="4"
                 pl="4"
                 pb="4"
@@ -233,7 +233,7 @@ const MainContent = (): JSX.Element => {
                 <Flex
                   background="rgba(0, 0, 0, 0.2)"
                   border="1px"
-                  borderColor="rgba(27, 28, 31, 1)"
+                  borderColor="rgba(29, 29, 32, 1)"
                   borderRadius="10px"
                   _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
                   width="100%"

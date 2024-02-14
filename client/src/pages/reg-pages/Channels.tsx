@@ -48,12 +48,11 @@ const Channels = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="640px"
+            mr="70vh"
             mb="10px"
-            mt="10px"
             color="zinc300"
           >
-            What&apos;s your team working on right now?
+            What&apos;s your team <br></br> working on right now?
           </Heading>
           <Flex
             wrap="wrap"
@@ -79,14 +78,14 @@ const Channels = (): JSX.Element => {
             ))}
             <Input
               flex="1"
-              placeholder="Enter channels' names"
-              fontSize="lg  "
+              placeholder="Enter channel names"
+              fontSize="lg"
               bg="zinc800"
               borderRadius="md"
               border={'0'}
               _focusVisible={{ borderColor: 'zinc600' }}
-              w="460px"
-              mb="10px"
+              w="400px"
+              minH="50px"
               color="zinc300"
               value={input}
               onChange={(e) => {
