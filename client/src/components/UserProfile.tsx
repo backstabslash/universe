@@ -24,14 +24,14 @@ interface UserProfileProps {
 const UserProfile = ({
   setisUserProfileVisible,
 }: UserProfileProps): JSX.Element => (
-  <Flex flexDirection={'column'} flex="2">
+  <Flex flexDirection={'column'} flex="3">
     <Heading
-      background="rgba(0, 0, 0, 0.6)"
+      background="rgba(0, 0, 0, 0.5)"
       color="zinc300"
       fontSize="xl"
       borderBottom="1px"
       borderLeft={'1px'}
-      borderColor="rgba(27, 28, 31, 1)"
+      borderColor="rgba(29, 29, 32, 1)"
       p="15px"
       pt="18px"
       h="60px"
@@ -47,11 +47,11 @@ const UserProfile = ({
       </Flex>
     </Heading>
     <VStack
-      background="rgba(0, 0, 0, 0.6)"
+      background="rgba(0, 0, 0, 0.5)"
       color="zinc300"
       h="calc(100vh - 102px)"
       borderLeft="1px"
-      borderColor="rgba(27, 28, 31, 1)"
+      borderColor="rgba(29, 29, 32, 1)"
       overflowY="auto"
     >
       <VStack width="100%">
@@ -68,7 +68,7 @@ const UserProfile = ({
           width="100%"
           align="start"
           borderBottom="1px"
-          borderColor="rgba(27, 28, 31, 1)"
+          borderColor="rgba(29, 29, 32, 1)"
           spacing={4}
           pr="15px"
           pl="15px"
@@ -93,7 +93,7 @@ const UserProfile = ({
             <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
               <Button
                 size="md"
-                bg="rgba(33,35,38,1)"
+                bg="zinc800"
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 color="zinc300"
               >
@@ -108,7 +108,7 @@ const UserProfile = ({
           <HStack width="100%">
             <Button
               flex={1}
-              bg="rgba(33,35,38,1)"
+              bg="zinc800"
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               color="zinc300"
               _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
@@ -121,14 +121,14 @@ const UserProfile = ({
                   width="100%"
                   as={Button}
                   rightIcon={<ChevronDownIcon />}
-                  bg="rgba(33,35,38,1)"
+                  bg="zinc800"
                   color="zinc300"
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                   _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   View as
                 </MenuButton>
-                <MenuList bg="rgba(33,35,38,1)" border="none">
+                <MenuList bg="zinc800" border="none">
                   <MenuItem
                     background="rgba(0, 0, 0, 0)"
                     color="zinc300"
@@ -152,13 +152,13 @@ const UserProfile = ({
                   width="100%"
                   as={Button}
                   color="zinc300"
-                  bg="rgba(33,35,38,1)"
+                  bg="zinc800"
                   _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                   _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 >
                   ⋮
                 </MenuButton>
-                <MenuList bg="rgba(33,35,38,1)" border="none">
+                <MenuList bg="zinc800" border="none">
                   <MenuItem
                     background="rgba(0, 0, 0, 0)"
                     color="zinc300"
@@ -182,7 +182,7 @@ const UserProfile = ({
           width="100%"
           align="start"
           borderBottom="1px"
-          borderColor="rgba(27, 28, 31, 1)"
+          borderColor="rgba(29, 29, 32, 1)"
           spacing={4}
           pr="15px"
           pl="15px"
@@ -217,7 +217,7 @@ const UserProfile = ({
           <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
             <Button
               size="md"
-              bg="rgba(33,35,38,1)"
+              bg="zinc800"
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               color="zinc300"
             >
@@ -248,7 +248,7 @@ const UserProfile = ({
           <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
             <Button
               size="md"
-              bg="rgba(33,35,38,1)"
+              bg="zinc800"
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               color="zinc300"
             >

@@ -9,21 +9,21 @@ const directMessages = ['user1', 'user2', 'user3']
 
 const Sidebar = (): JSX.Element => (
   <VStack
-    background="rgba(0, 0, 0, 0.6)"
+    background="rgba(0, 0, 0, 0.5)"
     w="200px"
-    flex="1"
+    flex="2"
     color="zinc400"
     h="calc(100vh - 42px)"
     overflow="auto"
     borderRight="1px"
-    borderColor="rgba(27, 28, 31, 1)"
+    borderColor="rgba(29, 29, 32, 1)"
   >
     <Flex
       mb="2"
       fontSize="xl"
       width="100%"
       borderBottom="1px"
-      borderColor="rgba(27, 28, 31, 1)"
+      borderColor="rgba(29, 29, 32, 1)"
       color="zinc300"
       p="15px"
       pt="18px"
@@ -49,9 +49,9 @@ const Sidebar = (): JSX.Element => (
         pr="15px"
         pl="15px"
         borderRadius="md"
-        background="rgba(0, 0, 0, 0.2)"
+        background="rgba(0, 0, 0, 0.1)"
         color="zinc400"
-        _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+        _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
         width="90%"
         gap="5px"
         alignItems={'center'}
@@ -61,7 +61,6 @@ const Sidebar = (): JSX.Element => (
         {`${channel}`}
       </Flex>
     ))}
-    {/* <Divider my="1" /> */}
     <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
       Direct Messages
     </Heading>
@@ -70,9 +69,9 @@ const Sidebar = (): JSX.Element => (
         key={user}
         p="2"
         borderRadius="md"
-        background="rgba(0, 0, 0, 0.2)"
+        background="rgba(0, 0, 0, 0.1)"
         color="zinc400"
-        _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+        _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
         width="90%"
         pr="15px"
         pl="15px"
@@ -84,7 +83,6 @@ const Sidebar = (): JSX.Element => (
         {`${user}`}
       </Flex>
     ))}
-    {/* <Divider my="1" /> */}
   </VStack>
 )
 

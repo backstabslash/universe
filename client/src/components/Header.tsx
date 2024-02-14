@@ -22,7 +22,7 @@ const Header = (): JSX.Element => (
       height="30px"
       _placeholder={{ color: 'zinc300' }}
       _focusVisible={{ borderColor: '' }}
-      _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.5)' }}
+      _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
     />
     <Button
       size={'sm'}

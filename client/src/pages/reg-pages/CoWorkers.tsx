@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/RegSidebar'
 
 const Coworkers = (): JSX.Element => {
-  const organisationName = 'Your Organisation Name'
+  const organisationName = 'Placeholder'
   const isLoadingMock = false
 
   const [tags, setTags] = useState<string[]>([])
@@ -47,7 +47,7 @@ const Coworkers = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="640px"
+            mr="50vw"
             mb="10px"
             color="zinc300"
           >
@@ -82,8 +82,8 @@ const Coworkers = (): JSX.Element => {
               borderRadius="md"
               border={'0'}
               _focusVisible={{ borderColor: 'zinc600' }}
-              w="460px"
-              mb="10px"
+              w="400px"
+              minH="50px"
               color="zinc300"
               value={input}
               onChange={(e) => {
@@ -98,7 +98,7 @@ const Coworkers = (): JSX.Element => {
               bg="zinc800"
               color="zinc300"
               _hover={{ bg: 'zinc700' }}
-              w="80px"
+              w="100px"
               onClick={() => {
                 navigate('/reg/channels')
               }}
