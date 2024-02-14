@@ -14,7 +14,6 @@ import {
 } from '@chakra-ui/react'
 
 import MainpageSvg from '../../public/svg/mainpageSvg'
-import { BsArrowRightShort } from 'react-icons/bs'
 import { useNavigate } from 'react-router-dom'
 
 const MainPage = (): JSX.Element => {
