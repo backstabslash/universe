@@ -48,7 +48,7 @@ const Channels = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="70vh"
+            mr="50vw"
             mb="10px"
             color="zinc300"
           >

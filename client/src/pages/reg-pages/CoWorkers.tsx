@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/RegSidebar'
 
 const Coworkers = (): JSX.Element => {
-  const organisationName = 'Organisation Name'
+  const organisationName = 'Placeholder'
   const isLoadingMock = false
 
   const [tags, setTags] = useState<string[]>([])
@@ -47,7 +47,7 @@ const Coworkers = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="70vh"
+            mr="50vw"
             mb="10px"
             color="zinc300"
           >

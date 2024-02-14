@@ -27,12 +27,12 @@ const CompanyName = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="70vh"
+            mr="50vw"
             color="zinc300"
           >
             What&apos;s the name of your company or team
           </Heading>
-          <Text fontSize="sm" w="75%" color="zinc300">
+          <Text fontSize="sm" w="50%" color="zinc300">
             This will be the name of your Slack workspace - choose something
             that your team will recognize.
           </Text>
