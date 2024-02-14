@@ -33,35 +33,17 @@ import {
 } from 'slate'
 import type { BaseEditor, BaseElement, Descendant } from 'slate'
 import { withHistory } from 'slate-history'
-import { css } from '@emotion/css'
-const HOTKEYS: Hotkeys = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+s': 'strikethrough',
-  'mod+`': 'code',
-}
-
-const LIST_TYPES = ['numbered-list', 'bulleted-list']
-const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
-
-const initialValue: any[] = [
-  {
-    type: 'paragraph',
-    children: [{ text: '' }],
-  },
-]
+import styled from 'styled-components'
 
 interface IconButtonProps extends ButtonProps {
   label: string | JSX.Element
 }
 
-interface BlockButtonProps extends ButtonProps {
-  label: string | JSX.Element
+interface BlockButtonProps extends IconButtonProps {
   format: string
 }
 
-interface MarkButtonProps extends ButtonProps {
-  label: string | JSX.Element
+interface MarkButtonProps extends IconButtonProps {
   format: string
 }
 
@@ -91,6 +73,29 @@ interface LinkElement {
   url: string
   children: Descendant[]
 }
+
+const HOTKEYS: Hotkeys = {
+  'mod+b': 'bold',
+  'mod+i': 'italic',
+  'mod+s': 'strikethrough',
+  'mod+`': 'code',
+}
+
+const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const TEXT_ALIGN_TYPES = ['left']
+
+const initialValue: any[] = [
+  {
+    type: 'paragraph',
+    children: [{ text: '' }],
+  },
+]
+
+const StyledEditable = styled(Editable)`
+  &:focus {
+    outline: none;
+  }
+`
 
 const TextEditor = (): JSX.Element => {
   const renderElement = useCallback(
@@ -153,7 +158,7 @@ const TextEditor = (): JSX.Element => {
           <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
           <MarkButton format="code" label={<Code fontSize="small" />} />
         </Flex>
-        <Editable
+        <StyledEditable
           style={{
             width: '95%',
             marginRight: '20px',
@@ -162,7 +167,6 @@ const TextEditor = (): JSX.Element => {
           renderLeaf={renderLeaf}
           placeholder="Type a message..."
           spellCheck
-          autoFocus
           onKeyDown={(event: React.KeyboardEvent) => {
             for (const hotkey in HOTKEYS) {
               if (isHotkey(hotkey, event)) {
@@ -209,6 +213,17 @@ const TextEditor = (): JSX.Element => {
       </Flex>
     </Slate>
   )
+}
+
+const withInlines = (editor: BaseEditor): BaseEditor => {
+  const { isInline } = editor
+
+  editor.isInline = (element: MyElement) =>
+    (element.type !== undefined &&
+      ['link', 'button', 'badge'].includes(element.type)) ||
+    isInline(element)
+
+  return editor
 }
 
 const toggleBlock = (editor: BaseEditor, format: string): void => {
@@ -284,93 +299,6 @@ const isMarkActive = (editor: BaseEditor, format: any): boolean => {
   return marks !== null && marks !== undefined && marks[format]
 }
 
-const Element = (props: ElementProps): JSX.Element => {
-  const { attributes, children, element } = props
-  const style = { textAlign: element.align }
-  switch (element.type) {
-    case 'block-quote':
-      return (
-        <blockquote style={style} {...attributes}>
-          {children}
-        </blockquote>
-      )
-    case 'bulleted-list':
-      return (
-        <ul style={style} {...attributes}>
-          {children}
-        </ul>
-      )
-    case 'heading-one':
-      return (
-        <h1 style={style} {...attributes}>
-          {children}
-        </h1>
-      )
-    case 'heading-two':
-      return (
-        <h2 style={style} {...attributes}>
-          {children}
-        </h2>
-      )
-    case 'list-item':
-      return (
-        <li style={style} {...attributes}>
-          {children}
-        </li>
-      )
-    case 'numbered-list':
-      return (
-        <ol style={style} {...attributes}>
-          {children}
-        </ol>
-      )
-    case 'link':
-      return <LinkComponent {...props} />
-    default:
-      return (
-        <p style={style} {...attributes}>
-          {children}
-        </p>
-      )
-  }
-}
-
-const withInlines = (editor: BaseEditor): BaseEditor => {
-  const { isInline } = editor
-
-  editor.isInline = (element: MyElement) =>
-    (element.type !== undefined &&
-      ['link', 'button', 'badge'].includes(element.type)) ||
-    isInline(element)
-
-  return editor
-}
-const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
-  const selected = useSelected()
-  return (
-    <a
-      {...attributes}
-      href={element.url}
-      className={
-        selected
-          ? css`
-              box-shadow: 0 0 0 3px #ddd;
-            `
-          : ''
-      }
-      style={{ color: 'blue' }}
-    >
-      {children}
-    </a>
-  )
-}
-
-const insertLink = (editor: BaseEditor, url: string): void => {
-  if (editor.selection !== null) {
-    wrapLink(editor, url)
-  }
-}
-
 const isLinkActive = (editor: BaseEditor): boolean => {
   const [link] = Editor.nodes(editor, {
     match: (n) =>
@@ -379,6 +307,12 @@ const isLinkActive = (editor: BaseEditor): boolean => {
       (n as LinkElement).type === 'link',
   })
   return Boolean(link)
+}
+
+const insertLink = (editor: BaseEditor, url: string): void => {
+  if (editor.selection !== null) {
+    wrapLink(editor, url)
+  }
 }
 
 const unwrapLink = (editor: BaseEditor): void => {
@@ -411,6 +345,57 @@ const wrapLink = (editor: BaseEditor, url: string): void => {
   }
 }
 
+const Element = (props: ElementProps): JSX.Element => {
+  const { attributes, children, element } = props
+  const style = { textAlign: element.align }
+  switch (element.type) {
+    case 'block-quote':
+      return (
+        <blockquote style={style} {...attributes}>
+          {children}
+        </blockquote>
+      )
+    case 'bulleted-list':
+      return (
+        <ul style={{ ...style, paddingLeft: '20px' }} {...attributes}>
+          {children}
+        </ul>
+      )
+    case 'heading-one':
+      return (
+        <h1 style={style} {...attributes}>
+          {children}
+        </h1>
+      )
+    case 'heading-two':
+      return (
+        <h2 style={style} {...attributes}>
+          {children}
+        </h2>
+      )
+    case 'list-item':
+      return (
+        <li style={style} {...attributes}>
+          {children}
+        </li>
+      )
+    case 'numbered-list':
+      return (
+        <ol style={{ ...style, paddingLeft: '20px' }} {...attributes}>
+          {children}
+        </ol>
+      )
+    case 'link':
+      return <LinkComponent {...props} />
+    default:
+      return (
+        <p style={style} {...attributes}>
+          {children}
+        </p>
+      )
+  }
+}
+
 const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
   let newChildren = children
   if (leaf.bold === true) {
@@ -425,15 +410,24 @@ const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
     newChildren = <em>{newChildren}</em>
   }
 
-  if (leaf.underline === true) {
-    newChildren = <u>{newChildren}</u>
-  }
-
   if (leaf.strikethrough === true) {
     newChildren = <del>{newChildren}</del>
   }
 
   return <span {...attributes}>{newChildren}</span>
+}
+const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
+  const selected = useSelected()
+  return (
+    <a
+      {...attributes}
+      href={element.url}
+      className={selected}
+      style={{ color: '#1D9BD1' }}
+    >
+      {children}
+    </a>
+  )
 }
 
 const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
@@ -455,23 +449,53 @@ const BlockButton = ({
   ...props
 }: BlockButtonProps): JSX.Element => {
   const editor = useSlate()
+  const isActive = isBlockActive(
+    editor,
+    format,
+    TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
+  )
+
   return (
     <Button
       size="sm"
       mr="2"
-      background="rgba(0, 0, 0, 0)"
-      color="zinc300"
+      background={isActive ? 'zinc900' : 'rgba(0, 0, 0, 0)'}
+      color={isActive ? 'zinc300' : 'zinc300'}
       p="1px"
       _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
       {...props}
-      active={isBlockActive(
-        editor,
-        format,
-        TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
-      )}
+      active={isActive}
       onMouseDown={(event) => {
         event.preventDefault()
         toggleBlock(editor, format)
+      }}
+    >
+      {label}
+    </Button>
+  )
+}
+
+const MarkButton = ({
+  format,
+  label,
+  ...props
+}: MarkButtonProps): JSX.Element => {
+  const editor = useSlate()
+  const isActive = isMarkActive(editor, format)
+
+  return (
+    <Button
+      size="sm"
+      mr="2"
+      background={isActive ? 'zinc900' : 'rgba(0, 0, 0, 0)'}
+      color={isActive ? 'zinc300' : 'zinc300'}
+      p="1px"
+      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+      {...props}
+      active={isActive}
+      onMouseDown={(event) => {
+        event.preventDefault()
+        toggleMark(editor, format)
       }}
     >
       {label}
@@ -518,32 +542,6 @@ const RemoveLinkButton = (): JSX.Element => {
       }}
     >
       <LinkOff fontSize="small" />
-    </Button>
-  )
-}
-
-const MarkButton = ({
-  format,
-  label,
-  ...props
-}: MarkButtonProps): JSX.Element => {
-  const editor = useSlate()
-  return (
-    <Button
-      size="sm"
-      mr="2"
-      background="rgba(0, 0, 0, 0)"
-      color="zinc300"
-      p="1px"
-      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-      {...props}
-      active={isMarkActive(editor, format)}
-      onMouseDown={(event) => {
-        event.preventDefault()
-        toggleMark(editor, format)
-      }}
-    >
-      {label}
     </Button>
   )
 }
