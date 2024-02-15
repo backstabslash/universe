@@ -1,4 +1,19 @@
-import { Box, Flex, Button, Divider, type ButtonProps } from '@chakra-ui/react'
+import {
+  Box,
+  Flex,
+  Button,
+  Divider,
+  type ButtonProps,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Input,
+} from '@chakra-ui/react'
 import {
   FormatBold,
   FormatItalic,
@@ -13,8 +28,9 @@ import {
   FormatColorText,
   InsertLink,
   LinkOff,
+  DataArray,
 } from '@mui/icons-material/'
-import { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import isHotkey from 'is-hotkey'
 import {
   Editable,
@@ -157,6 +173,10 @@ const TextEditor = (): JSX.Element => {
           />
           <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
           <MarkButton format="code" label={<Code fontSize="small" />} />
+          <BlockButton
+            format="code-block"
+            label={<DataArray fontSize="small" />}
+          />
         </Flex>
         <StyledEditable
           style={{
@@ -387,6 +407,21 @@ const Element = (props: ElementProps): JSX.Element => {
       )
     case 'link':
       return <LinkComponent {...props} />
+    case 'code-block':
+      return (
+        <div
+          style={{
+            backgroundColor: '#18181b',
+            color: '#d4d4d8',
+            fontSize: '0.8em',
+            whiteSpace: 'pre-wrap', // Wraps the text onto the next line
+            fontFamily: 'Courier New, monospace', // Changes the font to a monospace font
+          }}
+          {...attributes}
+        >
+          {children}
+        </div>
+      )
     default:
       return (
         <p style={style} {...attributes}>
@@ -403,7 +438,18 @@ const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
   }
 
   if (leaf.code === true) {
-    newChildren = <code>{newChildren}</code>
+    newChildren = (
+      <code
+        style={{
+          backgroundColor: '#27272a',
+          color: 'orange',
+          border: '1px solid #71717a',
+          fontSize: '0.8em',
+        }}
+      >
+        {newChildren}
+      </code>
+    )
   }
 
   if (leaf.italic === true) {
@@ -505,23 +551,73 @@ const MarkButton = ({
 
 const AddLinkButton = (): JSX.Element => {
   const editor = useSlate()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [url, setUrl] = React.useState<string>('')
+
+  const handleSave = (): void => {
+    if (url.trim() === '') return
+    insertLink(editor, url)
+    onClose()
+  }
+
   return (
-    <Button
-      size="sm"
-      mr="2"
-      background="rgba(0, 0, 0, 0)"
-      color="zinc300"
-      p="1px"
-      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-      onMouseDown={(event) => {
-        event.preventDefault()
-        const url = window.prompt('Enter the URL of the link:')
-        if (url === null || url === undefined || url.trim() === '') return
-        insertLink(editor, url)
-      }}
-    >
-      <InsertLink fontSize="small" />
-    </Button>
+    <>
+      <Button
+        size="sm"
+        mr="2"
+        background="rgba(0, 0, 0, 0)"
+        color="zinc300"
+        p="1px"
+        _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+        onMouseDown={(event) => {
+          event.preventDefault()
+          onOpen()
+        }}
+      >
+        <InsertLink fontSize="small" />
+      </Button>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent bgColor={'zinc900'}>
+          <ModalHeader color={'zinc300'}>
+            Enter the URL of the link:
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input
+              value={url}
+              onChange={(event) => {
+                setUrl(event.target.value)
+              }}
+              placeholder="Enter URL"
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              bg="#16a34a"
+              _hover={{ background: '#14532d' }}
+              _active={{ background: '#14532d' }}
+              color="zinc100"
+              mr={3}
+              onClick={handleSave}
+            >
+              Save
+            </Button>
+            <Button
+              color="zinc100"
+              bg="zinc800"
+              _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   )
 }
 const RemoveLinkButton = (): JSX.Element => {
