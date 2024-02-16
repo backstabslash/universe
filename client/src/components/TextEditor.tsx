@@ -414,8 +414,8 @@ const Element = (props: ElementProps): JSX.Element => {
             backgroundColor: '#18181b',
             color: '#d4d4d8',
             fontSize: '0.8em',
-            whiteSpace: 'pre-wrap', // Wraps the text onto the next line
-            fontFamily: 'Courier New, monospace', // Changes the font to a monospace font
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'Courier New, monospace',
           }}
           {...attributes}
         >
@@ -508,7 +508,7 @@ const BlockButton = ({
       background={isActive ? 'zinc900' : 'rgba(0, 0, 0, 0)'}
       color={isActive ? 'zinc300' : 'zinc300'}
       p="1px"
-      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+      _hover={{ background: 'zinc900' }}
       {...props}
       active={isActive}
       onMouseDown={(event) => {
@@ -536,7 +536,7 @@ const MarkButton = ({
       background={isActive ? 'zinc900' : 'rgba(0, 0, 0, 0)'}
       color={isActive ? 'zinc300' : 'zinc300'}
       p="1px"
-      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+      _hover={{ background: 'zinc900' }}
       {...props}
       active={isActive}
       onMouseDown={(event) => {
@@ -568,7 +568,7 @@ const AddLinkButton = (): JSX.Element => {
         background="rgba(0, 0, 0, 0)"
         color="zinc300"
         p="1px"
-        _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+        _hover={{ background: 'zinc900' }}
         onMouseDown={(event) => {
           event.preventDefault()
           onOpen()
@@ -630,7 +630,7 @@ const RemoveLinkButton = (): JSX.Element => {
       background="rgba(0, 0, 0, 0)"
       color="zinc300"
       p="1px"
-      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+      _hover={{ background: 'zinc900' }}
       onMouseDown={() => {
         if (isLinkActive(editor)) {
           unwrapLink(editor)
