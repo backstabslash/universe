@@ -253,17 +253,13 @@ const toggleBlock = (editor: BaseEditor, format: string): void => {
   const isList = LIST_TYPES.includes(format)
 
   Transforms.unwrapNodes(editor, {
-    match: (n) => {
-      if ('type' in n) {
-        return (
-          !Editor.isEditor(n) &&
-          SlateElement.isElement(n) &&
-          LIST_TYPES.includes(n.type as string) &&
-          !TEXT_ALIGN_TYPES.includes(format)
-        )
-      }
-      return false
-    },
+    match: (n) =>
+      !Editor.isEditor(n) &&
+      SlateElement.isElement(n) &&
+      (n as MyElement).type !== undefined &&
+      LIST_TYPES.includes((n as MyElement).type ?? '') &&
+      !TEXT_ALIGN_TYPES.includes(format),
+    split: true,
   })
   let newProperties: Partial<MyElement>
   if (TEXT_ALIGN_TYPES.includes(format)) {
@@ -281,9 +277,39 @@ const toggleBlock = (editor: BaseEditor, format: string): void => {
     const block = { type: format, children: [] }
     Transforms.wrapNodes(editor, block)
   }
+
+  if (format === 'code-block') {
+    // Check if there is a selection
+    if (editor.selection != null) {
+      // Expand the selection to the entire line
+      const [, linePath] = Editor.node(editor, editor.selection)
+      Transforms.select(editor, linePath)
+
+      // Get the current marks
+      const marks = Editor.marks(editor)
+      if (marks != null) {
+        // Iterate over the marks and remove them
+        Object.keys(marks).forEach((mark) => {
+          Editor.removeMark(editor, mark)
+        })
+      }
+
+      // Unwrap any 'link' elements in the selection
+      Transforms.unwrapNodes(editor, {
+        match: (n) => (n as MyElement).type === 'link',
+      })
+    }
+  }
 }
 
 const toggleMark = (editor: BaseEditor, format: string): void => {
+  const [match] = Editor.nodes(editor, {
+    match: (n) => (n as MyElement).type === 'code-block',
+  })
+
+  if (match !== null && match !== undefined) {
+    return
+  }
   const isActive = isMarkActive(editor, format)
 
   if (isActive) {
@@ -433,6 +459,7 @@ const Element = (props: ElementProps): JSX.Element => {
 
 const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
   let newChildren = children
+
   if (leaf.bold === true) {
     newChildren = <strong>{newChildren}</strong>
   }
@@ -529,6 +556,11 @@ const MarkButton = ({
   const editor = useSlate()
   const isActive = isMarkActive(editor, format)
 
+  // Check if the current block is a 'code-block'
+  const [match] = Editor.nodes(editor, {
+    match: (n) => (n as MyElement).type === 'code-block',
+  })
+
   return (
     <Button
       size="sm"
@@ -536,12 +568,20 @@ const MarkButton = ({
       background={isActive ? 'zinc900' : 'rgba(0, 0, 0, 0)'}
       color={isActive ? 'zinc300' : 'zinc300'}
       p="1px"
-      _hover={{ background: 'zinc900' }}
+      _hover={{
+        background:
+          match !== null && match !== undefined
+            ? 'rgba(0, 0, 0, 0)'
+            : 'zinc900',
+      }}
       {...props}
       active={isActive}
+      disabled={Boolean(match)}
       onMouseDown={(event) => {
         event.preventDefault()
-        toggleMark(editor, format)
+        if (match === null || match === undefined) {
+          toggleMark(editor, format)
+        }
       }}
     >
       {label}
@@ -560,6 +600,10 @@ const AddLinkButton = (): JSX.Element => {
     onClose()
   }
 
+  const [match] = Editor.nodes(editor, {
+    match: (n) => (n as MyElement).type === 'code-block',
+  })
+
   return (
     <>
       <Button
@@ -568,10 +612,17 @@ const AddLinkButton = (): JSX.Element => {
         background="rgba(0, 0, 0, 0)"
         color="zinc300"
         p="1px"
-        _hover={{ background: 'zinc900' }}
+        _hover={{
+          background:
+            match !== null && match !== undefined
+              ? 'rgba(0, 0, 0, 0)'
+              : 'zinc900',
+        }}
         onMouseDown={(event) => {
           event.preventDefault()
-          onOpen()
+          if (match === null || match === undefined) {
+            onOpen()
+          }
         }}
       >
         <InsertLink fontSize="small" />
@@ -622,6 +673,9 @@ const AddLinkButton = (): JSX.Element => {
 }
 const RemoveLinkButton = (): JSX.Element => {
   const editor = useSlate()
+  const [match] = Editor.nodes(editor, {
+    match: (n) => (n as MyElement).type === 'code-block',
+  })
 
   return (
     <Button
@@ -630,9 +684,14 @@ const RemoveLinkButton = (): JSX.Element => {
       background="rgba(0, 0, 0, 0)"
       color="zinc300"
       p="1px"
-      _hover={{ background: 'zinc900' }}
+      _hover={{
+        background:
+          match !== null && match !== undefined
+            ? 'rgba(0, 0, 0, 0)'
+            : 'zinc900',
+      }}
       onMouseDown={() => {
-        if (isLinkActive(editor)) {
+        if ((match === null || match === undefined) && isLinkActive(editor)) {
           unwrapLink(editor)
         }
       }}
