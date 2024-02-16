@@ -280,24 +280,30 @@ const toggleBlock = (editor: BaseEditor, format: string): void => {
 
   if (format === 'code-block') {
     // Check if there is a selection
-    if (editor.selection != null) {
-      // Expand the selection to the entire line
-      const [, linePath] = Editor.node(editor, editor.selection)
-      Transforms.select(editor, linePath)
+    if (editor.selection !== null && editor.selection !== undefined) {
+      // Iterate over all nodes in the selection
+      for (const [node, path] of Editor.nodes(editor, {
+        at: editor.selection,
+      })) {
+        if (SlateElement.isElement(node)) {
+          // Expand the selection to the entire line
+          Transforms.select(editor, path)
 
-      // Get the current marks
-      const marks = Editor.marks(editor)
-      if (marks != null) {
-        // Iterate over the marks and remove them
-        Object.keys(marks).forEach((mark) => {
-          Editor.removeMark(editor, mark)
-        })
+          // Get the current marks
+          const marks = Editor.marks(editor)
+          if (marks !== null && marks !== undefined) {
+            // Iterate over the marks and remove them
+            Object.keys(marks).forEach((mark) => {
+              Editor.removeMark(editor, mark)
+            })
+          }
+
+          // Unwrap any 'link' elements in the selection
+          Transforms.unwrapNodes(editor, {
+            match: (n) => (n as MyElement).type === 'link',
+          })
+        }
       }
-
-      // Unwrap any 'link' elements in the selection
-      Transforms.unwrapNodes(editor, {
-        match: (n) => (n as MyElement).type === 'link',
-      })
     }
   }
 }
@@ -556,7 +562,6 @@ const MarkButton = ({
   const editor = useSlate()
   const isActive = isMarkActive(editor, format)
 
-  // Check if the current block is a 'code-block'
   const [match] = Editor.nodes(editor, {
     match: (n) => (n as MyElement).type === 'code-block',
   })
