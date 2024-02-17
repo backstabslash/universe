@@ -616,16 +616,31 @@ const AddLinkButton = (): JSX.Element => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [url, setUrl] = React.useState<string>('')
 
+  // Function to handle the link button click
+  const handleLinkButtonClick = (): void => {
+    // Get the currently selected link node
+    const [linkNode] = Editor.nodes(editor, {
+      match: (n) => (n as MyElement).type === 'link',
+    })
+
+    if (linkNode) {
+      const { url } = linkNode[0] as MyElement
+      // Set the URL state to the URL of the link node
+      if (url) {
+        setUrl(url)
+      }
+    }
+
+    // Open the modal
+    onOpen()
+  }
+
   const handleSave = (): void => {
     if (url.trim() === '') return
     insertLink(editor, url)
-    setUrl('')
     onClose()
+    setUrl('')
   }
-
-  const [match] = Editor.nodes(editor, {
-    match: (n) => (n as MyElement).type === 'code-block',
-  })
 
   return (
     <>
@@ -635,26 +650,16 @@ const AddLinkButton = (): JSX.Element => {
         background="rgba(0, 0, 0, 0)"
         color="zinc300"
         p="1px"
-        _hover={{
-          background: match ? 'rgba(0, 0, 0, 0)' : 'zinc900',
-        }}
+        _hover={{ background: 'zinc900' }}
         onMouseDown={(event) => {
           event.preventDefault()
-          if (!match) {
-            onOpen()
-          }
+          handleLinkButtonClick()
         }}
       >
         <InsertLink fontSize="small" />
       </Button>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={() => {
-          setUrl('')
-          onClose()
-        }}
-      >
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bgColor={'zinc900'} color={'zinc300'}>
           <ModalHeader>Enter the URL of the link:</ModalHeader>
@@ -686,8 +691,8 @@ const AddLinkButton = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
               _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
               onClick={() => {
-                setUrl('')
                 onClose()
+                setUrl('') // Clear the URL input when canceling
               }}
             >
               Cancel
@@ -698,6 +703,7 @@ const AddLinkButton = (): JSX.Element => {
     </>
   )
 }
+
 const RemoveLinkButton = (): JSX.Element => {
   const editor = useSlate()
   const [match] = Editor.nodes(editor, {
