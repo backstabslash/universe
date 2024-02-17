@@ -38,5 +38,6 @@ module.exports = {
     '@typescript-eslint/comma-dangle': 'off',
     'react/react-in-jsx-scope': 'off',
     'multiline-ternary': 'off',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
   },
 }

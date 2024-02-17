@@ -202,6 +202,25 @@ const TextEditor = (): JSX.Element => {
                 toggleMark(editor, mark)
               }
             }
+
+            if (event.key === 'ArrowRight') {
+              const { selection } = editor
+              if (selection && Range.isCollapsed(selection)) {
+                const match = Editor.above(editor, {
+                  match: (n) => (n as MyElement).type === 'link',
+                })
+                if (match) {
+                  const [, path] = match
+                  if (Editor.isEnd(editor, selection.focus, path)) {
+                    const pointAfterLink = Editor.after(editor, path)
+                    if (pointAfterLink) {
+                      Transforms.select(editor, pointAfterLink)
+                      event.preventDefault()
+                    }
+                  }
+                }
+              }
+            }
           }}
         />
         <Flex
@@ -247,6 +266,7 @@ const withInlines = (editor: BaseEditor): BaseEditor => {
 
   editor.isInline = (element: MyElement) =>
     (element.type !== undefined &&
+      element.type !== null &&
       ['link', 'button', 'badge'].includes(element.type)) ||
     isInline(element)
 
@@ -263,7 +283,6 @@ const toggleBlock = (editor: BaseEditor, format: string): void => {
     match: (n) =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
-      (n as MyElement).type !== undefined &&
       LIST_TYPES.includes((n as MyElement).type ?? '') &&
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
@@ -286,26 +305,20 @@ const toggleBlock = (editor: BaseEditor, format: string): void => {
   }
 
   if (format === 'code-block') {
-    // Check if there is a selection
-    if (editor.selection !== null && editor.selection !== undefined) {
-      // Iterate over all nodes in the selection
+    if (editor.selection) {
       for (const [node, path] of Editor.nodes(editor, {
         at: editor.selection,
       })) {
         if (SlateElement.isElement(node)) {
-          // Expand the selection to the entire line
           Transforms.select(editor, path)
 
-          // Get the current marks
           const marks = Editor.marks(editor)
-          if (marks !== null && marks !== undefined) {
-            // Iterate over the marks and remove them
+          if (marks) {
             Object.keys(marks).forEach((mark) => {
               Editor.removeMark(editor, mark)
             })
           }
 
-          // Unwrap any 'link' elements in the selection
           Transforms.unwrapNodes(editor, {
             match: (n) => (n as MyElement).type === 'link',
           })
@@ -320,7 +333,7 @@ const toggleMark = (editor: BaseEditor, format: string): void => {
     match: (n) => (n as MyElement).type === 'code-block',
   })
 
-  if (match !== null && match !== undefined) {
+  if (match) {
     return
   }
   const isActive = isMarkActive(editor, format)
@@ -338,7 +351,7 @@ const isBlockActive = (
   { blockType = 'type' }: any
 ): boolean => {
   const { selection } = editor
-  if (selection === null || selection === undefined) return false
+  if (selection === null) return false
 
   const [match] = Array.from(
     Editor.nodes(editor, {
@@ -355,7 +368,7 @@ const isBlockActive = (
 
 const isMarkActive = (editor: BaseEditor, format: any): boolean => {
   const marks = Editor.marks(editor) as Marks
-  return marks !== null && marks !== undefined && marks[format]
+  return marks && marks[format]
 }
 
 const isLinkActive = (editor: BaseEditor): boolean => {
@@ -369,7 +382,7 @@ const isLinkActive = (editor: BaseEditor): boolean => {
 }
 
 const insertLink = (editor: BaseEditor, url: string): void => {
-  if (editor.selection !== null) {
+  if (editor.selection) {
     wrapLink(editor, url)
   }
 }
@@ -389,7 +402,7 @@ const wrapLink = (editor: BaseEditor, url: string): void => {
   }
 
   const { selection } = editor
-  const isCollapsed = selection !== null && Range.isCollapsed(selection)
+  const isCollapsed = selection && Range.isCollapsed(selection)
   const link: LinkElement = {
     type: 'link',
     url,
@@ -509,7 +522,7 @@ const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
       {...attributes}
       href={element.url}
       className={selected}
-      style={{ color: '#1D9BD1' }}
+      style={{ color: '#1D9BD1', textDecoration: 'underline' }}
     >
       {children}
     </a>
@@ -581,17 +594,14 @@ const MarkButton = ({
       color={isActive ? 'zinc300' : 'zinc300'}
       p="1px"
       _hover={{
-        background:
-          match !== null && match !== undefined
-            ? 'rgba(0, 0, 0, 0)'
-            : 'zinc900',
+        background: match ? 'rgba(0, 0, 0, 0)' : 'zinc900',
       }}
       {...props}
       active={isActive}
       disabled={Boolean(match)}
       onMouseDown={(event) => {
         event.preventDefault()
-        if (match === null || match === undefined) {
+        if (!match) {
           toggleMark(editor, format)
         }
       }}
@@ -609,6 +619,7 @@ const AddLinkButton = (): JSX.Element => {
   const handleSave = (): void => {
     if (url.trim() === '') return
     insertLink(editor, url)
+    setUrl('')
     onClose()
   }
 
@@ -625,14 +636,11 @@ const AddLinkButton = (): JSX.Element => {
         color="zinc300"
         p="1px"
         _hover={{
-          background:
-            match !== null && match !== undefined
-              ? 'rgba(0, 0, 0, 0)'
-              : 'zinc900',
+          background: match ? 'rgba(0, 0, 0, 0)' : 'zinc900',
         }}
         onMouseDown={(event) => {
           event.preventDefault()
-          if (match === null || match === undefined) {
+          if (!match) {
             onOpen()
           }
         }}
@@ -640,7 +648,13 @@ const AddLinkButton = (): JSX.Element => {
         <InsertLink fontSize="small" />
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          setUrl('')
+          onClose()
+        }}
+      >
         <ModalOverlay />
         <ModalContent bgColor={'zinc900'} color={'zinc300'}>
           <ModalHeader>Enter the URL of the link:</ModalHeader>
@@ -671,7 +685,10 @@ const AddLinkButton = (): JSX.Element => {
               bg="zinc800"
               _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
               _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              onClick={onClose}
+              onClick={() => {
+                setUrl('')
+                onClose()
+              }}
             >
               Cancel
             </Button>
@@ -695,13 +712,10 @@ const RemoveLinkButton = (): JSX.Element => {
       color="zinc300"
       p="1px"
       _hover={{
-        background:
-          match !== null && match !== undefined
-            ? 'rgba(0, 0, 0, 0)'
-            : 'zinc900',
+        background: match ? 'rgba(0, 0, 0, 0)' : 'zinc900',
       }}
       onMouseDown={() => {
-        if ((match === null || match === undefined) && isLinkActive(editor)) {
+        if (!match && isLinkActive(editor)) {
           unwrapLink(editor)
         }
       }}
