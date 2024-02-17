@@ -615,31 +615,37 @@ const AddLinkButton = (): JSX.Element => {
   const editor = useSlate()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [url, setUrl] = React.useState<string>('')
+  const [linkNode, setLinkNode] = React.useState<any>(null)
 
-  // Function to handle the link button click
   const handleLinkButtonClick = (): void => {
-    // Get the currently selected link node
     const [linkNode] = Editor.nodes(editor, {
       match: (n) => (n as MyElement).type === 'link',
     })
 
     if (linkNode) {
       const { url } = linkNode[0] as MyElement
-      // Set the URL state to the URL of the link node
       if (url) {
         setUrl(url)
       }
+      setLinkNode(linkNode)
     }
 
-    // Open the modal
     onOpen()
   }
 
   const handleSave = (): void => {
     if (url.trim() === '') return
-    insertLink(editor, url)
+
+    if (linkNode) {
+      const newElement: Partial<MyElement> = { url }
+      Transforms.setNodes(editor, newElement, { at: linkNode[1] })
+    } else {
+      insertLink(editor, url)
+    }
+
     onClose()
     setUrl('')
+    setLinkNode(null)
   }
 
   return (
@@ -692,7 +698,7 @@ const AddLinkButton = (): JSX.Element => {
               _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
               onClick={() => {
                 onClose()
-                setUrl('') // Clear the URL input when canceling
+                setUrl('')
               }}
             >
               Cancel
