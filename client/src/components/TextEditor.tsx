@@ -180,7 +180,7 @@ const TextEditor = (): JSX.Element => {
         </Flex>
         <StyledEditable
           style={{
-            width: '100ch',
+            width: '90ch',
             // maxWidth: '95%',
             overflow: 'auto',
             height: '100%',
