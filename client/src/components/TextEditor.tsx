@@ -137,7 +137,7 @@ const TextEditor = (): JSX.Element => {
         _hover={{ borderColor: 'zinc600' }}
         _focusVisible={{ borderColor: 'zinc600' }}
         width="100%"
-        h="120px"
+        h="140px"
         alignItems="center"
         justifyContent="center"
         flexDirection={'column'}
@@ -180,8 +180,15 @@ const TextEditor = (): JSX.Element => {
         </Flex>
         <StyledEditable
           style={{
-            width: '95%',
-            marginRight: '20px',
+            width: '100ch',
+            // maxWidth: '95%',
+            overflow: 'auto',
+            height: '100%',
+            margin: 'auto',
+            fontFamily: 'Libre Fraklin',
+            fontSize: '18px',
+            fontWeight: 500,
+            color: '#d4d4d8',
           }}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
@@ -635,10 +642,8 @@ const AddLinkButton = (): JSX.Element => {
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent bgColor={'zinc900'}>
-          <ModalHeader color={'zinc300'}>
-            Enter the URL of the link:
-          </ModalHeader>
+        <ModalContent bgColor={'zinc900'} color={'zinc300'}>
+          <ModalHeader>Enter the URL of the link:</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Input

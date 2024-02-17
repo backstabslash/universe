@@ -212,8 +212,8 @@ const MainContent = (): JSX.Element => {
                 pr="4"
                 pl="4"
                 pb="4"
-                alignItems="center"
-                h="150px"
+                h="170px"
+                width="100%"
               >
                 <TextEditor />
               </Flex>
