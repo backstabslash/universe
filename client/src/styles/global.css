@@ -69,3 +69,15 @@ a {
 *::-webkit-scrollbar-thumb:active {
   background-color: rgba(0, 0, 0, 0.1);
 }
+[data-slate-editor] [data-slate-placeholder] {
+  color: #d4d4d8;
+  opacity: 0.5;
+  font-weight: normal;
+  font-style: normal;
+  text-decoration: none;
+  font-size: medium;
+  font-family:
+    Libre Fraklin,
+    system-ui,
+    sans-serif;
+}

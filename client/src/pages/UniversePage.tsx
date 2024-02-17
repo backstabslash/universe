@@ -1,27 +1,12 @@
-import {
-  AddIcon,
-  ChatIcon,
-  EditIcon,
-  LinkIcon,
-  TimeIcon,
-} from '@chakra-ui/icons'
-import {
-  Box,
-  Heading,
-  Flex,
-  Input,
-  Button,
-  Divider,
-  Text,
-  Image,
-} from '@chakra-ui/react'
 import CottageIcon from '@mui/icons-material/Cottage'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import InboxIcon from '@mui/icons-material/Inbox'
 import AddMuiIcon from '@mui/icons-material/Add'
+import TextEditor from '../components/TextEditor'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
-import IconButton from '../components/IconButton'
+import { EditIcon } from '@chakra-ui/icons'
+import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react'
 import UserProfile from '../components/UserProfile'
 import { useState } from 'react'
 import orgImage from '../../public/org-placeholder.png'
@@ -227,80 +212,10 @@ const MainContent = (): JSX.Element => {
                 pr="4"
                 pl="4"
                 pb="4"
-                alignItems="center"
-                h="150px"
+                h="170px"
+                width="100%"
               >
-                <Flex
-                  background="rgba(0, 0, 0, 0.2)"
-                  border="1px"
-                  borderColor="rgba(29, 29, 32, 1)"
-                  borderRadius="10px"
-                  _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-                  width="100%"
-                  h="130px"
-                  alignItems="center"
-                  justifyContent="center"
-                  flexDirection={'column'}
-                >
-                  <Flex
-                    mt="5px"
-                    ml="20px"
-                    mb="5px"
-                    alignItems="center"
-                    justifyContent="left"
-                    width="100%"
-                  >
-                    <IconButton label={<b>B</b>} />
-                    <IconButton label={<i>I</i>} />
-                    <IconButton label={<del>S</del>} />
-                    <Divider
-                      orientation="vertical"
-                      h="12px"
-                      m="0"
-                      p="0"
-                      mr="8px"
-                    />
-                    <IconButton label={<LinkIcon boxSize={'3'} />} />
-                  </Flex>
-                  <Input
-                    placeholder="Type a message..."
-                    background="rgba(0, 0, 0, 0)"
-                    border="0"
-                    _placeholder={{
-                      color: 'zinc300',
-                    }}
-                    _focusVisible={{ borderColor: '' }}
-                    _hover={{ borderColor: '', bg: '' }}
-                    h="10vh"
-                  />
-                  <Flex
-                    alignItems="center"
-                    justifyContent="space-between"
-                    width="100%"
-                    ml="20px"
-                  >
-                    <Box>
-                      <IconButton
-                        label={<AddIcon boxSize={'3'} />}
-                        mb="5px"
-                        mt="5px"
-                      />
-                      <IconButton
-                        label={<TimeIcon boxSize={'3'} />}
-                        mb="5px"
-                        mt="5px"
-                      />
-                    </Box>
-                    <Box>
-                      <IconButton
-                        label={<ChatIcon boxSize={'4'} />}
-                        mb="5px"
-                        mr="30px"
-                        mt="5px"
-                      />
-                    </Box>
-                  </Flex>
-                </Flex>
+                <TextEditor />
               </Flex>
             </Box>
             {isUserProfileVisible && (
