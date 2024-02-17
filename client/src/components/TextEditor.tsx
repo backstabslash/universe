@@ -203,20 +203,18 @@ const TextEditor = (): JSX.Element => {
               }
             }
 
-            if (event.key === 'ArrowRight') {
-              const { selection } = editor
-              if (selection && Range.isCollapsed(selection)) {
-                const match = Editor.above(editor, {
-                  match: (n) => (n as MyElement).type === 'link',
-                })
-                if (match) {
-                  const [, path] = match
-                  if (Editor.isEnd(editor, selection.focus, path)) {
-                    const pointAfterLink = Editor.after(editor, path)
-                    if (pointAfterLink) {
-                      Transforms.select(editor, pointAfterLink)
-                      event.preventDefault()
-                    }
+            const { selection } = editor
+            if (selection && Range.isCollapsed(selection)) {
+              const match = Editor.above(editor, {
+                match: (n) => (n as MyElement).type === 'link',
+              })
+              if (match) {
+                const [, path] = match
+                if (Editor.isEnd(editor, selection.focus, path)) {
+                  const pointAfterLink = Editor.after(editor, path)
+                  if (pointAfterLink) {
+                    Transforms.select(editor, pointAfterLink)
+                    event.preventDefault()
                   }
                 }
               }
