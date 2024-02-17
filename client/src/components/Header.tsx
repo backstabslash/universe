@@ -10,10 +10,11 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Divider,
 } from '@chakra-ui/react'
+import CloseIcon from '@mui/icons-material/Close'
 
 const Header = (): JSX.Element => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -48,17 +49,49 @@ const Header = (): JSX.Element => {
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay bg="transparent" />
-        <ModalContent mt={1} bg="#18181b">
-          <ModalHeader>Modal Title</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text>Search Universe</Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-            <Button variant="ghost">Secondary Action</Button>
+        <ModalContent mt={1} bg="#18181b" color="zinc300">
+          <ModalHeader color="zinc500">
+            <Flex alignItems={'center'} justifyContent={'space-between'}>
+              <Input
+                placeholder="Search Universe"
+                fontSize={'md'}
+                background="rgba(0, 0, 0, 0.5)"
+                borderColor="transparent"
+                height="40px"
+                width="95%"
+                color="zinc300"
+                _placeholder={{ color: 'zinc300' }}
+                _focusVisible={{ borderColor: '' }}
+                _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
+              />
+              <Button
+                color="zinc500"
+                variant="ghost"
+                _hover={{ background: 'transparent' }}
+              >
+                Clear
+              </Button>
+              <Divider
+                orientation="vertical"
+                h="20px"
+                m="0"
+                p="0"
+                mr="8px"
+                borderColor="zinc500"
+              ></Divider>
+              <CloseIcon fontSize="medium"></CloseIcon>
+            </Flex>
+          </ModalHeader>
+          <ModalBody>Search options placeholder</ModalBody>
+          <ModalFooter fontSize="sm">
+            <Text>Not the results you expected?&nbsp;</Text>
+            <Text color="#1d9bd1" as="span">
+              Give feedback&nbsp;
+            </Text>
+            <Text>or&nbsp;</Text>
+            <Text color="#1d9bd1" as="span">
+              learn more
+            </Text>
           </ModalFooter>
         </ModalContent>
       </Modal>
