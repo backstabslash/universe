@@ -30,7 +30,7 @@ import {
   LinkOff,
   DataArray,
 } from '@mui/icons-material/'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import isHotkey from 'is-hotkey'
 import {
   Editable,
@@ -113,7 +113,11 @@ const StyledEditable = styled(Editable)`
   }
 `
 
-const TextEditor = (): JSX.Element => {
+interface TextEditorProps {
+  sendMessage: (message: any) => void
+}
+
+const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
     []
@@ -127,8 +131,18 @@ const TextEditor = (): JSX.Element => {
     }
     return withPlugins(withReact(withHistory(createEditor())))
   }, [])
+
+  const handleContentChange = (newContent: Descendant[]): void => {
+    setContent(newContent)
+  }
+
+  const [content, setContent] = useState<Descendant[]>(initialValue)
   return (
-    <Slate editor={editor as ReactEditor} initialValue={initialValue}>
+    <Slate
+      editor={editor as ReactEditor}
+      initialValue={initialValue}
+      onChange={handleContentChange}
+    >
       <Flex
         background="rgba(0, 0, 0, 0.2)"
         border="1px"
@@ -251,6 +265,9 @@ const TextEditor = (): JSX.Element => {
               mb="5px"
               mr="30px"
               mt="5px"
+              onClick={() => {
+                sendMessage(content)
+              }}
             />
           </Box>
         </Flex>
