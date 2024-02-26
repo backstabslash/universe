@@ -32,8 +32,8 @@ const MainContent = (): JSX.Element => {
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true)
 
-  const onClickSendMessage = (message: string): void => {
-    socket.emit('send-message', 'test')
+  const onClickSendMessage = (message: any): void => {
+    socket.emit('send-message', message)
   }
 
   socket.on('message', (message: string) => {
