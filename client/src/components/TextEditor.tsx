@@ -113,7 +113,11 @@ const StyledEditable = styled(Editable)`
   }
 `
 
-const TextEditor = (): JSX.Element => {
+interface UserProfileProps {
+  sendMessage: (message: string) => void
+}
+
+const TextEditor = ({ sendMessage }: UserProfileProps): JSX.Element => {
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
     []
@@ -251,6 +255,9 @@ const TextEditor = (): JSX.Element => {
               mb="5px"
               mr="30px"
               mt="5px"
+              onClick={() => {
+                sendMessage('test')
+              }}
             />
           </Box>
         </Flex>

@@ -39,5 +39,6 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'multiline-ternary': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/triple-slash-reference': 'off',
   },
 }

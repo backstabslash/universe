@@ -1,11 +1,17 @@
 import http from "http";
 import { Server, Socket } from "socket.io";
 import app from "./app";
-import { api } from "./config/config";
+import { api, client } from "./config/config";
 import { sendMessage } from "./handlers/messages";
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: client.url,
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+    credentials: true,
+  },
+});
 
 io.on("connection", (socket: Socket) => {
   console.info("User connected");
@@ -13,7 +19,7 @@ io.on("connection", (socket: Socket) => {
   sendMessage(socket);
 
   socket.on("disconnect", () => {
-    console.info("user disconnected");
+    console.info("User disconnected");
   });
 });
 
