@@ -12,6 +12,7 @@ import UserProfile from '../components/UserProfile'
 import { useState } from 'react'
 import orgImage from '../../public/org-placeholder.png'
 import profileImage from '../../public/profile-image-test.png'
+import { type Descendant } from 'slate'
 
 const contentData = [
   'This is a message',
@@ -32,7 +33,7 @@ const MainContent = (): JSX.Element => {
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true)
 
-  const onClickSendMessage = (message: any): void => {
+  const onClickSendMessage = (message: Descendant[]): void => {
     socket.emit('send-message', message)
   }
 
