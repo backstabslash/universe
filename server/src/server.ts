@@ -34,6 +34,7 @@ io.on("connection", (socket: Socket) => {
       throw new Error("Mongo URI is not provided");
     }
     await mongoose.connect(db.mongoUri);
+
     console.info("MongoDB connected");
   } catch (error) {
     console.error(error);

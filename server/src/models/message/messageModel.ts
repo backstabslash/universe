@@ -1,19 +1,38 @@
-import { Schema, model } from "mongoose";
-import { IChannel } from "../channel/channelModel";
-import { IUser } from "../user/userModel";
+import { Schema, Document, model } from "mongoose";
 
 export interface IMessage extends Document {
-  channel: Schema.Types.ObjectId | IChannel;
-  user: Schema.Types.ObjectId | IUser;
-  messageText: string;
-  createdAt: Date;
+  user: Schema.Types.ObjectId;
+  content: any;
+  channel: Schema.Types.ObjectId;
+  thread: Schema.Types.ObjectId;
+  sendAt: number;
 }
 
-const MessageSchema: Schema = new Schema({
-  channel: { type: Schema.Types.ObjectId, ref: "Channel", required: true },
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  messageText: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
+const MessageSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  content: {
+    type: Schema.Types.Mixed,
+    required: true,
+  },
+  channel: {
+    type: Schema.Types.ObjectId,
+    ref: "Channel",
+    required: true,
+  },
+  thread: {
+    type: Schema.Types.ObjectId,
+    ref: "Thread",
+  },
+  sendAt: {
+    type: Number,
+    required: true,
+  },
 });
 
 const Message = model<IMessage>("Message", MessageSchema);
+
+export default Message;
