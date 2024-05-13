@@ -9,10 +9,12 @@ const MessageAttachmentSchema = new Schema({
   attachment: {
     type: Schema.Types.ObjectId,
     ref: "Attachment",
+    required: true,
   },
   message: {
     type: Schema.Types.ObjectId,
     ref: "Message",
+    required: true,
   },
 });
 

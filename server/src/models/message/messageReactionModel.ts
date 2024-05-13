@@ -9,10 +9,12 @@ const MessageReactionSchema = new Schema({
   message: {
     type: Schema.Types.ObjectId,
     ref: "Message",
+    required: true,
   },
   reaction: {
     type: Schema.Types.ObjectId,
     ref: "Reaction",
+    required: true,
   },
 });
 

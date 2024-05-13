@@ -8,6 +8,7 @@ const ThreadSchema = new Schema({
   parentMessage: {
     type: Schema.Types.ObjectId,
     ref: "Message",
+    required: true,
   },
 });
 
