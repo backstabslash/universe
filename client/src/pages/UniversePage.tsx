@@ -1,3 +1,4 @@
+import socket from '../config/socketConfig'
 import CottageIcon from '@mui/icons-material/Cottage'
 import BookmarkIcon from '@mui/icons-material/Bookmark'
 import InboxIcon from '@mui/icons-material/Inbox'
@@ -11,6 +12,7 @@ import UserProfile from '../components/UserProfile'
 import { useState } from 'react'
 import orgImage from '../../public/org-placeholder.png'
 import profileImage from '../../public/profile-image-test.png'
+import { type Descendant } from 'slate'
 
 const contentData = [
   'This is a message',
@@ -30,6 +32,14 @@ const contentData = [
 const MainContent = (): JSX.Element => {
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true)
+
+  const onClickSendMessage = (message: Descendant[]): void => {
+    socket.emit('send-message', message)
+  }
+
+  socket.on('message', (message: string) => {
+    console.log(message)
+  })
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -215,7 +225,7 @@ const MainContent = (): JSX.Element => {
                 h="170px"
                 width="100%"
               >
-                <TextEditor />
+                <TextEditor sendMessage={onClickSendMessage} />
               </Flex>
             </Box>
             {isUserProfileVisible && (
