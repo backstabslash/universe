@@ -1,30 +1,33 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import TagIcon from '@mui/icons-material/Tag'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import PersonIcon from '@mui/icons-material/Person'
-
-import { DndContext } from '@dnd-kit/core'
-import Droppable from './custom-elements/drag-and-drop/Droppable'
-import { useState } from 'react'
-import Draggable from './custom-elements/drag-and-drop/Draggable'
-
-const channels = ['general', 'random', 'team-1', 'team-2']
+import DragAndDropList from './custom-elements/DragAndDropList'
+import { type List } from './custom-elements/DragAndDropList'
 const directMessages = ['user1', 'user2', 'user3']
-
 const Sidebar = (): JSX.Element => {
   const navigate = useNavigate()
 
-  const [parent, setParent] = useState(null)
-  const draggableMarkup = <Draggable id="draggable">Drag me</Draggable>
-  const handleDragEnd = (event) => {
-    const { over } = event
-
-    // If the item is dropped over a container, set it as the parent
-    // otherwise reset the parent to `null`
-    setParent(over ? over.id : null)
-  }
+  const [itemLists, setItemLists] = useState<List[]>([
+    {
+      name: 'list-1',
+      items: [
+        { id: 'item-1', name: 'Item 1' },
+        { id: 'item-2', name: 'Item 2' },
+        { id: 'item-3', name: 'Item 3' },
+      ],
+    },
+    {
+      name: 'list-2',
+      items: [
+        { id: 'item-4', name: 'Item 4' },
+        { id: 'item-5', name: 'Item 5' },
+      ],
+    },
+  ])
 
   return (
     <VStack
@@ -61,34 +64,7 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Channels
       </Heading>
-      <DndContext onDragEnd={handleDragEnd}>
-        {parent === null ? draggableMarkup : null}
-        {channels.map((channel) => (
-          <Droppable key={channel} id={channel}>
-            <Button
-              key={channel}
-              p="2"
-              pr="15px"
-              pl="15px"
-              borderRadius="md"
-              background="rgba(0, 0, 0, 0.1)"
-              color="zinc400"
-              _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
-              width="90%"
-              gap="5px"
-              alignItems={'center'}
-              justifyContent={'flex-start'}
-              onClick={() => {
-                navigate(`${channel}`)
-              }}
-            >
-              <TagIcon fontSize="small" />
-              {`${channel}`}
-            </Button>
-          </Droppable>
-        ))}
-      </DndContext>
+      <DragAndDropList itemLists={itemLists} setItemLists={setItemLists} />
       <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Direct Messages
       </Heading>

@@ -9,9 +9,7 @@ const domNode = document.getElementById('root')
 const root = createRoot(domNode ?? document.createElement('div'))
 
 root.render(
-  <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <App />
-    </ChakraProvider>
-  </React.StrictMode>
+  <ChakraProvider theme={theme}>
+    <App />
+  </ChakraProvider>
 )
