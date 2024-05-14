@@ -111,6 +111,10 @@ const StyledEditable = styled(Editable)`
   &:focus {
     outline: none;
   }
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  white-space: normal;
 `
 
 interface TextEditorProps {
@@ -194,11 +198,12 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         </Flex>
         <StyledEditable
           style={{
-            width: '90ch',
+            width: '97%',
             // maxWidth: '95%',
             overflow: 'auto',
             height: '100%',
             margin: 'auto',
+            marginLeft: '18px',
             fontFamily: 'Libre Fraklin',
             fontSize: '18px',
             fontWeight: 500,
