@@ -1,4 +1,4 @@
-import { QuestionOutlineIcon, SearchIcon } from '@chakra-ui/icons'
+import { QuestionOutlineIcon, SearchIcon } from '@chakra-ui/icons';
 import {
   Flex,
   Input,
@@ -13,11 +13,11 @@ import {
   ModalBody,
   ModalFooter,
   Divider,
-} from '@chakra-ui/react'
-import CloseIcon from '@mui/icons-material/Close'
+} from '@chakra-ui/react';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Header = (): JSX.Element => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Flex
@@ -106,7 +106,7 @@ const Header = (): JSX.Element => {
         <QuestionOutlineIcon boxSize={'5'} />
       </Button>
     </Flex>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

@@ -38,7 +38,16 @@ module.exports = {
     '@typescript-eslint/comma-dangle': 'off',
     'react/react-in-jsx-scope': 'off',
     'multiline-ternary': 'off',
+    '@typescript-eslint/semi': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/triple-slash-reference': 'off',
+    '@typescript-eslint/consistent-type-imports': 'off',
+    '@typescript-eslint/dot-notation': 'off',
+    '@typescript-eslint/return-await': 'off',
+    '@typescript-eslint/promise-function-async': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/member-delimiter-style': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/no-confusing-void-expression': 'off',
   },
-}
+};

@@ -18,6 +18,9 @@ const MessageAttachmentSchema = new Schema({
   },
 });
 
-const MessageAttachment = model<IMessageAttachment>("MessageAttachment", MessageAttachmentSchema);
+const MessageAttachment = model<IMessageAttachment>(
+  "MessageAttachment",
+  MessageAttachmentSchema,
+);
 
 export default MessageAttachment;

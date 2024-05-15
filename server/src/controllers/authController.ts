@@ -76,6 +76,17 @@ class AuthController {
     return res.status(201).json({});
   }
 
+  async logout(req: Request, res: Response) {
+    const cookies = req.cookies;
+    if (!cookies?.refreshtoken) return res.sendStatus(204);
+    res.clearCookie('refreshtoken', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.sendStatus(204);
+  }
+
   async refreshAccessToken(req: Request, res: Response) {
     const { cookies } = req;
     if (!cookies || !cookies.refreshtoken) {

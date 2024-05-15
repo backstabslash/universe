@@ -1,5 +1,5 @@
-import { JwtPayload } from 'jsonwebtoken';
-require('dotenv').config();
+import { JwtPayload } from "jsonwebtoken";
+require("dotenv").config();
 
 export interface UserJwtPayload extends JwtPayload {
   userId: string;

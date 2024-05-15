@@ -1,4 +1,4 @@
-import { AtSignIcon } from '@chakra-ui/icons'
+import { AtSignIcon } from '@chakra-ui/icons';
 import {
   Box,
   Text,
@@ -11,28 +11,28 @@ import {
   TagLabel,
   TagCloseButton,
   TagLeftIcon,
-} from '@chakra-ui/react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Sidebar from '../../components/RegSidebar'
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/RegSidebar';
 
 const Channels = (): JSX.Element => {
-  const isLoadingMock = false
+  const isLoadingMock = false;
 
-  const [tags, setTags] = useState<string[]>([])
-  const [input, setInput] = useState<string>('')
+  const [tags, setTags] = useState<string[]>([]);
+  const [input, setInput] = useState<string>('');
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleKeyDown = (event: any): void => {
     if (event.key === 'Enter') {
-      setTags([...tags, input])
-      setInput('')
+      setTags([...tags, input]);
+      setInput('');
     }
-  }
+  };
   const handleDelete = (tagToDelete: any): void => {
-    setTags(tags.filter((tag) => tag !== tagToDelete))
-  }
+    setTags(tags.filter(tag => tag !== tagToDelete));
+  };
 
   return (
     <Box flexDirection="column" height="100vh" bg="zinc900">
@@ -71,7 +71,7 @@ const Channels = (): JSX.Element => {
                 <TagLabel>{tag}</TagLabel>
                 <TagCloseButton
                   onClick={() => {
-                    handleDelete(tag)
+                    handleDelete(tag);
                   }}
                 />
               </Tag>
@@ -88,8 +88,8 @@ const Channels = (): JSX.Element => {
               minH="50px"
               color="zinc300"
               value={input}
-              onChange={(e) => {
-                setInput(e.target.value)
+              onChange={e => {
+                setInput(e.target.value);
               }}
               onKeyDown={handleKeyDown}
             />
@@ -102,7 +102,7 @@ const Channels = (): JSX.Element => {
               _hover={{ bg: 'zinc700' }}
               w="100px"
               onClick={() => {
-                navigate('/')
+                navigate('/');
               }}
               type="submit"
             >
@@ -112,7 +112,7 @@ const Channels = (): JSX.Element => {
         </Flex>
       </HStack>
     </Box>
-  )
-}
+  );
+};
 
-export default Channels
+export default Channels;

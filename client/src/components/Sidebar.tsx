@@ -1,15 +1,15 @@
-import { useNavigate } from 'react-router-dom'
-import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import TagIcon from '@mui/icons-material/Tag'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import PersonIcon from '@mui/icons-material/Person'
+import { useNavigate } from 'react-router-dom';
+import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import TagIcon from '@mui/icons-material/Tag';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import PersonIcon from '@mui/icons-material/Person';
 
-const channels = ['general', 'random', 'team-1', 'team-2']
-const directMessages = ['user1', 'user2', 'user3']
+const channels = ['general', 'random', 'team-1', 'team-2'];
+const directMessages = ['user1', 'user2', 'user3'];
 
 const Sidebar = (): JSX.Element => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <VStack
@@ -46,7 +46,7 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Channels
       </Heading>
-      {channels.map((channel) => (
+      {channels.map(channel => (
         <Button
           key={channel}
           p="2"
@@ -62,7 +62,7 @@ const Sidebar = (): JSX.Element => {
           alignItems={'center'}
           justifyContent={'flex-start'}
           onClick={() => {
-            navigate(`${channel}`)
+            navigate(`${channel}`);
           }}
         >
           <TagIcon fontSize="small" />
@@ -72,7 +72,7 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Direct Messages
       </Heading>
-      {directMessages.map((user) => (
+      {directMessages.map(user => (
         <Button
           key={user}
           p="2"
@@ -88,7 +88,7 @@ const Sidebar = (): JSX.Element => {
           justifyContent={'flex-start'}
           gap="5px"
           onClick={() => {
-            navigate(`${user}`)
+            navigate(`${user}`);
           }}
         >
           <PersonIcon fontSize="small" />
@@ -96,7 +96,7 @@ const Sidebar = (): JSX.Element => {
         </Button>
       ))}
     </VStack>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
