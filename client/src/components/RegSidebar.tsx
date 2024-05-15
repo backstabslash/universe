@@ -1,9 +1,9 @@
-import { Flex, Heading, VStack } from '@chakra-ui/react'
-import TagIcon from '@mui/icons-material/Tag'
-import PersonIcon from '@mui/icons-material/Person'
+import { Flex, Heading, VStack } from '@chakra-ui/react';
+import TagIcon from '@mui/icons-material/Tag';
+import PersonIcon from '@mui/icons-material/Person';
 
-const channels = ['general', 'random', 'team-1', 'team-2']
-const directMessages = ['user1', 'user2', 'user3']
+const channels = ['general', 'random', 'team-1', 'team-2'];
+const directMessages = ['user1', 'user2', 'user3'];
 
 const Sidebar = (): JSX.Element => (
   <VStack
@@ -31,7 +31,7 @@ const Sidebar = (): JSX.Element => (
     <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
       Channels
     </Heading>
-    {channels.map((channel) => (
+    {channels.map(channel => (
       <Flex
         key={channel}
         p="2"
@@ -53,7 +53,7 @@ const Sidebar = (): JSX.Element => (
     <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
       Direct Messages
     </Heading>
-    {directMessages.map((user) => (
+    {directMessages.map(user => (
       <Flex
         key={user}
         p="2"
@@ -73,6 +73,6 @@ const Sidebar = (): JSX.Element => (
       </Flex>
     ))}
   </VStack>
-)
+);
 
-export default Sidebar
+export default Sidebar;

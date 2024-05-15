@@ -12,13 +12,13 @@ import {
   Link,
   Heading,
   Flex,
-} from '@chakra-ui/react'
-import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons'
-import IconButton from './IconButton'
-import profileImage from '../../public/profile-image-test.png'
+} from '@chakra-ui/react';
+import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import IconButton from './IconButton';
+import profileImage from '../../public/profile-image-test.png';
 
 interface UserProfileProps {
-  setisUserProfileVisible: (visible: boolean) => void
+  setisUserProfileVisible: (visible: boolean) => void;
 }
 
 const UserProfile = ({
@@ -41,7 +41,7 @@ const UserProfile = ({
         <IconButton
           label={<CloseIcon boxSize={'3'} />}
           onClick={() => {
-            setisUserProfileVisible(false)
+            setisUserProfileVisible(false);
           }}
         />
       </Flex>
@@ -259,6 +259,6 @@ const UserProfile = ({
       </VStack>
     </VStack>
   </Flex>
-)
+);
 
-export default UserProfile
+export default UserProfile;

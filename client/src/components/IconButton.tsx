@@ -1,7 +1,7 @@
-import { Button, type ButtonProps } from '@chakra-ui/react'
+import { Button, type ButtonProps } from '@chakra-ui/react';
 
 interface IconButtonProps extends ButtonProps {
-  label: string | JSX.Element
+  label: string | JSX.Element;
 }
 
 const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
@@ -16,6 +16,6 @@ const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
   >
     {label}
   </Button>
-)
+);
 
-export default IconButton
+export default IconButton;

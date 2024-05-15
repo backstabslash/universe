@@ -1,18 +1,20 @@
-import socket from '../config/socketConfig'
-import CottageIcon from '@mui/icons-material/Cottage'
-import BookmarkIcon from '@mui/icons-material/Bookmark'
-import InboxIcon from '@mui/icons-material/Inbox'
-import AddMuiIcon from '@mui/icons-material/Add'
-import TextEditor from '../components/TextEditor'
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
-import { EditIcon } from '@chakra-ui/icons'
-import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react'
-import UserProfile from '../components/UserProfile'
-import { useState } from 'react'
-import orgImage from '../../public/org-placeholder.png'
-import profileImage from '../../public/profile-image-test.png'
-import { type Descendant } from 'slate'
+import socket from '../config/socketConfig';
+import CottageIcon from '@mui/icons-material/Cottage';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import InboxIcon from '@mui/icons-material/Inbox';
+import AddMuiIcon from '@mui/icons-material/Add';
+import TextEditor from '../components/TextEditor';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import { EditIcon } from '@chakra-ui/icons';
+import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react';
+import UserProfile from '../components/UserProfile';
+import { useState } from 'react';
+import orgImage from '../../public/org-placeholder.png';
+import profileImage from '../../public/profile-image-test.png';
+import { type Descendant } from 'slate';
+import useAuthStore from '../store/auth';
+import { useNavigate } from 'react-router-dom';
 
 const contentData = [
   'This is a message',
@@ -27,19 +29,31 @@ const contentData = [
   'This is a message',
   'Another message',
   'Yet another message',
-]
+];
 
 const MainContent = (): JSX.Element => {
   const [isUserProfileVisible, setisUserProfileVisible] =
-    useState<boolean>(true)
+    useState<boolean>(true);
+  const navigate = useNavigate();
 
   const onClickSendMessage = (message: Descendant[]): void => {
-    socket.emit('send-message', message)
-  }
+    socket.emit('send-message', message);
+  };
 
   socket.on('message', (message: string) => {
-    console.log(message)
-  })
+    console.log(message);
+  });
+
+  const logout = useAuthStore(state => state.logout);
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to log in:', error);
+    }
+  };
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -126,6 +140,9 @@ const MainContent = (): JSX.Element => {
               background={'rgba(0,0,0,0.3)'}
               _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
               _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+              onClick={() => {
+                handleLogout();
+              }}
             >
               <AddMuiIcon fontSize="medium" />
             </Button>
@@ -136,7 +153,7 @@ const MainContent = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0)' }}
               _active={{ background: 'rgba(0, 0, 0, 0)' }}
               onClick={() => {
-                setisUserProfileVisible(true)
+                setisUserProfileVisible(true);
               }}
             >
               <Image
@@ -235,7 +252,7 @@ const MainContent = (): JSX.Element => {
         </Box>
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
-export default MainContent
+export default MainContent;

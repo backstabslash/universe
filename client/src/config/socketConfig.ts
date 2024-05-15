@@ -1,7 +1,7 @@
-import io from 'socket.io-client'
+import io from 'socket.io-client';
 
-import { api } from './config'
+import { api } from './config';
 
-const socket = io(api.url)
+const socket = io(api.url);
 
-export default socket
+export default socket;

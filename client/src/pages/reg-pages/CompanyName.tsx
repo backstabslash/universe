@@ -6,12 +6,12 @@ import {
   Text,
   HStack,
   Flex,
-} from '@chakra-ui/react'
-import { useNavigate } from 'react-router-dom'
-import Sidebar from '../../components/RegSidebar'
+} from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/RegSidebar';
 
 const CompanyName = (): JSX.Element => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <Box flexDirection="column" height="100vh" bg="zinc900">
@@ -61,7 +61,7 @@ const CompanyName = (): JSX.Element => {
             color="zinc300"
             _hover={{ bg: 'zinc700' }}
             onClick={() => {
-              navigate('/reg/coworkers')
+              navigate('/reg/coworkers');
             }}
           >
             Next
@@ -69,6 +69,6 @@ const CompanyName = (): JSX.Element => {
         </Flex>
       </HStack>
     </Box>
-  )
-}
-export default CompanyName
+  );
+};
+export default CompanyName;

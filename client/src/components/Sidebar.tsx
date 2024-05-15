@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import PersonIcon from '@mui/icons-material/Person'
-import DragAndDropList from './custom-elements/DragAndDropList'
-import { type List } from './custom-elements/DragAndDropList'
-const directMessages = ['user1', 'user2', 'user3']
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import PersonIcon from '@mui/icons-material/Person';
+import DragAndDropList from './custom-elements/DragAndDropList';
+import { type List } from './custom-elements/DragAndDropList';
+const directMessages = ['user1', 'user2', 'user3'];
 const Sidebar = (): JSX.Element => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [itemLists, setItemLists] = useState<List[]>([
     {
@@ -29,7 +29,7 @@ const Sidebar = (): JSX.Element => {
         { id: 'item-5', name: 'Item 5' },
       ],
     },
-  ])
+  ]);
 
   return (
     <VStack
@@ -70,7 +70,7 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Direct Messages
       </Heading>
-      {directMessages.map((user) => (
+      {directMessages.map(user => (
         <Button
           key={user}
           p="2"
@@ -86,7 +86,7 @@ const Sidebar = (): JSX.Element => {
           justifyContent={'flex-start'}
           gap="5px"
           onClick={() => {
-            navigate(`${user}`)
+            navigate(`${user}`);
           }}
         >
           <PersonIcon fontSize="small" />
@@ -94,7 +94,7 @@ const Sidebar = (): JSX.Element => {
         </Button>
       ))}
     </VStack>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

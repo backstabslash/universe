@@ -9,29 +9,29 @@ import {
   Tag,
   TagLabel,
   TagCloseButton,
-} from '@chakra-ui/react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Sidebar from '../../components/RegSidebar'
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/RegSidebar';
 
 const Coworkers = (): JSX.Element => {
-  const organisationName = 'Placeholder'
-  const isLoadingMock = false
+  const organisationName = 'Placeholder';
+  const isLoadingMock = false;
 
-  const [tags, setTags] = useState<string[]>([])
-  const [input, setInput] = useState<string>('')
+  const [tags, setTags] = useState<string[]>([]);
+  const [input, setInput] = useState<string>('');
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleKeyDown = (event: any): void => {
     if (event.key === 'Enter') {
-      setTags([...tags, input])
-      setInput('')
+      setTags([...tags, input]);
+      setInput('');
     }
-  }
+  };
   const handleDelete = (tagToDelete: any): void => {
-    setTags(tags.filter((tag) => tag !== tagToDelete))
-  }
+    setTags(tags.filter(tag => tag !== tagToDelete));
+  };
 
   return (
     <Box flexDirection="column" height="100vh" bg="zinc900">
@@ -69,7 +69,7 @@ const Coworkers = (): JSX.Element => {
                 <TagLabel>{tag}</TagLabel>
                 <TagCloseButton
                   onClick={() => {
-                    handleDelete(tag)
+                    handleDelete(tag);
                   }}
                 />
               </Tag>
@@ -86,8 +86,8 @@ const Coworkers = (): JSX.Element => {
               minH="50px"
               color="zinc300"
               value={input}
-              onChange={(e) => {
-                setInput(e.target.value)
+              onChange={e => {
+                setInput(e.target.value);
               }}
               onKeyDown={handleKeyDown}
             />
@@ -100,7 +100,7 @@ const Coworkers = (): JSX.Element => {
               _hover={{ bg: 'zinc700' }}
               w="100px"
               onClick={() => {
-                navigate('/reg/channels')
+                navigate('/reg/channels');
               }}
               type="submit"
             >
@@ -110,7 +110,7 @@ const Coworkers = (): JSX.Element => {
         </Flex>
       </HStack>
     </Box>
-  )
-}
+  );
+};
 
-export default Coworkers
+export default Coworkers;

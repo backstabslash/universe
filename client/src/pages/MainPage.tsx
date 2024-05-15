@@ -11,10 +11,11 @@ import {
   Avatar,
   Spacer,
   SkeletonCircle,
-} from '@chakra-ui/react'
+} from '@chakra-ui/react';
 
-import MainpageSvg from '../../public/svg/mainpageSvg'
-import { useNavigate } from 'react-router-dom'
+import MainpageSvg from '../../public/svg/mainpageSvg';
+import { useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/auth';
 
 const MainPage = (): JSX.Element => {
   const organisations = [
@@ -43,13 +44,27 @@ const MainPage = (): JSX.Element => {
       name: 'Organisation 5',
       coWorkers: ['worker6', 'worker7', 'worker8', 'worker9'],
     },
-  ]
+  ];
 
-  const userName = 'Alex Faltin'
-  const email = 'viperr@onu.edu.ua'
-  const isLoading = false
+  const userName = 'Alex Faltin';
+  const email = 'viperr@onu.edu.ua';
+  const isLoading = false;
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const login = useAuthStore(state => state.login);
+
+  const handleLogin = async (): Promise<void> => {
+    try {
+      const credentials = {
+        email: 'faltin@gmail.com',
+        password: 'fffffffffF1!',
+      };
+      await login(credentials);
+    } catch (error) {
+      console.error('Failed to log in:', error);
+    }
+  };
 
   return (
     <VStack h="100vh" w="100vw" bg="zinc900">
@@ -75,7 +90,7 @@ const MainPage = (): JSX.Element => {
                   color="zinc300"
                   _hover={{ bg: 'zinc700' }}
                   onClick={() => {
-                    navigate('/reg/companyname')
+                    navigate('/reg/companyname');
                   }}
                   size="md"
                 >
@@ -194,7 +209,7 @@ const MainPage = (): JSX.Element => {
                     </Flex>
                     <Button
                       onClick={() => {
-                        navigate('/')
+                        handleLogin();
                       }}
                       bg="zinc800"
                       color="zinc300"
@@ -213,7 +228,7 @@ const MainPage = (): JSX.Element => {
         </Box>
       </VStack>
     </VStack>
-  )
-}
+  );
+};
 
-export default MainPage
+export default MainPage;

@@ -13,7 +13,7 @@ import {
   ModalBody,
   ModalFooter,
   Input,
-} from '@chakra-ui/react'
+} from '@chakra-ui/react';
 import {
   FormatBold,
   FormatItalic,
@@ -29,9 +29,9 @@ import {
   InsertLink,
   LinkOff,
   DataArray,
-} from '@mui/icons-material/'
-import React, { useCallback, useMemo, useState } from 'react'
-import isHotkey from 'is-hotkey'
+} from '@mui/icons-material/';
+import React, { useCallback, useMemo, useState } from 'react';
+import isHotkey from 'is-hotkey';
 import {
   Editable,
   withReact,
@@ -39,55 +39,55 @@ import {
   Slate,
   useSelected,
   type ReactEditor,
-} from 'slate-react'
+} from 'slate-react';
 import {
   Editor,
   Transforms,
   createEditor,
   Range,
   Element as SlateElement,
-} from 'slate'
-import type { BaseEditor, BaseElement, Descendant } from 'slate'
-import { withHistory } from 'slate-history'
-import styled from 'styled-components'
+} from 'slate';
+import type { BaseEditor, BaseElement, Descendant } from 'slate';
+import { withHistory } from 'slate-history';
+import styled from 'styled-components';
 
 interface IconButtonProps extends ButtonProps {
-  label: string | JSX.Element
+  label: string | JSX.Element;
 }
 
 interface BlockButtonProps extends IconButtonProps {
-  format: string
+  format: string;
 }
 
 interface MarkButtonProps extends IconButtonProps {
-  format: string
+  format: string;
 }
 
 interface ElementProps {
-  attributes: any
-  children: any
-  element: any
+  attributes: any;
+  children: any;
+  element: any;
 }
 
 interface LeafProps {
-  attributes: any
-  children: any
-  leaf: any
+  attributes: any;
+  children: any;
+  leaf: any;
 }
 
-type Marks = Record<string, boolean>
+type Marks = Record<string, boolean>;
 
 interface MyElement extends BaseElement {
-  align?: string
-  type?: string
-  url?: string
+  align?: string;
+  type?: string;
+  url?: string;
 }
 
-type Hotkeys = Record<string, string>
+type Hotkeys = Record<string, string>;
 interface LinkElement {
-  type: 'link'
-  url: string
-  children: Descendant[]
+  type: 'link';
+  url: string;
+  children: Descendant[];
 }
 
 const HOTKEYS: Hotkeys = {
@@ -95,17 +95,17 @@ const HOTKEYS: Hotkeys = {
   'mod+i': 'italic',
   'mod+s': 'strikethrough',
   'mod+`': 'code',
-}
+};
 
-const LIST_TYPES = ['numbered-list', 'bulleted-list']
-const TEXT_ALIGN_TYPES = ['left']
+const LIST_TYPES = ['numbered-list', 'bulleted-list'];
+const TEXT_ALIGN_TYPES = ['left'];
 
 const initialValue: any[] = [
   {
     type: 'paragraph',
     children: [{ text: '' }],
   },
-]
+];
 
 const StyledEditable = styled(Editable)`
   &:focus {
@@ -115,32 +115,32 @@ const StyledEditable = styled(Editable)`
   overflow-wrap: break-word;
   word-break: break-all;
   white-space: normal;
-`
+`;
 
 interface TextEditorProps {
-  sendMessage: (message: any) => void
+  sendMessage: (message: any) => void;
 }
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
     []
-  )
-  const renderLeaf = useCallback((props: LeafProps) => <Leaf {...props} />, [])
+  );
+  const renderLeaf = useCallback((props: LeafProps) => <Leaf {...props} />, []);
   const editor = useMemo(() => {
     const withPlugins = (editor: BaseEditor): BaseEditor => {
-      withInlines(editor)
+      withInlines(editor);
       // withMentions(editor)
-      return editor
-    }
-    return withPlugins(withReact(withHistory(createEditor())))
-  }, [])
+      return editor;
+    };
+    return withPlugins(withReact(withHistory(createEditor())));
+  }, []);
 
   const handleContentChange = (newContent: Descendant[]): void => {
-    setContent(newContent)
-  }
+    setContent(newContent);
+  };
 
-  const [content, setContent] = useState<Descendant[]>(initialValue)
+  const [content, setContent] = useState<Descendant[]>(initialValue);
   return (
     <Slate
       editor={editor as ReactEditor}
@@ -216,24 +216,24 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
           onKeyDown={(event: React.KeyboardEvent) => {
             for (const hotkey in HOTKEYS) {
               if (isHotkey(hotkey, event)) {
-                event.preventDefault()
-                const mark = HOTKEYS[hotkey]
-                toggleMark(editor, mark)
+                event.preventDefault();
+                const mark = HOTKEYS[hotkey];
+                toggleMark(editor, mark);
               }
             }
 
-            const { selection } = editor
+            const { selection } = editor;
             if (selection && Range.isCollapsed(selection)) {
               const match = Editor.above(editor, {
-                match: (n) => (n as MyElement).type === 'link',
-              })
+                match: n => (n as MyElement).type === 'link',
+              });
               if (match) {
-                const [, path] = match
+                const [, path] = match;
                 if (Editor.isEnd(editor, selection.focus, path)) {
-                  const pointAfterLink = Editor.after(editor, path)
+                  const pointAfterLink = Editor.after(editor, path);
                   if (pointAfterLink) {
-                    Transforms.select(editor, pointAfterLink)
-                    event.preventDefault()
+                    Transforms.select(editor, pointAfterLink);
+                    event.preventDefault();
                   }
                 }
               }
@@ -271,57 +271,57 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
               mr="30px"
               mt="5px"
               onClick={() => {
-                sendMessage(content)
+                sendMessage(content);
               }}
             />
           </Box>
         </Flex>
       </Flex>
     </Slate>
-  )
-}
+  );
+};
 
 const withInlines = (editor: BaseEditor): BaseEditor => {
-  const { isInline } = editor
+  const { isInline } = editor;
 
   editor.isInline = (element: MyElement) =>
     (element.type !== undefined &&
       element.type !== null &&
       ['link', 'button', 'badge'].includes(element.type)) ||
-    isInline(element)
+    isInline(element);
 
-  return editor
-}
+  return editor;
+};
 
 const toggleBlock = (editor: BaseEditor, format: string): void => {
   const isActive = isBlockActive(editor, format, {
     blockType: TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type',
-  })
-  const isList = LIST_TYPES.includes(format)
+  });
+  const isList = LIST_TYPES.includes(format);
 
   Transforms.unwrapNodes(editor, {
-    match: (n) =>
+    match: n =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
       LIST_TYPES.includes((n as MyElement).type ?? '') &&
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
-  })
-  let newProperties: Partial<MyElement>
+  });
+  let newProperties: Partial<MyElement>;
   if (TEXT_ALIGN_TYPES.includes(format)) {
     newProperties = {
       align: isActive ? undefined : format,
-    }
+    };
   } else {
     newProperties = {
       type: isActive ? 'paragraph' : isList ? 'list-item' : format,
-    }
+    };
   }
-  Transforms.setNodes<MyElement>(editor, newProperties)
+  Transforms.setNodes<MyElement>(editor, newProperties);
 
   if (!isActive && isList) {
-    const block = { type: format, children: [] }
-    Transforms.wrapNodes(editor, block)
+    const block = { type: format, children: [] };
+    Transforms.wrapNodes(editor, block);
   }
 
   if (format === 'code-block') {
@@ -330,155 +330,155 @@ const toggleBlock = (editor: BaseEditor, format: string): void => {
         at: editor.selection,
       })) {
         if (SlateElement.isElement(node)) {
-          Transforms.select(editor, path)
+          Transforms.select(editor, path);
 
-          const marks = Editor.marks(editor)
+          const marks = Editor.marks(editor);
           if (marks) {
-            Object.keys(marks).forEach((mark) => {
-              Editor.removeMark(editor, mark)
-            })
+            Object.keys(marks).forEach(mark => {
+              Editor.removeMark(editor, mark);
+            });
           }
 
           Transforms.unwrapNodes(editor, {
-            match: (n) => (n as MyElement).type === 'link',
-          })
+            match: n => (n as MyElement).type === 'link',
+          });
         }
       }
     }
   }
-}
+};
 
 const toggleMark = (editor: BaseEditor, format: string): void => {
   const [match] = Editor.nodes(editor, {
-    match: (n) => (n as MyElement).type === 'code-block',
-  })
+    match: n => (n as MyElement).type === 'code-block',
+  });
 
   if (match) {
-    return
+    return;
   }
-  const isActive = isMarkActive(editor, format)
+  const isActive = isMarkActive(editor, format);
 
   if (isActive) {
-    Editor.removeMark(editor, format)
+    Editor.removeMark(editor, format);
   } else {
-    Editor.addMark(editor, format, true)
+    Editor.addMark(editor, format, true);
   }
-}
+};
 
 const isBlockActive = (
   editor: BaseEditor,
   format: any,
   { blockType = 'type' }: any
 ): boolean => {
-  const { selection } = editor
-  if (selection === null) return false
+  const { selection } = editor;
+  if (selection === null) return false;
 
   const [match] = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
-      match: (n) =>
+      match: n =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
         n[blockType as keyof BaseElement] === format,
     })
-  )
+  );
 
-  return Boolean(match)
-}
+  return Boolean(match);
+};
 
 const isMarkActive = (editor: BaseEditor, format: any): boolean => {
-  const marks = Editor.marks(editor) as Marks
-  return marks && marks[format]
-}
+  const marks = Editor.marks(editor) as Marks;
+  return marks && marks[format];
+};
 
 const isLinkActive = (editor: BaseEditor): boolean => {
   const [link] = Editor.nodes(editor, {
-    match: (n) =>
+    match: n =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
       (n as LinkElement).type === 'link',
-  })
-  return Boolean(link)
-}
+  });
+  return Boolean(link);
+};
 
 const insertLink = (editor: BaseEditor, url: string): void => {
   if (editor.selection) {
-    wrapLink(editor, url)
+    wrapLink(editor, url);
   }
-}
+};
 
 const unwrapLink = (editor: BaseEditor): void => {
   Transforms.unwrapNodes(editor, {
-    match: (n) =>
+    match: n =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
       (n as LinkElement).type === 'link',
-  })
-}
+  });
+};
 
 const wrapLink = (editor: BaseEditor, url: string): void => {
   if (isLinkActive(editor)) {
-    unwrapLink(editor)
+    unwrapLink(editor);
   }
 
-  const { selection } = editor
-  const isCollapsed = selection && Range.isCollapsed(selection)
+  const { selection } = editor;
+  const isCollapsed = selection && Range.isCollapsed(selection);
   const link: LinkElement = {
     type: 'link',
     url,
     children: isCollapsed ? [{ text: url }] : [],
-  }
+  };
 
   if (isCollapsed) {
-    Transforms.insertNodes(editor, link)
+    Transforms.insertNodes(editor, link);
   } else {
-    Transforms.wrapNodes(editor, link, { split: true })
-    Transforms.collapse(editor, { edge: 'end' })
+    Transforms.wrapNodes(editor, link, { split: true });
+    Transforms.collapse(editor, { edge: 'end' });
   }
-}
+};
 
 const Element = (props: ElementProps): JSX.Element => {
-  const { attributes, children, element } = props
-  const style = { textAlign: element.align }
+  const { attributes, children, element } = props;
+  const style = { textAlign: element.align };
   switch (element.type) {
     case 'block-quote':
       return (
         <blockquote style={style} {...attributes}>
           {children}
         </blockquote>
-      )
+      );
     case 'bulleted-list':
       return (
         <ul style={{ ...style, paddingLeft: '20px' }} {...attributes}>
           {children}
         </ul>
-      )
+      );
     case 'heading-one':
       return (
         <h1 style={style} {...attributes}>
           {children}
         </h1>
-      )
+      );
     case 'heading-two':
       return (
         <h2 style={style} {...attributes}>
           {children}
         </h2>
-      )
+      );
     case 'list-item':
       return (
         <li style={style} {...attributes}>
           {children}
         </li>
-      )
+      );
     case 'numbered-list':
       return (
         <ol style={{ ...style, paddingLeft: '20px' }} {...attributes}>
           {children}
         </ol>
-      )
+      );
     case 'link':
-      return <LinkComponent {...props} />
+      return <LinkComponent {...props} />;
     case 'code-block':
       return (
         <div
@@ -493,21 +493,21 @@ const Element = (props: ElementProps): JSX.Element => {
         >
           {children}
         </div>
-      )
+      );
     default:
       return (
         <p style={style} {...attributes}>
           {children}
         </p>
-      )
+      );
   }
-}
+};
 
 const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
-  let newChildren = children
+  let newChildren = children;
 
   if (leaf.bold === true) {
-    newChildren = <strong>{newChildren}</strong>
+    newChildren = <strong>{newChildren}</strong>;
   }
 
   if (leaf.code === true) {
@@ -522,21 +522,21 @@ const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
       >
         {newChildren}
       </code>
-    )
+    );
   }
 
   if (leaf.italic === true) {
-    newChildren = <em>{newChildren}</em>
+    newChildren = <em>{newChildren}</em>;
   }
 
   if (leaf.strikethrough === true) {
-    newChildren = <del>{newChildren}</del>
+    newChildren = <del>{newChildren}</del>;
   }
 
-  return <span {...attributes}>{newChildren}</span>
-}
+  return <span {...attributes}>{newChildren}</span>;
+};
 const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
-  const selected = useSelected()
+  const selected = useSelected();
   return (
     <a
       {...attributes}
@@ -546,8 +546,8 @@ const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
     >
       {children}
     </a>
-  )
-}
+  );
+};
 
 const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
   <Button
@@ -561,18 +561,18 @@ const IconButton = ({ label, ...props }: IconButtonProps): JSX.Element => (
   >
     {label}
   </Button>
-)
+);
 const BlockButton = ({
   format,
   label,
   ...props
 }: BlockButtonProps): JSX.Element => {
-  const editor = useSlate()
+  const editor = useSlate();
   const isActive = isBlockActive(
     editor,
     format,
     TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
-  )
+  );
 
   return (
     <Button
@@ -584,27 +584,27 @@ const BlockButton = ({
       _hover={{ background: 'zinc900' }}
       {...props}
       active={isActive}
-      onMouseDown={(event) => {
-        event.preventDefault()
-        toggleBlock(editor, format)
+      onMouseDown={event => {
+        event.preventDefault();
+        toggleBlock(editor, format);
       }}
     >
       {label}
     </Button>
-  )
-}
+  );
+};
 
 const MarkButton = ({
   format,
   label,
   ...props
 }: MarkButtonProps): JSX.Element => {
-  const editor = useSlate()
-  const isActive = isMarkActive(editor, format)
+  const editor = useSlate();
+  const isActive = isMarkActive(editor, format);
 
   const [match] = Editor.nodes(editor, {
-    match: (n) => (n as MyElement).type === 'code-block',
-  })
+    match: n => (n as MyElement).type === 'code-block',
+  });
 
   return (
     <Button
@@ -619,54 +619,54 @@ const MarkButton = ({
       {...props}
       active={isActive}
       disabled={Boolean(match)}
-      onMouseDown={(event) => {
-        event.preventDefault()
+      onMouseDown={event => {
+        event.preventDefault();
         if (!match) {
-          toggleMark(editor, format)
+          toggleMark(editor, format);
         }
       }}
     >
       {label}
     </Button>
-  )
-}
+  );
+};
 
 const AddLinkButton = (): JSX.Element => {
-  const editor = useSlate()
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [url, setUrl] = React.useState<string>('')
-  const [linkNode, setLinkNode] = React.useState<any>(null)
+  const editor = useSlate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [url, setUrl] = React.useState<string>('');
+  const [linkNode, setLinkNode] = React.useState<any>(null);
 
   const handleLinkButtonClick = (): void => {
     const [linkNode] = Editor.nodes(editor, {
-      match: (n) => (n as MyElement).type === 'link',
-    })
+      match: n => (n as MyElement).type === 'link',
+    });
 
     if (linkNode) {
-      const { url } = linkNode[0] as MyElement
+      const { url } = linkNode[0] as MyElement;
       if (url) {
-        setUrl(url)
+        setUrl(url);
       }
-      setLinkNode(linkNode)
+      setLinkNode(linkNode);
     }
 
-    onOpen()
-  }
+    onOpen();
+  };
 
   const handleSave = (): void => {
-    if (url.trim() === '') return
+    if (url.trim() === '') return;
 
     if (linkNode) {
-      const newElement: Partial<MyElement> = { url }
-      Transforms.setNodes(editor, newElement, { at: linkNode[1] })
+      const newElement: Partial<MyElement> = { url };
+      Transforms.setNodes(editor, newElement, { at: linkNode[1] });
     } else {
-      insertLink(editor, url)
+      insertLink(editor, url);
     }
 
-    onClose()
-    setUrl('')
-    setLinkNode(null)
-  }
+    onClose();
+    setUrl('');
+    setLinkNode(null);
+  };
 
   return (
     <>
@@ -677,9 +677,9 @@ const AddLinkButton = (): JSX.Element => {
         color="zinc300"
         p="1px"
         _hover={{ background: 'zinc900' }}
-        onMouseDown={(event) => {
-          event.preventDefault()
-          handleLinkButtonClick()
+        onMouseDown={event => {
+          event.preventDefault();
+          handleLinkButtonClick();
         }}
       >
         <InsertLink fontSize="small" />
@@ -693,8 +693,8 @@ const AddLinkButton = (): JSX.Element => {
           <ModalBody>
             <Input
               value={url}
-              onChange={(event) => {
-                setUrl(event.target.value)
+              onChange={event => {
+                setUrl(event.target.value);
               }}
               placeholder="Enter URL"
             />
@@ -717,8 +717,8 @@ const AddLinkButton = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
               _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
               onClick={() => {
-                onClose()
-                setUrl('')
+                onClose();
+                setUrl('');
               }}
             >
               Cancel
@@ -727,14 +727,14 @@ const AddLinkButton = (): JSX.Element => {
         </ModalContent>
       </Modal>
     </>
-  )
-}
+  );
+};
 
 const RemoveLinkButton = (): JSX.Element => {
-  const editor = useSlate()
+  const editor = useSlate();
   const [match] = Editor.nodes(editor, {
-    match: (n) => (n as MyElement).type === 'code-block',
-  })
+    match: n => (n as MyElement).type === 'code-block',
+  });
 
   return (
     <Button
@@ -748,13 +748,13 @@ const RemoveLinkButton = (): JSX.Element => {
       }}
       onMouseDown={() => {
         if (!match && isLinkActive(editor)) {
-          unwrapLink(editor)
+          unwrapLink(editor);
         }
       }}
     >
       <LinkOff fontSize="small" />
     </Button>
-  )
-}
+  );
+};
 
-export default TextEditor
+export default TextEditor;

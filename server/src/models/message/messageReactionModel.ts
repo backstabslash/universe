@@ -20,6 +20,9 @@ const MessageReactionSchema = new Schema<IMessageReaction>({
   },
 });
 
-const MessageReaction = model<IMessageReaction>("MessageReaction", MessageReactionSchema);
+const MessageReaction = model<IMessageReaction>(
+  "MessageReaction",
+  MessageReactionSchema,
+);
 
 export default MessageReaction;
