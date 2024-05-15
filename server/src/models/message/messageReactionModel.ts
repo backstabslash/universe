@@ -1,8 +1,10 @@
 import { Schema, Document, model } from "mongoose";
+import { IMessage } from "./messageModel";
+import { IReaction } from "./reactionModel";
 
 export interface IMessageReaction extends Document {
-  message: Schema.Types.ObjectId;
-  reaction: Schema.Types.ObjectId;
+  message: IMessage;
+  reaction: IReaction;
 }
 
 const MessageReactionSchema = new Schema<IMessageReaction>({

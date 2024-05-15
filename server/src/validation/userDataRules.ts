@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const email = Joi.string()
+export const emailRules = Joi.string()
   .email({ tlds: { allow: false } })
   .required()
   .trim()
@@ -10,7 +10,7 @@ const email = Joi.string()
     "any.required": "Email is required",
   });
 
-const password = Joi.string()
+export const passwordRules = Joi.string()
   .min(8)
   .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])"))
   .required()
@@ -21,7 +21,7 @@ const password = Joi.string()
     "any.required": "Password is required",
   });
 
-const name = Joi.string()
+export const nameRules = Joi.string()
   .min(3)
   .max(30)
   .pattern(new RegExp("^[a-zA-Z ]+$"))
@@ -34,13 +34,14 @@ const name = Joi.string()
     "any.required": "Name is required",
   });
 
-export const loginSchema = Joi.object({
-  email,
-  password,
-});
-
-export const registerSchema = Joi.object({
-  name,
-  email,
-  password,
-});
+export const tagRules = Joi.string()
+  .min(3)
+  .max(30)
+  .pattern(new RegExp("^[a-zA-Z0-9]+$"))
+  .required()
+  .messages({
+    "string.min": "Tag must be at least 3 characters long",
+    "string.max": "Tag must be less than 30 characters long",
+    "string.pattern.base": "Tag can only contain letters and numbers",
+    "any.required": "Tag is required",
+  });
