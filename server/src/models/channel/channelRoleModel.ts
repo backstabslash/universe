@@ -1,11 +1,13 @@
 import { Schema, model, Document } from "mongoose";
+import { IChannel } from "./channelModel";
+import { IRole } from "../user/roleModel";
 
 export interface IChannelRole extends Document {
-  channel: Schema.Types.ObjectId;
-  role: Schema.Types.ObjectId;
+  channel: IChannel;
+  role: IRole;
 }
 
-const ChannelRoleSchema: Schema = new Schema({
+const ChannelRoleSchema = new Schema<IChannelRole>({
   channel: {
     type: Schema.Types.ObjectId,
     ref: "Channel",

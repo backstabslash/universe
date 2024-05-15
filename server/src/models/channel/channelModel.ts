@@ -4,7 +4,7 @@ export interface IChannel extends Document {
   name: string;
 }
 
-const ChannelSchema: Schema = new Schema({
+const ChannelSchema = new Schema<IChannel>({
   name: {
     type: String,
     required: true,

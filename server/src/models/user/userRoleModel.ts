@@ -5,7 +5,7 @@ export interface IUserRole extends Document {
   role: Schema.Types.ObjectId;
 }
 
-const UserRoleSchema = new Schema({
+const UserRoleSchema = new Schema<IUserRole>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",

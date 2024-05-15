@@ -11,7 +11,7 @@ export enum AttachmentType {
   FILE = "FILE",
 }
 
-const AttachmentSchema = new Schema({
+const AttachmentSchema = new Schema<IAttachment>({
   type: {
     type: String,
     enum: Object.values(AttachmentType),
