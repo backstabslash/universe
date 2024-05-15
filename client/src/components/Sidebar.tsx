@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import TagIcon from '@mui/icons-material/Tag'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import PersonIcon from '@mui/icons-material/Person'
 import DragAndDropList from './custom-elements/DragAndDropList'
@@ -15,7 +14,10 @@ const Sidebar = (): JSX.Element => {
     {
       name: 'list-1',
       items: [
-        { id: 'item-1', name: 'Item 1' },
+        {
+          id: 'item-1',
+          name: 'Item 11111111111111111111111111111111111111111111',
+        },
         { id: 'item-2', name: 'Item 2' },
         { id: 'item-3', name: 'Item 3' },
       ],
