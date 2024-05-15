@@ -1,10 +1,11 @@
 import { Schema, Document, model } from "mongoose";
+import { IMessage } from "./messageModel";
 
 export interface IThread extends Document {
-  parentMessage: Schema.Types.ObjectId;
+  parentMessage: IMessage;
 }
 
-const ThreadSchema = new Schema({
+const ThreadSchema = new Schema<IThread>({
   parentMessage: {
     type: Schema.Types.ObjectId,
     ref: "Message",

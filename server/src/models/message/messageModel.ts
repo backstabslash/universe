@@ -1,14 +1,17 @@
 import { Schema, Document, model } from "mongoose";
+import { IUser } from "../user/userModel";
+import { IChannel } from "../channel/channelModel";
+import { IThread } from "./threadModel";
 
 export interface IMessage extends Document {
-  user: Schema.Types.ObjectId;
+  user: IUser;
   content: any;
-  channel: Schema.Types.ObjectId;
-  thread: Schema.Types.ObjectId;
+  channel: IChannel;
+  thread: IThread;
   sendAt: number;
 }
 
-const MessageSchema = new Schema({
+const MessageSchema = new Schema<IMessage>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",

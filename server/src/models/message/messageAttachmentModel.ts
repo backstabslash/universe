@@ -1,11 +1,13 @@
 import { Schema, Document, model } from "mongoose";
+import { IAttachment } from "./attachmentModel";
+import { IMessage } from "./messageModel";
 
 export interface IMessageAttachment extends Document {
-  attachment: Schema.Types.ObjectId;
-  message: Schema.Types.ObjectId;
+  attachment: IAttachment;
+  message: IMessage;
 }
 
-const MessageAttachmentSchema = new Schema({
+const MessageAttachmentSchema = new Schema<IMessageAttachment>({
   attachment: {
     type: Schema.Types.ObjectId,
     ref: "Attachment",

@@ -4,7 +4,7 @@ export interface IReaction extends Document {
   name: string;
 }
 
-const ReactionSchema = new Schema({
+const ReactionSchema = new Schema<IReaction>({
   name: {
     type: String,
     required: true,
