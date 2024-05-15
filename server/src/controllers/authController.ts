@@ -127,11 +127,14 @@ class AuthController {
   }
 
   async refreshAccessToken(req: Request, res: Response) {
+    console.log('cookies');
+
     const { cookies } = req;
+    console.log('cookies');
     if (!cookies || !cookies.refreshtoken) {
       return res.sendStatus(401);
     }
-
+    console.log('???');
     const refreshToken = cookies.refreshtoken;
     try {
       const decoded = jwt.verify(

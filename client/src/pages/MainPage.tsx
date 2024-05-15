@@ -58,7 +58,7 @@ const MainPage = (): JSX.Element => {
     try {
       const credentials = {
         email: 'faltin@gmail.com',
-        password: '1111',
+        password: 'fffffffffF1!',
       };
       await login(credentials);
     } catch (error) {

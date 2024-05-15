@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AxiosInstance } from 'axios';
+import axios from 'axios';
 
 interface UserData {
   userId?: string | null;
@@ -11,24 +11,20 @@ interface UserData {
 interface AuthState {
   userData: UserData | null;
   error: any;
-  axiosPrivate: AxiosInstance | null;
   refresh: () => Promise<string | null>;
   login: (userData: UserData) => Promise<void>;
   logout: () => Promise<void>;
-  setAxiosPrivate: (axiosPrivate: AxiosInstance) => void;
 }
 
-const useAuthStore = create<AuthState>((set, get) => ({
+const BASE_URL = 'http://localhost:3001';
+
+const useAuthStore = create<AuthState>(set => ({
   userData: null,
   error: null,
-  axiosPrivate: null,
-
-  setAxiosPrivate: (axiosPrivate: AxiosInstance) => set({ axiosPrivate }),
 
   register: async (userData: UserData) => {
     try {
-      const { axiosPrivate } = get();
-      await axiosPrivate?.post('/auth/register', userData);
+      await axios.post(`${BASE_URL}/auth/register`, userData);
       set({ error: null });
     } catch (err: any) {
       const error = err.response || { status: err.status, data: err.message };
@@ -38,9 +34,8 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (userData: UserData) => {
     try {
-      const { axiosPrivate } = get();
-      const response = await axiosPrivate?.post(
-        'http://localhost:3001/auth/login',
+      const response = await axios.post(
+        `${BASE_URL}/auth/login`,
         {
           email: userData.email,
           password: userData.password,
@@ -56,8 +51,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   refresh: async () => {
     try {
-      const { axiosPrivate } = get();
-      const response = await axiosPrivate?.get('/auth/refresh');
+      const response = await axios.get(`${BASE_URL}/auth/refresh`, {
+        withCredentials: true,
+      });
       set({ userData: response?.data, error: null });
       return response?.data?.accessToken;
     } catch (err: any) {
@@ -69,8 +65,9 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      const { axiosPrivate } = get();
-      await axiosPrivate?.get('/auth/logout');
+      await axios.get(`${BASE_URL}/auth/logout`, {
+        withCredentials: true,
+      });
       set({ userData: null, error: null });
     } catch (err: any) {
       const error = err.response || { status: err.status, data: err.message };
