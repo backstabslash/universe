@@ -5,7 +5,7 @@ export interface IMessageReaction extends Document {
   reaction: Schema.Types.ObjectId;
 }
 
-const MessageReactionSchema = new Schema({
+const MessageReactionSchema = new Schema<IMessageReaction>({
   message: {
     type: Schema.Types.ObjectId,
     ref: "Message",

@@ -4,7 +4,7 @@ export interface IThread extends Document {
   parentMessage: Schema.Types.ObjectId;
 }
 
-const ThreadSchema = new Schema({
+const ThreadSchema = new Schema<IThread>({
   parentMessage: {
     type: Schema.Types.ObjectId,
     ref: "Message",

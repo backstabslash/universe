@@ -5,7 +5,7 @@ export interface IMessageAttachment extends Document {
   message: Schema.Types.ObjectId;
 }
 
-const MessageAttachmentSchema = new Schema({
+const MessageAttachmentSchema = new Schema<IMessageAttachment>({
   attachment: {
     type: Schema.Types.ObjectId,
     ref: "Attachment",

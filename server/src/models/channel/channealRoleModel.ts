@@ -5,7 +5,7 @@ export interface IChannelRole extends Document {
   role: Schema.Types.ObjectId;
 }
 
-const ChannelRoleSchema: Schema = new Schema({
+const ChannelRoleSchema = new Schema<IChannelRole>({
   channel: {
     type: Schema.Types.ObjectId,
     ref: "Channel",

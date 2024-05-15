@@ -5,7 +5,7 @@ export interface IChannelUser extends Document {
   channel: Schema.Types.ObjectId;
 }
 
-const ChannelUserSchema: Schema = new Schema({
+const ChannelUserSchema = new Schema<IChannelUser>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",

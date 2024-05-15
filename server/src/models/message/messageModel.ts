@@ -8,7 +8,7 @@ export interface IMessage extends Document {
   sendAt: number;
 }
 
-const MessageSchema = new Schema({
+const MessageSchema = new Schema<IMessage>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",
