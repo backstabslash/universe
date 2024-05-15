@@ -5,6 +5,7 @@ import {
   type DropResult,
 } from 'react-beautiful-dnd'
 import { Box, Flex, Heading, Text } from '@chakra-ui/react'
+import TagIcon from '@mui/icons-material/Tag'
 
 interface DragAndDropListProps {
   itemLists: List[]
@@ -83,10 +84,13 @@ const DragAndDropList = ({
           <Flex
             ref={provided.innerRef}
             {...provided.droppableProps}
-            bg={snapshot.isDraggingOver ? 'gray.200' : 'inherit'}
-            p={4}
+            bg={snapshot.isDraggingOver ? 'rgba(0, 0, 0, 0.2)' : 'inherit'}
+            p="15px"
             flexDirection="column"
-            gap={4}
+            gap="4"
+            minWidth="100%"
+            maxWidth="100%"
+            background="rgba(0, 0, 0, 0.1)"
           >
             {itemLists.map((list, index) => (
               <Draggable key={list.name} draggableId={list.name} index={index}>
@@ -95,21 +99,36 @@ const DragAndDropList = ({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    bg={snapshot.draggingOver ? 'blue.200' : 'white'}
-                    p={4}
+                    bg={
+                      snapshot.isDragging
+                        ? 'rgba(0, 0, 0, 0.4)'
+                        : 'rgba(0, 0, 0, 0.1)'
+                    }
+                    border="1px"
+                    borderColor="rgba(29, 29, 32, 1)"
                     borderRadius="md"
-                    boxShadow="md"
+                    p="15px"
+                    mb="2"
+                    color="zinc400"
+                    maxWidth="100%"
+                    background="rgba(0, 0, 0, 0.1)"
+                    _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                    _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                   >
                     <Droppable droppableId={list.name} type="item">
                       {(provided, snapshot) => (
                         <Box
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          bg={snapshot.isDraggingOver ? 'gray.100' : 'inherit'}
-                          p={2}
+                          bg={
+                            snapshot.isDraggingOver
+                              ? 'rgba(0, 0, 0, 0.2)'
+                              : 'inherit'
+                          }
+                          p="2"
                           borderRadius="md"
                         >
-                          <Heading size="sm" mb={2}>
+                          <Heading size="sm" mb="2" color="zinc300">
                             {list.name}
                           </Heading>
                           {list.items.map((item, index) => (
@@ -119,20 +138,32 @@ const DragAndDropList = ({
                               index={index}
                             >
                               {(provided, snapshot) => (
-                                <Box
+                                <Flex
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                   bg={
-                                    snapshot.isDragging ? 'green.100' : 'white'
+                                    snapshot.isDragging
+                                      ? 'rgba(0, 0, 0, 0.4)'
+                                      : 'rgba(0, 0, 0, 0.1)'
                                   }
-                                  p={2}
+                                  p="2"
                                   borderRadius="md"
-                                  mb={2}
-                                  boxShadow="sm"
+                                  mb="2"
+                                  color="zinc400"
+                                  _hover={{ background: 'rgba(0, 0, 0, 1)' }}
+                                  overflow="hidden"
+                                  textOverflow="ellipsis"
+                                  whiteSpace="nowrap"
+                                  maxWidth="100%"
+                                  alignItems="center"
                                 >
+                                  <TagIcon
+                                    fontSize="small"
+                                    style={{ marginRight: '8px' }}
+                                  />
                                   <Text>{item.name}</Text>
-                                </Box>
+                                </Flex>
                               )}
                             </Draggable>
                           ))}
