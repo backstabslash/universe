@@ -1,10 +1,17 @@
 import { Request, Response } from "express";
-import Joi from "joi";
 import bcrypt from "bcrypt";
+import { loginSchema, registerSchema } from "../validation/authSchemas";
 import User from "../models/user/userModel";
 
 class AuthController {
   async login(req: Request, res: Response) {
+    const { error } = loginSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
@@ -25,6 +32,13 @@ class AuthController {
   }
 
   async register(req: Request, res: Response) {
+    const { error } = registerSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
     const { name, email, password } = req.body;
 
     const user = await User.findOne({ name });
