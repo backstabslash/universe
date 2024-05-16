@@ -1,5 +1,4 @@
-import { Socket } from 'socket.io-client';
-import connectSocket from '../config/socketConfig';
+import useMessengerStore from '../store/messenger';
 import CottageIcon from '@mui/icons-material/Cottage';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import InboxIcon from '@mui/icons-material/Inbox';
@@ -35,11 +34,15 @@ const contentData = [
 const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
 
-  const [socket, setSocket] = useState<Socket>();
+  const { socket, connectSocket, getChannelGroups, currentChannel } =
+    useMessengerStore(state => state);
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true);
 
-  const onClickSendMessage = (message: Descendant[]): void => {};
+  const onClickSendMessage = (message: Descendant[]): void => {
+    console.log(currentChannel);
+    socket?.emit('send-message', { message, channelId: currentChannel?.id });
+  };
 
   const logout = useAuthStore(state => state.logout);
 
@@ -53,8 +56,8 @@ const MainContent = (): JSX.Element => {
   };
 
   useEffect(() => {
-    setSocket(connectSocket());
-
+    connectSocket();
+    getChannelGroups();
     return () => {
       socket?.disconnect();
     };

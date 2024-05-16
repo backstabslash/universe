@@ -3,79 +3,81 @@ import {
   Droppable,
   Draggable,
   type DropResult,
-} from 'react-beautiful-dnd'
-import { Box, Flex, Heading, Text } from '@chakra-ui/react'
-import TagIcon from '@mui/icons-material/Tag'
+} from 'react-beautiful-dnd';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import TagIcon from '@mui/icons-material/Tag';
 
 interface DragAndDropListProps {
-  itemLists: List[]
-  setItemLists: (itemLists: List[]) => void
+  itemLists: List[];
+  setItemLists: (itemLists: List[]) => void;
+  onItemClick: (item: Item) => void;
+}
+interface List {
+  name: string;
+  items: Item[];
 }
 
 interface Item {
-  id: string
-  name: string
-}
-
-export interface List {
-  name: string
-  items: Item[]
+  id: string;
+  name: string;
+  content: any;
 }
 
 const DragAndDropList = ({
   itemLists,
   setItemLists,
+  onItemClick,
 }: DragAndDropListProps): JSX.Element => {
   const onDragEnd = (result: DropResult): void => {
     if (!result.destination) {
-      return
+      return;
     }
 
     if (result.type === 'list') {
-      const reorderedLists = [...itemLists]
-      const [movedList] = reorderedLists.splice(result.source.index, 1)
-      reorderedLists.splice(result.destination.index, 0, movedList)
-      setItemLists(reorderedLists)
-      return
+      const reorderedLists = [...itemLists];
+      const [movedList] = reorderedLists.splice(result.source.index, 1);
+      reorderedLists.splice(result.destination.index, 0, movedList);
+      setItemLists(reorderedLists);
+      return;
     }
 
     const sourceList = itemLists.find(
-      (list) => list.name === result.source.droppableId
-    )
+      list => list.name === result.source.droppableId
+    );
     const destinationList = itemLists.find(
-      (list) => list.name === result.destination?.droppableId
-    )
+      list => list.name === result.destination?.droppableId
+    );
 
     if (sourceList?.name === destinationList?.name) {
-      const reorderedItems = [...(sourceList?.items ?? [])]
-      const [movedItem] = reorderedItems.splice(result.source.index, 1)
-      reorderedItems.splice(result.destination.index, 0, movedItem)
+      const reorderedItems = [...(sourceList?.items ?? [])];
+      const [movedItem] = reorderedItems.splice(result.source.index, 1);
+      reorderedItems.splice(result.destination.index, 0, movedItem);
 
       setItemLists(
-        itemLists.map((list) =>
+        itemLists.map(list =>
           list.name === sourceList?.name
             ? { ...list, items: reorderedItems }
             : list
         )
-      )
+      );
     } else {
-      const sourceListCopy = [...(sourceList?.items ?? [])]
-      const destinationListCopy = [...(destinationList?.items ?? [])]
+      const sourceListCopy = [...(sourceList?.items ?? [])];
+      const destinationListCopy = [...(destinationList?.items ?? [])];
 
-      const [movedItem] = sourceListCopy.splice(result.source.index, 1)
-      destinationListCopy.splice(result.destination.index, 0, movedItem)
+      const [movedItem] = sourceListCopy.splice(result.source.index, 1);
+      destinationListCopy.splice(result.destination.index, 0, movedItem);
 
       setItemLists(
-        itemLists.map((list) =>
+        itemLists.map(list =>
           list.name === sourceList?.name
             ? { ...list, items: sourceListCopy }
             : list.name === destinationList?.name
               ? { ...list, items: destinationListCopy }
               : list
         )
-      )
+      );
     }
-  }
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -157,6 +159,7 @@ const DragAndDropList = ({
                                   whiteSpace="nowrap"
                                   maxWidth="100%"
                                   alignItems="center"
+                                  onClick={() => onItemClick(item)}
                                 >
                                   <TagIcon
                                     fontSize="small"
@@ -180,7 +183,7 @@ const DragAndDropList = ({
         )}
       </Droppable>
     </DragDropContext>
-  )
-}
+  );
+};
 
-export default DragAndDropList
+export default DragAndDropList;

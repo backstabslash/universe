@@ -4,6 +4,7 @@ import app from "./app";
 import { api, db, client } from "./config/config";
 import verifySocketJwt from "./middleware/verifySocketJwt";
 import mongoose from "mongoose";
+import connectionHandler from "./socket-handlers/connectionHandler";
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -14,10 +15,10 @@ const io = new Server(server, {
   },
 });
 
-io.use(verifySocketJwt);
-
-io.on("connection", (socket: Socket) => {
+io.use(verifySocketJwt).on("connection", (socket: Socket) => {
   console.info("User connected");
+
+  connectionHandler.joinAndSendChannels(socket);
 
   socket.on("disconnect", () => {
     console.info("User disconnected");

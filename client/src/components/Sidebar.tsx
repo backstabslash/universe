@@ -1,35 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { VStack, Heading, Flex, Box, Button } from '@chakra-ui/react';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PersonIcon from '@mui/icons-material/Person';
 import DragAndDropList from './custom-elements/DragAndDropList';
-import { type List } from './custom-elements/DragAndDropList';
+import useMessengerStore, { Channel, ChannelGroups } from '../store/messenger';
+
 const directMessages = ['user1', 'user2', 'user3'];
+
 const Sidebar = (): JSX.Element => {
   const navigate = useNavigate();
 
-  const [itemLists, setItemLists] = useState<List[]>([
-    {
-      name: 'list-1',
-      items: [
-        {
-          id: 'item-1',
-          name: 'Item 11111111111111111111111111111111111111111111',
-        },
-        { id: 'item-2', name: 'Item 2' },
-        { id: 'item-3', name: 'Item 3' },
-      ],
-    },
-    {
-      name: 'list-2',
-      items: [
-        { id: 'item-4', name: 'Item 4' },
-        { id: 'item-5', name: 'Item 5' },
-      ],
-    },
-  ]);
+  const { channelGroups, setCurrentChannel, getChannelMessages } =
+    useMessengerStore(state => state);
+  const [channelList, setChannelList] = useState<ChannelGroups[]>([]);
+
+  const onChannelClick = (channel: Channel): void => {
+    setCurrentChannel(channel);
+    getChannelMessages(channel);
+    // navigate(`${channel.name}`);
+  };
+
+  useEffect(() => {
+    setChannelList(channelGroups);
+  }, [channelGroups]);
 
   return (
     <VStack
@@ -66,7 +61,11 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Channels
       </Heading>
-      <DragAndDropList itemLists={itemLists} setItemLists={setItemLists} />
+      <DragAndDropList
+        itemLists={channelList}
+        setItemLists={setChannelList}
+        onItemClick={onChannelClick}
+      />
       <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Direct Messages
       </Heading>

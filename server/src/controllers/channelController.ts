@@ -43,6 +43,7 @@ class ChannelController {
   async create(req: Request, res: Response) {
     const createChannelSchema = Joi.object({
       name: channelNameRules,
+      userId: uuidRules,
     });
     const { error } = createChannelSchema.validate(req.body);
     if (error) {
