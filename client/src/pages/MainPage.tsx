@@ -13,19 +13,36 @@ import {
 import MainpageSvg from '../../public/svg/mainpageSvg';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/auth';
+import { useState } from 'react';
 
 const MainPage = (): JSX.Element => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   const navigate = useNavigate();
 
-  const login = useAuthStore(state => state.login);
+  const { login, error } = useAuthStore(state => ({
+    login: state.login,
+    error: state.error,
+  }));
+
+  const handleEmailChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setPassword(event.target.value);
+  };
 
   const handleLogin = async (): Promise<void> => {
     try {
-      const credentials = {
-        email: 'faltin@gmail.com',
-        password: 'fffffffffF1!',
-      };
-      await login(credentials);
+      await login({ email, password });
+      await error;
+      navigate('/client');
     } catch (error) {
       console.error('Failed to log in:', error);
     }
@@ -33,7 +50,7 @@ const MainPage = (): JSX.Element => {
 
   return (
     <VStack h="100vh" w="100vw" bg="zinc900">
-      <VStack spacing="2rem" mb="100rem" mt="6rem">
+      <VStack spacing="2rem" mt="3rem">
         <HStack mb="2rem">
           <Flex justify="end">
             <Stack align="start" w="70%" justify="center" mr="1rm">
@@ -76,8 +93,6 @@ const MainPage = (): JSX.Element => {
           borderColor="zinc700"
           p="1.4rem"
           mt="0.1 rem"
-          mx="auto"
-          h="260px"
         >
           <VStack align="center" gap="2">
             <Text
@@ -91,6 +106,8 @@ const MainPage = (): JSX.Element => {
             </Text>
             <Input
               flex="1"
+              value={email}
+              onChange={handleEmailChange}
               placeholder="Email"
               fontSize="md"
               bg="zinc800"
@@ -104,7 +121,10 @@ const MainPage = (): JSX.Element => {
             />
             <Input
               flex="1"
+              value={password}
+              onChange={handlePasswordChange}
               placeholder="Password"
+              type="password"
               fontSize="md"
               bg="zinc800"
               borderRadius="md"
@@ -115,6 +135,11 @@ const MainPage = (): JSX.Element => {
               mb="10px"
               color="zinc300"
             />
+            {error && (
+              <Text fontSize="sm" color="red.500" mt="0.5rem">
+                {'Login or password is incorrect'}
+              </Text>
+            )}
             <Button
               onClick={() => {
                 handleLogin();

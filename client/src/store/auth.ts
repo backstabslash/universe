@@ -31,7 +31,7 @@ const useAuthStore = create<AuthState>(set => ({
       await axios.post(`${BASE_URL}/auth/register`, userData);
       set({ error: null });
     } catch (err: any) {
-      const error = err.response?.data?.error || err.message || 'An unknown error occurred';
+      const error = err.response?.data?.message || err.message || 'An unknown error occurred';
       set({ error });
     }
   },
@@ -59,6 +59,8 @@ const useAuthStore = create<AuthState>(set => ({
       set({ userData: response?.data?.accessToken, error: null });
     } catch (err: any) {
       const error = err.response?.data?.message || err.message || 'An unknown error occurred';
+      console.log(err);
+
       set({ userData: null, error });
     }
   },

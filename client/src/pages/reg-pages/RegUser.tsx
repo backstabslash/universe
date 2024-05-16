@@ -137,7 +137,8 @@ const RegUser = (): JSX.Element => {
     if (validate()) {
       try {
         await register({ name, email, password, verifyCode });
-        console.log('Registration successful');
+        await verifyError;
+        if (!verifyError) navigate('/main');
       } catch (error) {
         console.error('Failed to register:', error);
       }
