@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from '../models/user/userModel';
 import { getEnvVar, UserJwtPayload } from '../utils/utils';
+import EmailService from '../email-service/emailService';
 
 class AuthController {
   private readonly accessTokenSecret: string;
@@ -22,6 +23,7 @@ class AuthController {
     this.login = this.login.bind(this);
     this.register = this.register.bind(this);
     this.refreshAccessToken = this.refreshAccessToken.bind(this);
+    const emailService = new EmailService();
   }
 
   async login(req: Request, res: Response) {
