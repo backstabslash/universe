@@ -7,10 +7,10 @@ import credentials from './middleware/credentials';
 import verifyJWT from './middleware/verify-jwt';
 import userRoutes from './routes/userRoutes';
 import channelRoutes from './routes/channelRoutes';
+import EmailService from './email-service/emailService';
 require('dotenv').config();
 
 const app = express();
-
 app.use(credentials);
 app.use(cors(corsOptions));
 app.use(express.json());
