@@ -18,7 +18,6 @@ class EmailService {
         });
     }
 
-    // Функция для генерации уникального кода
     generateConfirmationCode(length = 6) {
         const characters = '0123456789';
         let code = '';
@@ -32,7 +31,6 @@ class EmailService {
     }
 
 
-    // Функция для отправки письма с кодом подтверждения
     sendConfirmationEmail(recipient: string, confirmationCode: string): void {
         const mailOptions = {
             from: this.mailServiceLogin,
