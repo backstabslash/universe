@@ -38,10 +38,20 @@ export const tagRules = Joi.string()
   .min(3)
   .max(30)
   .pattern(new RegExp("^[a-zA-Z0-9]+$"))
+// .required()
+// .messages({
+//   "string.min": "Tag must be at least 3 characters long",
+//   "string.max": "Tag must be less than 30 characters long",
+//   "string.pattern.base": "Tag can only contain letters and numbers",
+//   "any.required": "Tag is required",
+// });
+export const verifyCodeRules = Joi.string()
+  .length(6)
+  .pattern(/^\d+$/)
   .required()
   .messages({
-    "string.min": "Tag must be at least 3 characters long",
-    "string.max": "Tag must be less than 30 characters long",
-    "string.pattern.base": "Tag can only contain letters and numbers",
-    "any.required": "Tag is required",
+    'string.length': 'Verification code must be 6 characters long',
+    'string.pattern.base': 'Verification code must contain only digits',
+    'any.required': 'Verification code is required',
+    'string.empty': 'Verification code cannot be empty',
   });
