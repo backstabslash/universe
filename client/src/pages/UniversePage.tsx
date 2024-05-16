@@ -1,4 +1,5 @@
-import socket from '../config/socketConfig';
+import { Socket } from 'socket.io-client';
+import connectSocket from '../config/socketConfig';
 import CottageIcon from '@mui/icons-material/Cottage';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import InboxIcon from '@mui/icons-material/Inbox';
@@ -9,7 +10,7 @@ import Header from '../components/Header';
 import { EditIcon } from '@chakra-ui/icons';
 import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import orgImage from '../../public/org-placeholder.png';
 import profileImage from '../../public/profile-image-test.png';
 import { type Descendant } from 'slate';
@@ -32,17 +33,13 @@ const contentData = [
 ];
 
 const MainContent = (): JSX.Element => {
-  const [isUserProfileVisible, setisUserProfileVisible] =
-    useState<boolean>(true);
   const navigate = useNavigate();
 
-  const onClickSendMessage = (message: Descendant[]): void => {
-    socket.emit('send-message', message);
-  };
+  const [socket, setSocket] = useState<Socket>();
+  const [isUserProfileVisible, setisUserProfileVisible] =
+    useState<boolean>(true);
 
-  socket.on('message', (message: string) => {
-    console.log(message);
-  });
+  const onClickSendMessage = (message: Descendant[]): void => {};
 
   const logout = useAuthStore(state => state.logout);
 
@@ -54,6 +51,14 @@ const MainContent = (): JSX.Element => {
       console.error('Failed to log in:', error);
     }
   };
+
+  useEffect(() => {
+    setSocket(connectSocket());
+
+    return () => {
+      socket?.disconnect();
+    };
+  }, []);
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>

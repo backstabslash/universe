@@ -1,7 +1,11 @@
-import io from 'socket.io-client';
-
+import io, { Socket } from 'socket.io-client';
 import { api } from './config';
 
-const socket = io(api.url);
+const connectSocket = (): Socket => {
+  const socket = io(api.url, {
+    withCredentials: true,
+  });
+  return socket;
+};
 
-export default socket;
+export default connectSocket;
