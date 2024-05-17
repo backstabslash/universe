@@ -5,20 +5,23 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PersonIcon from '@mui/icons-material/Person';
 import DragAndDropList from './custom-elements/DragAndDropList';
-import useMessengerStore, { Channel, ChannelGroups } from '../store/messenger';
+import useMessengerStore, { Channel, ChannelGroup } from '../store/messenger';
 
 const directMessages = ['user1', 'user2', 'user3'];
 
 const Sidebar = (): JSX.Element => {
   const navigate = useNavigate();
 
-  const { channelGroups, setCurrentChannel, getChannelMessages } =
+  const { channelGroups, setCurrentGroupAndChannel, getChannelMessages } =
     useMessengerStore(state => state);
-  const [channelList, setChannelList] = useState<ChannelGroups[]>([]);
+  const [channelList, setChannelList] = useState<ChannelGroup[]>([]);
 
-  const onChannelClick = (channel: Channel): void => {
-    setCurrentChannel(channel);
-    getChannelMessages(channel);
+  const onChannelClick = (
+    channelGroup: ChannelGroup,
+    channel: Channel
+  ): void => {
+    setCurrentGroupAndChannel(channelGroup.name, channel.id);
+    getChannelMessages(channel.id);
     // navigate(`${channel.name}`);
   };
 

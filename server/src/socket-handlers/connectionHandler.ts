@@ -10,9 +10,15 @@ class ConnectionHandler {
 
       const userChannels = await ChannelUser.find({ user: socket.data.userId }).populate({
         path: "channel",
-        select: "name _id as id",
+        select: "name _id",
       });
-      const channels = userChannels.map((userChannel) => userChannel.channel);
+
+      const channels = userChannels.map((userChannel) => ({
+        name: userChannel.channel.name,
+        id: userChannel.channel.id,
+        content: {},
+      }));
+
       const channelIds = channels.map((channel) => channel.id);
 
       socket.join(channelIds);

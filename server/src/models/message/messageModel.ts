@@ -5,7 +5,7 @@ import { IThread } from "./threadModel";
 
 export interface IMessage extends Document {
   user: IUser;
-  content: any;
+  textContent: any;
   channel: IChannel;
   thread: IThread;
   sendAt: number;
@@ -17,7 +17,7 @@ const MessageSchema = new Schema<IMessage>({
     ref: "User",
     required: true,
   },
-  content: {
+  textContent: {
     type: Schema.Types.Mixed,
     required: true,
   },

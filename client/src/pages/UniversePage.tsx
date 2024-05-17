@@ -1,4 +1,4 @@
-import useMessengerStore from '../store/messenger';
+import useMessengerStore, { Message } from '../store/messenger';
 import CottageIcon from '@mui/icons-material/Cottage';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import InboxIcon from '@mui/icons-material/Inbox';
@@ -12,37 +12,27 @@ import UserProfile from '../components/UserProfile';
 import { useEffect, useState } from 'react';
 import orgImage from '../../public/org-placeholder.png';
 import profileImage from '../../public/profile-image-test.png';
-import { type Descendant } from 'slate';
 import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
-
-const contentData = [
-  'This is a message',
-  'Another message',
-  'Yet another message',
-  'This is a message',
-  'Another message',
-  'Yet another message',
-  'This is a message',
-  'Another message',
-  'Yet another message',
-  'This is a message',
-  'Another message',
-  'Yet another message',
-];
 
 const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
 
-  const { socket, connectSocket, getChannelGroups, currentChannel } =
-    useMessengerStore(state => state);
+  const {
+    socket,
+    channelGroups,
+    currentGroupName,
+    currentChannelId,
+    connectSocket,
+    getChannelGroups,
+    sendMessage,
+    recieveMessage,
+  } = useMessengerStore(state => state);
+  const [currentChannelMessages, setCurrentChannelMessages] = useState<
+    Message[]
+  >([]);
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true);
-
-  const onClickSendMessage = (message: Descendant[]): void => {
-    console.log(currentChannel);
-    socket?.emit('send-message', { message, channelId: currentChannel?.id });
-  };
 
   const logout = useAuthStore(state => state.logout);
 
@@ -56,8 +46,19 @@ const MainContent = (): JSX.Element => {
   };
 
   useEffect(() => {
+    setCurrentChannelMessages(
+      channelGroups
+        ?.find(channelGroup => channelGroup.name === currentGroupName)
+        ?.items.find(channel => channel.id === currentChannelId)?.content
+        ?.messages ?? []
+    );
+  }, [channelGroups]);
+
+  useEffect(() => {
     connectSocket();
     getChannelGroups();
+    recieveMessage();
+
     return () => {
       socket?.disconnect();
     };
@@ -226,21 +227,22 @@ const MainContent = (): JSX.Element => {
                 <Heading p="4" mb="5" fontSize="xl">
                   Welcome to #general
                 </Heading>
-                {contentData.map((content, index) => (
-                  <Box
-                    key={index}
-                    p="3"
-                    bg="zinc800"
-                    borderRadius="md"
-                    boxShadow="md"
-                    color="zinc300"
-                    mb="4"
-                    ml="4"
-                    width="fit-content"
-                  >
-                    {content}
-                  </Box>
-                ))}
+                {currentChannelMessages.length > 0 &&
+                  currentChannelMessages.map((message, index) => (
+                    <Box
+                      key={index}
+                      p="3"
+                      bg="zinc800"
+                      borderRadius="md"
+                      boxShadow="md"
+                      color="zinc300"
+                      mb="4"
+                      ml="4"
+                      width="fit-content"
+                    >
+                      {message.textContent[0].children[0].text}
+                    </Box>
+                  ))}
               </Box>
               <Flex
                 background="rgba(0, 0, 0, 0.5)"
@@ -250,7 +252,7 @@ const MainContent = (): JSX.Element => {
                 h="170px"
                 width="100%"
               >
-                <TextEditor sendMessage={onClickSendMessage} />
+                <TextEditor sendMessage={sendMessage} />
               </Flex>
             </Box>
             {isUserProfileVisible && (

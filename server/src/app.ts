@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRoutes);
-// app.use(verifyJWT);
+app.use(verifyJWT);
 app.use("/user", userRoutes);
 app.use("/channel", channelRoutes);
 
