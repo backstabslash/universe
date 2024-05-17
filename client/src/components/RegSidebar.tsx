@@ -10,7 +10,7 @@ const Sidebar = (): JSX.Element => (
     padding="5"
     bg="zinc900"
     color="zinc300"
-    width="300px"
+    maxWidth="300px"
     borderRight="1px"
     borderColor="zinc600"
     height={'100vh'}
@@ -25,6 +25,9 @@ const Sidebar = (): JSX.Element => (
       justifyContent={'space-between'}
       alignItems={'center'}
       h="60px"
+      whiteSpace="nowrap"
+      overflow="hidden"
+      textOverflow="ellipsis"
     >
       <b>Organization</b>
     </Flex>
@@ -47,7 +50,7 @@ const Sidebar = (): JSX.Element => (
         justifyContent={'flex-start'}
       >
         <TagIcon fontSize="small" />
-        {`${channel}`}
+        {channel}
       </Flex>
     ))}
     <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
@@ -69,7 +72,7 @@ const Sidebar = (): JSX.Element => (
         gap="5px"
       >
         <PersonIcon fontSize="small" />
-        {`${user}`}
+        {user}
       </Flex>
     ))}
   </VStack>

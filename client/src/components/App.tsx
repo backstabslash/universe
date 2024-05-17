@@ -5,6 +5,7 @@ import CompanyName from '../pages/reg-pages/CompanyName';
 import Coworkers from '../pages/reg-pages/CoWorkers';
 import Channels from '../pages/reg-pages/Channels';
 import PersistLogin from './PersistLogin';
+import RegUser from '../pages/reg-pages/RegUser';
 // import { useEffect } from 'react';
 // import useAxiosPrivate from '../hooks/useAxiosPrivate';
 // import useAuthStore from '../store/auth';
@@ -23,6 +24,7 @@ const App = (): JSX.Element => {
         <Route path="/reg/companyname" element={<CompanyName />} />
         <Route path="/reg/coworkers" element={<Coworkers />} />
         <Route path="/reg/channels" element={<Channels />} />
+        <Route path="/reg/reguser" element={<RegUser />} />
         <Route element={<PersistLogin />}>
           <Route path="/client" element={<MainContent />} />
         </Route>

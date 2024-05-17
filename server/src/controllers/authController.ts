@@ -5,11 +5,14 @@ import {
   emailRules,
   passwordRules,
   tagRules,
+  verifyCodeRules,
 } from '../validation/userDataRules';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from '../models/user/userModel';
 import { getEnvVar, UserJwtPayload } from '../utils/utils';
+import EmailService from '../email-service/emailService';
+import UserVerifyCode from '../models/user/userVerifyCodeModel';
 
 class AuthController {
   private readonly accessTokenSecret: string;
@@ -83,6 +86,7 @@ class AuthController {
       tag: tagRules,
       email: emailRules,
       password: passwordRules,
+      verifyCode: verifyCodeRules,
     });
     const { error } = registerSchema.validate(req.body);
     if (error) {
@@ -90,7 +94,7 @@ class AuthController {
         message: error.details[0].message,
       });
     }
-    const { name, email, password } = req.body;
+    const { name, email, password, verifyCode } = req.body;
     try {
       const user = await User.findOne({ name });
       if (user) {
@@ -98,20 +102,66 @@ class AuthController {
           message: 'User already exists',
         });
       }
+      const existingUserVerifyCode = await UserVerifyCode.findOne({ email });
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new User({
-        name,
-        email,
-        password: hashedPassword,
-      });
-      await newUser.save();
+      if (existingUserVerifyCode?.verifyCode === verifyCode) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+          name,
+          email,
+          password: hashedPassword,
+        });
+        await newUser.save();
 
-      return res.status(201).json({});
+        // await existingUserVerifyCode?.deleteOne();
+
+        return res.status(201).json({});
+      } else {
+        return res.status(400).json({
+          message: 'Verify codes do not match',
+        });
+      }
     } catch (error) {
+      console.error(error);
       res.status(500).json({
         message: 'Internal server error',
       });
+    }
+  }
+
+  async verify(req: Request, res: Response) {
+    try {
+      const { error } = emailRules.validate(req?.body?.email);
+      if (error) {
+        return res.status(400).json({
+          message: error.details[0].message,
+        });
+      }
+      const { email } = req.body;
+
+      const existingUser = await User.findOne({ email });
+      const existingUserVerifyCode = await UserVerifyCode.findOne({ email });
+
+      const emailService = new EmailService();
+
+      if (!existingUser && !existingUserVerifyCode) {
+        const confirmationCode = emailService.generateConfirmationCode();
+
+        await UserVerifyCode.create({ email, verifyCode: confirmationCode });
+
+        emailService.sendConfirmationEmail(email, confirmationCode);
+
+        res
+          .status(200)
+          .json({ message: 'Confirmation code sent successfully' });
+      } else if (existingUser) {
+        res.status(400).json({ error: 'User with this email already exists' });
+      } else {
+        res.status(400).json({ error: 'Verify code has been already sent' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
