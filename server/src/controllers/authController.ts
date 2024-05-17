@@ -121,8 +121,6 @@ class AuthController {
           message: 'Verify codes do not match',
         });
       }
-
-
     } catch (error) {
       console.error(error);
       res.status(500).json({
@@ -133,9 +131,7 @@ class AuthController {
 
   async verify(req: Request, res: Response) {
     try {
-
-
-      const { error } = emailRules.validate(req.body);
+      const { error } = emailRules.validate(req?.body?.email);
       if (error) {
         return res.status(400).json({
           message: error.details[0].message,
@@ -148,17 +144,16 @@ class AuthController {
 
       const emailService = new EmailService();
 
-
-
       if (!existingUser && !existingUserVerifyCode) {
-
         const confirmationCode = emailService.generateConfirmationCode();
 
         await UserVerifyCode.create({ email, verifyCode: confirmationCode });
 
         emailService.sendConfirmationEmail(email, confirmationCode);
 
-        res.status(200).json({ message: 'Confirmation code sent successfully' });
+        res
+          .status(200)
+          .json({ message: 'Confirmation code sent successfully' });
       } else if (existingUser) {
         res.status(400).json({ error: 'User with this email already exists' });
       } else {
