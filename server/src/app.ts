@@ -9,8 +9,6 @@ import userRoutes from "./routes/userRoutes";
 import channelRoutes from "./routes/channelRoutes";
 import rateLimiter from "./middleware/rateLimiter";
 
-require("dotenv").config();
-
 const app = express();
 
 app.use(credentials);

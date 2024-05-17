@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Socket } from "socket.io";
-import { getEnvVar } from "../utils/utils";
+import { auth } from "../config/config";
 import User from "../models/user/userModel";
 
 const verifySocketJwt = async (socket: Socket, next: (err?: Error) => void) => {
@@ -8,7 +8,7 @@ const verifySocketJwt = async (socket: Socket, next: (err?: Error) => void) => {
   if (!refreshToken) {
     return next(new Error("Authentication error"));
   }
-  const decoded = jwt.verify(refreshToken, getEnvVar("REFRESH_TOKEN_SECRET")) as JwtPayload;
+  const decoded = jwt.verify(refreshToken, auth.refreshSecret) as JwtPayload;
 
   const user = await User.findById(decoded.userId);
   if (!user) {

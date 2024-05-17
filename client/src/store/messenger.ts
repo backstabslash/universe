@@ -17,8 +17,12 @@ export interface Channel {
 }
 
 export interface Message {
-  textContent: Descendant[];
+  textContent: MessageTextContent[];
 }
+
+type MessageTextContent = Descendant & {
+  children: any[];
+};
 
 interface MessengerState {
   socket: Socket | null;

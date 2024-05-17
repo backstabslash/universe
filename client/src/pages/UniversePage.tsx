@@ -240,7 +240,7 @@ const MainContent = (): JSX.Element => {
                       ml="4"
                       width="fit-content"
                     >
-                      {message.textContent[0].children[0].text}
+                      {message.textContent[0]?.children[0]?.text}
                     </Box>
                   ))}
               </Box>
