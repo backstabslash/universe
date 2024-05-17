@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/user/userModel";
-import { getEnvVar, UserJwtPayload } from "../utils/utils";
+import { UserJwtPayload } from "../utils/utils";
+import { auth } from "../config/config";
 import {
   nameRules,
   emailRules,
@@ -19,8 +20,8 @@ class AuthController {
   private readonly refreshTokenSecret: string;
 
   constructor() {
-    this.accessTokenSecret = getEnvVar("ACCESS_TOKEN_SECRET");
-    this.refreshTokenSecret = getEnvVar("REFRESH_TOKEN_SECRET");
+    this.accessTokenSecret = auth.accessSecret;
+    this.refreshTokenSecret = auth.refreshSecret;
 
     this.login = this.login.bind(this);
     this.register = this.register.bind(this);

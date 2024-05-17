@@ -271,7 +271,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
               mr="30px"
               mt="5px"
               onClick={() => {
-                sendMessage(content);
+                sendMessage({ textContent: content });
               }}
             />
           </Box>

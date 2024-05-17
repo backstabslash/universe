@@ -12,6 +12,16 @@ export const api = {
   port: process.env.API_PORT,
 };
 
+export const auth = {
+  accessSecret: process.env.ACCESS_TOKEN_SECRET as string,
+  refreshSecret: process.env.REFRESH_TOKEN_SECRET as string,
+};
+
 export const client = {
   url: process.env.CLIENT_URL,
+};
+
+export const emailService = {
+  login: process.env.EMAIL_SERVICE_LOGIN as string,
+  pass: process.env.EMAIL_SERVICE_PASS as string,
 };

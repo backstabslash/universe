@@ -10,8 +10,6 @@ import channelRoutes from "./routes/channelRoutes";
 import rateLimiter from "./middleware/rateLimiter";
 import workSpaceRoutes from "./routes/workSpaceRoutes";
 
-require("dotenv").config();
-
 const app = express();
 
 app.use(credentials);
