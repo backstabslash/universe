@@ -1,48 +1,36 @@
-import http from 'http';
-import { Server, Socket } from 'socket.io';
-import app from './app';
-import { api, db, client } from './config/config';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { sendMessage } from './handlers/messages';
-import mongoose from 'mongoose';
-import { getEnvVar } from './utils/utils';
-import User from './models/user/userModel';
+import http from "http";
+import { Server, Socket } from "socket.io";
+import app from "./app";
+import { api, db, client } from "./config/config";
+import verifySocketJwt from "./middleware/verifySocketJwt";
+import mongoose from "mongoose";
+import connectionHandler from "./socket-handlers/connectionHandler";
+import channelsHandler from "./socket-handlers/channelsHandler";
+import messagesHandler from "./socket-handlers/messagesHandler";
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: client.url,
-    methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
     credentials: true,
   },
 });
 
-io.use(async (socket: any, next) => {
-  const refreshToken = socket.handshake.auth.refreshToken;
-  if (!refreshToken) {
-    return next(new Error('authentication error'));
-  }
-  const decoded = jwt.verify(
-    refreshToken,
-    getEnvVar('REFRESH_TOKEN_SECRET')
-  ) as JwtPayload;
+io.use(verifySocketJwt).on("connection", (socket: Socket) => {
+  console.info("User connected");
 
-  const user = await User.findById(decoded.userId);
-  if (!user) {
-    return next(new Error('no such user'));
-  }
+  connectionHandler.joinAndSendChannels(socket);
 
-  socket.userId = decoded.userId;
-  next();
-});
+  socket.on("get-channel-messages", (data) => {
+    channelsHandler.getMessages(socket, data);
+  });
+  socket.on("send-message", (data) => {
+    messagesHandler.sendMessage(io, socket, data);
+  });
 
-io.on('connection', (socket: Socket) => {
-  console.info('User connected');
-
-  sendMessage(socket);
-
-  socket.on('disconnect', () => {
-    console.info('User disconnected');
+  socket.on("disconnect", () => {
+    console.info("User disconnected");
   });
 });
 
@@ -53,11 +41,11 @@ io.on('connection', (socket: Socket) => {
     });
 
     if (!db.mongoUri) {
-      throw new Error('Mongo URI is not provided');
+      throw new Error("Mongo URI is not provided");
     }
     await mongoose.connect(db.mongoUri);
 
-    console.info('MongoDB connected');
+    console.info("MongoDB connected");
   } catch (error) {
     console.error(error);
   }

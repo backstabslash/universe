@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { api } from '../config/config';
 
 interface UserData {
   userId?: string | null;
@@ -21,8 +22,6 @@ interface AuthState {
   setErrorNull: () => void;
 }
 
-const BASE_URL = 'http://localhost:3001';
-
 const useAuthStore = create<AuthState>(set => ({
   userData: null,
   error: null,
@@ -33,7 +32,7 @@ const useAuthStore = create<AuthState>(set => ({
 
   register: async (userData: UserData) => {
     try {
-      await axios.post(`${BASE_URL}/auth/register`, userData);
+      await axios.post(`${api.url}/auth/register`, userData);
       set({ error: null });
     } catch (err: any) {
       const error =
@@ -59,7 +58,7 @@ const useAuthStore = create<AuthState>(set => ({
   login: async (userData: UserData) => {
     try {
       const response = await axios.post(
-        `${BASE_URL}/auth/login`,
+        `${api.url}/auth/login`,
         {
           email: userData.email,
           password: userData.password,
@@ -79,7 +78,7 @@ const useAuthStore = create<AuthState>(set => ({
 
   refresh: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/auth/refresh`, {
+      const response = await axios.get(`${api.url}/auth/refresh`, {
         withCredentials: true,
       });
       set({ userData: response?.data, error: null });
@@ -96,7 +95,7 @@ const useAuthStore = create<AuthState>(set => ({
 
   logout: async () => {
     try {
-      await axios.get(`${BASE_URL}/auth/logout`, {
+      await axios.get(`${api.url}/auth/logout`, {
         withCredentials: true,
       });
       set({ userData: null, error: null });
