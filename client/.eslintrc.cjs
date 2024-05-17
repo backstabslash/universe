@@ -49,6 +49,10 @@ module.exports = {
     '@typescript-eslint/member-delimiter-style': 'off',
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/no-confusing-void-expression': 'off',
+<<<<<<< socket.io-implementation
     '@typescript-eslint/indent': 'off',
+=======
+    'prefer-regex-literals': 'off',
+>>>>>>> main
   },
 };

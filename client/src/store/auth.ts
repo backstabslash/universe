@@ -7,6 +7,8 @@ interface UserData {
   email?: string | null;
   accessToken?: string | null;
   password?: string | null;
+  verifyCode?: string | null;
+  name?: string | null;
 }
 
 interface AuthState {
@@ -15,18 +17,40 @@ interface AuthState {
   refresh: () => Promise<string | null>;
   login: (userData: UserData) => Promise<void>;
   logout: () => Promise<void>;
+  verify: (userData: UserData) => Promise<void>;
+  register: (userData: UserData) => Promise<void>;
+  setErrorNull: () => void;
 }
 
 const useAuthStore = create<AuthState>(set => ({
   userData: null,
   error: null,
 
+  setErrorNull: () => {
+    set({ error: null })
+  },
+
   register: async (userData: UserData) => {
     try {
       await axios.post(`${api.url}/auth/register`, userData);
       set({ error: null });
     } catch (err: any) {
-      const error = err.response || { status: err.status, data: err.message };
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+
+  verify: async (userData: UserData) => {
+    try {
+      await axios.post(`${BASE_URL}/auth/verifyemail`, userData);
+      set({ error: null });
+    } catch (err: any) {
+      const error =
+        err.response?.data?.error || err.message || 'An unknown error occurred';
       set({ error });
     }
   },
@@ -43,8 +67,12 @@ const useAuthStore = create<AuthState>(set => ({
       );
       set({ userData: response?.data?.accessToken, error: null });
     } catch (err: any) {
-      const error = err.response || { status: err.status, data: err.message };
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
       set({ userData: null, error });
+      throw error;
     }
   },
 
@@ -56,7 +84,10 @@ const useAuthStore = create<AuthState>(set => ({
       set({ userData: response?.data, error: null });
       return response?.data?.accessToken;
     } catch (err: any) {
-      const error = err.response || { status: err.status, data: err.message };
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
       set({ error });
       throw error;
     }
@@ -69,10 +100,15 @@ const useAuthStore = create<AuthState>(set => ({
       });
       set({ userData: null, error: null });
     } catch (err: any) {
-      const error = err.response || { status: err.status, data: err.message };
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
       set({ error });
+      throw error;
     }
   },
+
 }));
 
 export default useAuthStore;
