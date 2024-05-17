@@ -25,8 +25,8 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
   socket.on("get-channel-messages", (data) => {
     channelsHandler.getMessages(socket, data);
   });
-  socket.on("send-message", (data) => {
-    messagesHandler.sendMessage(io, socket, data);
+  socket.on("send-message", (data, callback) => {
+    messagesHandler.sendMessage(socket, data, callback);
   });
 
   socket.on("disconnect", () => {

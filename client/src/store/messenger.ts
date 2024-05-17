@@ -12,17 +12,36 @@ export interface Channel {
   id: string;
   name: string;
   content: {
-    messages: Message[];
+    messages: UserMessage[];
   };
+}
+
+export type UserMessage = Message & MessageInfo;
+
+export interface MessageInfo {
+  user: { id: string; name: string };
+  sendAt: number;
 }
 
 export interface Message {
   textContent: MessageTextContent[];
+  status: MessageStatus;
+}
+
+export enum MessageStatus {
+  SENDING,
+  FAILED,
+  SUCCESS,
 }
 
 type MessageTextContent = Descendant & {
   children: any[];
 };
+
+interface SocketResponse {
+  status: string;
+  message: string;
+}
 
 interface MessengerState {
   socket: Socket | null;
@@ -68,19 +87,60 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  sendMessage: (message: string) => {
-    try {
-      const socket = get().socket;
+  sendMessage: (message: Message) => {
+    const { socket, currentChannelId, channelGroups } = get();
 
-      socket?.emit('send-message', {
-        message: {
-          textContent: message,
-        },
-        channelId: get().currentChannelId,
-      });
-    } catch (error: any) {
-      set({ error });
+    if (!socket || !currentChannelId) {
+      return;
     }
+
+    let tempMessage: Message;
+    for (const channelGroup of channelGroups) {
+      for (const channel of channelGroup.items) {
+        if (channel.id === currentChannelId) {
+          const messagesLength = channel.content.messages.push({
+            textContent: message.textContent,
+            status: MessageStatus.SENDING,
+            user: {
+              id: '',
+              name: '',
+            },
+            sendAt: 0,
+          });
+          tempMessage = channel.content.messages[messagesLength - 1];
+        }
+      }
+    }
+    set({ channelGroups: [...channelGroups] });
+
+    const timeout = setTimeout(() => {
+      tempMessage.status = MessageStatus.FAILED;
+      set({ channelGroups: [...channelGroups] });
+    }, 10000);
+
+    socket.emit(
+      'send-message',
+      {
+        message: {
+          textContent: message.textContent,
+        },
+        channelId: currentChannelId,
+      },
+      (response: SocketResponse) => {
+        clearTimeout(timeout);
+
+        if (response.status === 'error') {
+          tempMessage.status = MessageStatus.FAILED;
+          set({
+            channelGroups: [...channelGroups],
+          });
+        }
+        if (response.status === 'success') {
+          tempMessage.status = MessageStatus.SUCCESS;
+          set({ channelGroups: [...channelGroups] });
+        }
+      }
+    );
   },
 
   recieveMessage: () => {

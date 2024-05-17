@@ -27,7 +27,7 @@ const useAuthStore = create<AuthState>(set => ({
   error: null,
 
   setErrorNull: () => {
-    set({ error: null })
+    set({ error: null });
   },
 
   register: async (userData: UserData) => {
@@ -46,7 +46,7 @@ const useAuthStore = create<AuthState>(set => ({
 
   verify: async (userData: UserData) => {
     try {
-      await axios.post(`${BASE_URL}/auth/verifyemail`, userData);
+      await axios.post(`${api.url}/auth/verifyemail`, userData);
       set({ error: null });
     } catch (err: any) {
       const error =
@@ -108,7 +108,6 @@ const useAuthStore = create<AuthState>(set => ({
       throw error;
     }
   },
-
 }));
 
 export default useAuthStore;
