@@ -38,7 +38,6 @@ const MainPage = (): JSX.Element => {
   const handleLogin = async (): Promise<void> => {
     try {
       await login({ email, password });
-      // await error;
       navigate('/client');
     } catch (error) {
       console.error('Failed to log in:', error);
