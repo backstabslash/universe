@@ -1,4 +1,4 @@
-import { Request, Response } from "express";;
+import { Request, Response } from "express";
 import User from "../models/user/userModel";
 import { getEnvVar, UserJwtPayload } from "../utils/utils";
 import {
@@ -7,11 +7,12 @@ import {
   passwordRules,
   tagRules,
   verifyCodeRules,
-} from '../validation/userDataRules';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import EmailService from '../email-service/emailService';
-import UserVerifyCode from '../models/user/userVerifyCodeModel';
+} from "../validation/userDataRules";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import EmailService from "../email-service/emailService";
+import UserVerifyCode from "../models/user/userVerifyCodeModel";
+import Joi from "joi";
 
 class AuthController {
   private readonly accessTokenSecret: string;
@@ -93,11 +94,8 @@ class AuthController {
         message: error.details[0].message,
       });
     }
-<<<<<<< socket.io-implementation
-    const { name, tag, email, password } = req.body;
-=======
     const { name, email, password, verifyCode } = req.body;
->>>>>>> main
+
     try {
       const user = await User.findOne({ name });
       if (user) {
@@ -116,23 +114,12 @@ class AuthController {
         });
         await newUser.save();
 
-<<<<<<< socket.io-implementation
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new User({
-        name,
-        tag,
-        email,
-        password: hashedPassword,
-      });
-      await newUser.save();
-=======
-        // await existingUserVerifyCode?.deleteOne();
->>>>>>> main
+        await existingUserVerifyCode?.deleteOne();
 
         return res.status(201).json({});
       } else {
         return res.status(400).json({
-          message: 'Verify codes do not match',
+          message: "Verify codes do not match",
         });
       }
     } catch (error) {
@@ -165,17 +152,15 @@ class AuthController {
 
         emailService.sendConfirmationEmail(email, confirmationCode);
 
-        res
-          .status(200)
-          .json({ message: 'Confirmation code sent successfully' });
+        res.status(200).json({ message: "Confirmation code sent successfully" });
       } else if (existingUser) {
-        res.status(400).json({ error: 'User with this email already exists' });
+        res.status(400).json({ error: "User with this email already exists" });
       } else {
-        res.status(400).json({ error: 'Verify code has been already sent' });
+        res.status(400).json({ error: "Verify code has been already sent" });
       }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 
