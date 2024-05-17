@@ -133,14 +133,15 @@ class AuthController {
 
   async verify(req: Request, res: Response) {
     try {
-      const { email } = req.body;
 
-      const { error } = emailRules.validate(email);
+
+      const { error } = emailRules.validate(req.body);
       if (error) {
         return res.status(400).json({
           message: error.details[0].message,
         });
       }
+      const { email } = req.body;
 
       const existingUser = await User.findOne({ email });
       const existingUserVerifyCode = await UserVerifyCode.findOne({ email });
