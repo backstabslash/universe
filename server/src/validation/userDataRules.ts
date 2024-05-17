@@ -61,3 +61,14 @@ export const verifyCodeRules = Joi.string()
 export const phoneRules = Joi.string().min(10).max(15).optional();
 
 export const pfpUrlSchema = Joi.string().uri().optional();
+
+export const emailTemplateRule = Joi.string()
+  .required()
+  .regex(/^@[^\s@]+(\.[^\s@]+)*$/)
+  .messages({
+    'string.empty': 'Email template cannot be empty',
+    'any.required': 'Email template is required',
+    'string.pattern.base': 'Invalid email template format',
+  });
+
+export const emailTemplatesRule = Joi.array().items(emailTemplateRule);

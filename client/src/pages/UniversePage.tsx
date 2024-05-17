@@ -1,4 +1,4 @@
-import useMessengerStore, { Message } from '../store/messenger';
+import useMessengerStore from '../store/messenger';
 import CottageIcon from '@mui/icons-material/Cottage';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import InboxIcon from '@mui/icons-material/Inbox';
@@ -7,30 +7,26 @@ import TextEditor from '../components/TextEditor';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { EditIcon } from '@chakra-ui/icons';
-import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react';
+import { Box, Flex, Button, Text, Image } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
 import { useEffect, useState } from 'react';
 import orgImage from '../../public/org-placeholder.png';
 import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/user';
+import MessagesContainer from '../components/MessagesContainer';
 
 const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
 
   const {
     socket,
-    channelGroups,
-    currentGroupName,
-    currentChannelId,
     connectSocket,
     getChannelGroups,
     sendMessage,
     recieveMessage,
   } = useMessengerStore(state => state);
-  const [currentChannelMessages, setCurrentChannelMessages] = useState<
-    Message[]
-  >([]);
+
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true);
 
@@ -44,15 +40,6 @@ const MainContent = (): JSX.Element => {
       console.error('Failed to log in:', error);
     }
   };
-
-  useEffect(() => {
-    setCurrentChannelMessages(
-      channelGroups
-        ?.find(channelGroup => channelGroup.name === currentGroupName)
-        ?.items.find(channel => channel.id === currentChannelId)?.content
-        ?.messages ?? []
-    );
-  }, [channelGroups]);
 
   useEffect(() => {
     connectSocket();
@@ -223,35 +210,7 @@ const MainContent = (): JSX.Element => {
                   <EditIcon boxSize={'4'} /> &nbsp; Canvas
                 </Button>
               </Flex>
-              <Box
-                background="rgba(0, 0, 0, 0.5)"
-                h="calc(100vh - 252px)"
-                overflowY="auto"
-                bgImage="../../public/chat-bg-pattern-dark.png"
-                bgSize="cover"
-                bgRepeat="no-repeat"
-                bgPosition="center"
-              >
-                <Heading p="4" mb="5" fontSize="xl">
-                  Welcome to #general
-                </Heading>
-                {currentChannelMessages.length > 0 &&
-                  currentChannelMessages.map((message, index) => (
-                    <Box
-                      key={index}
-                      p="3"
-                      bg="zinc800"
-                      borderRadius="md"
-                      boxShadow="md"
-                      color="zinc300"
-                      mb="4"
-                      ml="4"
-                      width="fit-content"
-                    >
-                      {message.textContent[0].children[0].text}
-                    </Box>
-                  ))}
-              </Box>
+              <MessagesContainer />
               <Flex
                 background="rgba(0, 0, 0, 0.5)"
                 pr="4"

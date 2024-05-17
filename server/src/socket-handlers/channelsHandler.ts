@@ -14,7 +14,7 @@ class ChannelsHandler {
 
       const messages = await Message.find({ channel: data.channelId }).populate({
         path: "user",
-        select: "name _id",
+        select: "name id",
       });
 
       socket.emit("recieve-channel-messages", messages);
