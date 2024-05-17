@@ -4,6 +4,7 @@ import User from "../models/user/userModel";
 
 type Message = {
   textContent: any;
+  sendAt: number;
   attachments: any;
 };
 class MessagesHandler {
@@ -17,21 +18,19 @@ class MessagesHandler {
         return;
       }
 
-      const sendAt = Date.now();
-
       const userName = await User.findById(socket.data.userId).select("name");
 
       socket.broadcast.to(data.channelId).emit("receive-message", {
         textContent: data.message.textContent,
         user: { id: socket.data.userId, name: userName },
-        sendAt,
+        sendAt: data.message.sendAt,
       });
 
       await Message.create({
         user: socket.data.userId,
         textContent: data.message.textContent,
         channel: data.channelId,
-        sendAt,
+        sendAt: data.message.sendAt,
       });
 
       callback({ status: "success", message: "Message sent" });

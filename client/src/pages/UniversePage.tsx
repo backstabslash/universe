@@ -21,7 +21,7 @@ const MainContent = (): JSX.Element => {
 
   const {
     socket,
-    currentChannelId,
+    currentChannel: currentChannelId,
     connectSocket,
     getChannelGroups,
     sendMessage,

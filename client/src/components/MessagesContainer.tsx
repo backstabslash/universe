@@ -7,21 +7,31 @@ import { useEffect, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 
 const MessagesContainer = (): JSX.Element => {
-  const { channelGroups, currentGroupName, currentChannelId } =
-    useMessengerStore(state => state);
+  const { channelGroups, currentChannel } = useMessengerStore(state => state);
 
   const [currentChannelMessages, setCurrentChannelMessages] = useState<
     UserMessage[]
   >([]);
 
   useEffect(() => {
-    setCurrentChannelMessages(
-      channelGroups
-        ?.find(channelGroup => channelGroup.name === currentGroupName)
-        ?.items.find(channel => channel.id === currentChannelId)?.content
-        ?.messages ?? []
-    );
-  }, [channelGroups, currentChannelId]);
+    setCurrentChannelMessages(prevMessages => {
+      const messages: UserMessage[] = [];
+
+      channelGroups?.forEach(channelGroup => {
+        const channel = channelGroup?.items?.find(
+          channel => channel.id === currentChannel?.id
+        );
+        if (channel) {
+          const channelMessages = channel.content.messages;
+          if (Array.isArray(channelMessages)) {
+            messages.push(...channelMessages);
+          }
+        }
+      });
+
+      return messages;
+    });
+  }, [channelGroups, currentChannel]);
 
   return (
     <Box
@@ -42,13 +52,7 @@ const MessagesContainer = (): JSX.Element => {
             key={index}
             spacing={'12px'}
             p={'5px 8px 5px 8px'}
-            bg={
-              message.status === MessageStatus.SENDING
-                ? 'zinc400'
-                : message.status === MessageStatus.FAILED
-                  ? 'red.500'
-                  : 'zinc800'
-            }
+            bg={'zinc800'}
             borderRadius="md"
             boxShadow="md"
             color="zinc300"
@@ -64,6 +68,7 @@ const MessagesContainer = (): JSX.Element => {
                   minute: '2-digit',
                 })}
               </Text>
+
               {message.status === MessageStatus.FAILED ? (
                 <Icon
                   mt={'1px'}

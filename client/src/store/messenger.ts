@@ -46,12 +46,11 @@ interface SocketResponse {
 interface MessengerState {
   socket: Socket | null;
   channelGroups: ChannelGroup[];
-  currentGroupName: string | null;
-  currentChannelId: string | null;
+  currentChannel: Omit<Channel, 'content'> | null;
   error: typeof Error | null;
   connectSocket: () => void;
   getChannelGroups: () => void;
-  setCurrentGroupAndChannel: (channelGroup: string, channel: string) => void;
+  setCurrentChannel: (channel: Channel) => void;
   getChannelMessages: (channelId: string) => void;
   sendMessage: (message: any) => void;
   recieveMessage: () => void;
@@ -60,8 +59,7 @@ interface MessengerState {
 const useMessengerStore = create<MessengerState>((set, get) => ({
   socket: null,
   channelGroups: [],
-  currentChannelId: null,
-  currentGroupName: null,
+  currentChannel: null,
   error: null,
 
   connectSocket: () => {
@@ -77,7 +75,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
   getChannelGroups: () => {
     try {
-      const socket = get().socket;
+      const { socket } = get();
 
       socket?.once('send-channels', channelGroups => {
         set({ channelGroups, error: null });
@@ -88,55 +86,58 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   },
 
   sendMessage: (message: Message) => {
-    const { socket, currentChannelId, channelGroups } = get();
+    const { socket, currentChannel, channelGroups } = get();
 
-    if (!socket || !currentChannelId) {
+    if (!socket || !currentChannel?.id) {
       return;
     }
 
-    let tempMessage: Message;
+    const newMessage = {
+      textContent: message.textContent,
+      status: MessageStatus.SENDING,
+      user: {
+        id: '',
+        name: '',
+      },
+      sendAt: Date.now(),
+    };
+
+    let messageLink: UserMessage | undefined;
     for (const channelGroup of channelGroups) {
       for (const channel of channelGroup.items) {
-        if (channel.id === currentChannelId) {
-          const messagesLength = channel.content.messages.push({
-            textContent: message.textContent,
-            status: MessageStatus.SENDING,
-            user: {
-              id: '',
-              name: '',
-            },
-            sendAt: 0,
-          });
-          tempMessage = channel.content.messages[messagesLength - 1];
+        if (channel.id === currentChannel?.id) {
+          const messagesLength = channel.content.messages.push(newMessage);
+          messageLink = channel.content.messages[messagesLength - 1];
         }
       }
+    }
+    if (!messageLink) {
+      return;
     }
     set({ channelGroups: [...channelGroups] });
 
     const timeout = setTimeout(() => {
-      tempMessage.status = MessageStatus.FAILED;
+      messageLink.status = MessageStatus.FAILED;
       set({ channelGroups: [...channelGroups] });
     }, 10000);
 
     socket.emit(
       'send-message',
       {
-        message: {
-          textContent: message.textContent,
-        },
-        channelId: currentChannelId,
+        message: newMessage,
+        channelId: currentChannel.id,
       },
       (response: SocketResponse) => {
         clearTimeout(timeout);
 
         if (response.status === 'error') {
-          tempMessage.status = MessageStatus.FAILED;
+          messageLink.status = MessageStatus.FAILED;
           set({
             channelGroups: [...channelGroups],
           });
         }
         if (response.status === 'success') {
-          tempMessage.status = MessageStatus.SUCCESS;
+          messageLink.status = MessageStatus.SUCCESS;
           set({ channelGroups: [...channelGroups] });
         }
       }
@@ -145,16 +146,12 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
   recieveMessage: () => {
     try {
-      const socket = get().socket;
+      const { currentChannel, channelGroups, socket } = get();
 
       const onRecieveMessage = (message: any): void => {
-        console.log('recieve-message', message);
-        const currentChannelId = get().currentChannelId;
-        const channelGroups = get().channelGroups;
-
         for (const channelGroup of channelGroups) {
           for (const channel of channelGroup.items) {
-            if (channel.id === currentChannelId) {
+            if (channel.id === currentChannel?.id) {
               channel.content.messages.push(message);
             }
           }
@@ -169,15 +166,18 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  setCurrentGroupAndChannel: (channelGroupName: string, channelId: string) => {
-    set({ currentGroupName: channelGroupName });
-    set({ currentChannelId: channelId });
+  setCurrentChannel: (channel: Channel) => {
+    set({
+      currentChannel: {
+        id: channel.id,
+        name: channel.name,
+      },
+    });
   },
 
   getChannelMessages: (channelId: string): void => {
     try {
-      const socket = get().socket;
-      const channelGroups = get().channelGroups;
+      const { socket, channelGroups } = get();
 
       const onRecieveChannelMessages = (messages: any[]): void => {
         for (const channelGroup of channelGroups) {
