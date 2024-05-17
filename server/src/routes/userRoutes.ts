@@ -1,10 +1,11 @@
-import { Router } from "express";
-import userController from "../controllers/userController";
-import rateLimiter from "../middleware/rateLimiter";
+import { Router } from 'express';
+import userController from '../controllers/userController';
+import rateLimiter from '../middleware/rateLimiter';
 
 const router = Router();
 
-router.get("/get-by-tag", rateLimiter(), userController.getByTag);
-router.get("/get-by-id", rateLimiter(), userController.getById);
+router.get('/get-by-email', rateLimiter(), userController.getByEmail);
+router.get('/get-by-id', rateLimiter(), userController.getById);
+router.put('/user', rateLimiter(), userController.updateUserInfo);
 
 export default router;

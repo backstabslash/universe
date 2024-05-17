@@ -6,6 +6,7 @@ interface UserData {
   userId?: string | null;
   email?: string | null;
   accessToken?: string | null;
+  tag?: string | null;
   password?: string | null;
   verifyCode?: string | null;
   name?: string | null;
@@ -27,11 +28,14 @@ const useAuthStore = create<AuthState>(set => ({
   error: null,
 
   setErrorNull: () => {
-    set({ error: null })
+    set({ error: null });
   },
 
   register: async (userData: UserData) => {
     try {
+      if (userData.email) {
+        userData.tag = userData.email.split('@')[0];
+      }
       await axios.post(`${api.url}/auth/register`, userData);
       set({ error: null });
     } catch (err: any) {
@@ -46,7 +50,7 @@ const useAuthStore = create<AuthState>(set => ({
 
   verify: async (userData: UserData) => {
     try {
-      await axios.post(`${BASE_URL}/auth/verifyemail`, userData);
+      await axios.post(`${api.url}/auth/verifyemail`, userData);
       set({ error: null });
     } catch (err: any) {
       const error =
@@ -81,7 +85,10 @@ const useAuthStore = create<AuthState>(set => ({
       const response = await axios.get(`${api.url}/auth/refresh`, {
         withCredentials: true,
       });
-      set({ userData: response?.data, error: null });
+      set({
+        userData: { accessToken: response?.data.accessToken },
+        error: null,
+      });
       return response?.data?.accessToken;
     } catch (err: any) {
       const error =
@@ -108,7 +115,6 @@ const useAuthStore = create<AuthState>(set => ({
       throw error;
     }
   },
-
 }));
 
 export default useAuthStore;

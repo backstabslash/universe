@@ -11,9 +11,9 @@ import { Box, Heading, Flex, Button, Text, Image } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
 import { useEffect, useState } from 'react';
 import orgImage from '../../public/org-placeholder.png';
-import profileImage from '../../public/profile-image-test.png';
 import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
+import useUserStore from '../store/user';
 
 const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
@@ -63,6 +63,10 @@ const MainContent = (): JSX.Element => {
       socket?.disconnect();
     };
   }, []);
+
+  const { userData } = useUserStore(state => ({
+    userData: state.userData,
+  }));
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -168,7 +172,11 @@ const MainContent = (): JSX.Element => {
               <Image
                 w="50px"
                 h="50px"
-                src={profileImage}
+                src={
+                  userData?.pfp_url
+                    ? userData.pfp_url
+                    : 'https://i.imgur.com/zPKzLoe.gif'
+                }
                 alt="Profile banner"
                 alignSelf="center"
                 borderRadius="10px"
