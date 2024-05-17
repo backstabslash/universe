@@ -77,11 +77,21 @@ const Coworkers = (): JSX.Element => {
   }>({});
   const [focusField, setFocusField] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const {
     register,
     verify,
     error: registerError,
   } = useAuthStore(state => state);
+
+  useEffect(() => {
+    validate();
+  }, [name, email, password, confirmPassword, verifyCode]);
+
+  const { error, workSpaceData, addWorkSpace } = useWorkSpaceStore(
+    state => state
+  );
   const handleFocus = (field: string): void => {
     setFocusField(field);
   };
@@ -132,16 +142,6 @@ const Coworkers = (): JSX.Element => {
       !confirmPasswordValidation.error
     );
   };
-
-  useEffect(() => {
-    validate();
-  }, [name, email, password, confirmPassword, verifyCode]);
-
-  const navigate = useNavigate();
-
-  const { error, workSpaceData, addWorkSpace } = useWorkSpaceStore(
-    state => state
-  );
 
   const organisationName = workSpaceData?.workSpaceName;
   if (!organisationName) {
