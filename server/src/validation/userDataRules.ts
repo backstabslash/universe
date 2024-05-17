@@ -55,3 +55,14 @@ export const verifyCodeRules = Joi.string()
     'any.required': 'Verification code is required',
     'string.empty': 'Verification code cannot be empty',
   });
+
+export const emailTemplateRule = Joi.string()
+  .required()
+  .regex(/^@[^\s@]+(\.[^\s@]+)*$/)
+  .messages({
+    'string.empty': 'Email template cannot be empty',
+    'any.required': 'Email template is required',
+    'string.pattern.base': 'Invalid email template format',
+  });
+
+export const emailTemplatesRule = Joi.array().items(emailTemplateRule);

@@ -8,6 +8,7 @@ import verifyJWT from "./middleware/verify-jwt";
 import userRoutes from "./routes/userRoutes";
 import channelRoutes from "./routes/channelRoutes";
 import rateLimiter from "./middleware/rateLimiter";
+import workSpaceRoutes from "./routes/workSpaceRoutes";
 
 require("dotenv").config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRoutes);
+app.use("/workspace", workSpaceRoutes);
 app.use(rateLimiter(), verifyJWT);
 app.use("/user", userRoutes);
 app.use("/channel", channelRoutes);
