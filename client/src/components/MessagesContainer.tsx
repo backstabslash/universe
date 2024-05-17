@@ -1,4 +1,4 @@
-import { Box, HStack, Heading, Icon, Spinner, Text } from '@chakra-ui/react';
+import { Box, HStack, Icon, Spinner, Text } from '@chakra-ui/react';
 import useMessengerStore, {
   UserMessage,
   MessageStatus,
@@ -43,9 +43,6 @@ const MessagesContainer = (): JSX.Element => {
       bgRepeat="no-repeat"
       bgPosition="center"
     >
-      <Heading p="4" mb="5" fontSize="xl">
-        Welcome to #general
-      </Heading>
       {currentChannelMessages.length > 0 &&
         currentChannelMessages.map((message, index) => (
           <HStack

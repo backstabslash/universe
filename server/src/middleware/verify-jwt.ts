@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { UserJwtPayload } from "../utils/utils";
 import { auth } from "../config/config";
 
@@ -9,7 +9,7 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     if (!authHeader) return res.status(401).send();
     const token = authHeader.split(" ")[1];
 
-    const decoded = Jwt.verify(token, auth.accessSecret) as UserJwtPayload;
+    const decoded = jwt.verify(token, auth.accessSecret) as UserJwtPayload;
     if (!decoded) {
       return res.status(403).send();
     }

@@ -21,7 +21,6 @@ const MainContent = (): JSX.Element => {
 
   const {
     socket,
-    currentChannel: currentChannelId,
     connectSocket,
     getChannelGroups,
     sendMessage,
@@ -212,7 +211,7 @@ const MainContent = (): JSX.Element => {
                 h="170px"
                 width="100%"
               >
-                {currentChannelId && <TextEditor sendMessage={sendMessage} />}
+                <TextEditor sendMessage={sendMessage} />
               </Flex>
             </Box>
             {isUserProfileVisible && (
