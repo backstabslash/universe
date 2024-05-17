@@ -21,10 +21,7 @@ const MainPage = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const { login, error } = useAuthStore(state => ({
-    login: state.login,
-    error: state.error,
-  }));
+  const { login, error, setErrorNull } = useAuthStore(state => state);
 
   const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -41,7 +38,7 @@ const MainPage = (): JSX.Element => {
   const handleLogin = async (): Promise<void> => {
     try {
       await login({ email, password });
-      await error;
+      // await error;
       navigate('/client');
     } catch (error) {
       console.error('Failed to log in:', error);
@@ -158,11 +155,12 @@ const MainPage = (): JSX.Element => {
             <Button
               bg="zinc900"
               color="zinc400"
-              _hover={{ color: 'zinc700' }}
-              _active={{ color: 'zinc700' }}
+              _hover={{ color: 'zinc300' }}
+              _active={{ color: 'zinc300' }}
               borderColor="transparent"
               variant="outline"
               onClick={() => {
+                setErrorNull();
                 navigate('/reg/reguser');
               }}
             >

@@ -18,6 +18,7 @@ interface AuthState {
   logout: () => Promise<void>;
   verify: (userData: UserData) => Promise<void>;
   register: (userData: UserData) => Promise<void>;
+  setErrorNull: () => void;
 }
 
 const BASE_URL = 'http://localhost:3001';
@@ -25,6 +26,10 @@ const BASE_URL = 'http://localhost:3001';
 const useAuthStore = create<AuthState>(set => ({
   userData: null,
   error: null,
+
+  setErrorNull: () => {
+    set({ error: null })
+  },
 
   register: async (userData: UserData) => {
     try {
@@ -36,6 +41,7 @@ const useAuthStore = create<AuthState>(set => ({
         err.message ||
         'An unknown error occurred';
       set({ error });
+      throw error;
     }
   },
 
@@ -66,9 +72,8 @@ const useAuthStore = create<AuthState>(set => ({
         err.response?.data?.message ||
         err.message ||
         'An unknown error occurred';
-      console.log(err);
-
       set({ userData: null, error });
+      throw error;
     }
   },
 
@@ -101,8 +106,10 @@ const useAuthStore = create<AuthState>(set => ({
         err.message ||
         'An unknown error occurred';
       set({ error });
+      throw error;
     }
   },
+
 }));
 
 export default useAuthStore;

@@ -68,15 +68,9 @@ const RegUser = (): JSX.Element => {
   }>({});
   const [focusField, setFocusField] = useState<string | null>(null);
 
-  const {
-    register,
-    verify,
-    error: verifyError,
-  } = useAuthStore(state => ({
-    register: state.register,
-    verify: state.verify,
-    error: state.error,
-  }));
+  const { register, verify, error, setErrorNull } = useAuthStore(
+    state => state
+  );
 
   useEffect(() => {
     validate();
@@ -137,8 +131,7 @@ const RegUser = (): JSX.Element => {
     if (validate()) {
       try {
         await register({ name, email, password, verifyCode });
-        await verifyError;
-        if (!verifyError) navigate('/main');
+        navigate('/main');
       } catch (error) {
         console.error('Failed to register:', error);
       }
@@ -297,9 +290,9 @@ const RegUser = (): JSX.Element => {
               <Text color="red.500">{errors.confirmPassword}</Text>
             )}
           </Box>
-          {verifyError && (
+          {error && (
             <Text color="red.500" mt="10px">
-              {verifyError}
+              {error}
             </Text>
           )}
           <Button
@@ -320,11 +313,12 @@ const RegUser = (): JSX.Element => {
           <Button
             bg="zinc900"
             color="zinc400"
-            _hover={{ color: 'zinc700' }}
-            _active={{ color: 'zinc700' }}
+            _hover={{ color: 'zinc300' }}
+            _active={{ color: 'zinc300' }}
             borderColor="transparent"
             variant="outline"
             onClick={() => {
+              setErrorNull();
               navigate('/main');
             }}
           >
