@@ -97,7 +97,7 @@ class AuthController {
     const { name, email, password, verifyCode } = req.body;
 
     try {
-      const user = await User.findOne({ name });
+      const user = await User.findOne({ email });
       if (user) {
         return res.status(400).json({
           message: "User already exists",
