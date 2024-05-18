@@ -20,7 +20,7 @@ interface UserState {
   error: any;
   setAxiosPrivate: (axiosPrivate: AxiosInstance) => Promise<void>;
   fetchUserByEmail: () => Promise<void>;
-  fetchUserById: (userData: UserData) => Promise<void>;
+  fetchUserById: (userId: string) => Promise<void>;
   updateUserInfo: (updateData: UserData) => Promise<void>;
 }
 
@@ -44,10 +44,10 @@ const useUserStore = create<UserState>((set, get) => ({
       throw Error(error);
     }
   },
-  fetchUserById: async () => {
+  fetchUserById: async (userId: string) => {
     try {
       const { axios } = get();
-      const response = await axios?.get(`${api.url}/user/get-by-id`);
+      const response = await axios?.get(`${api.url}/user/get-by-id/${userId}`);
       set({ userData: response?.data });
     } catch (error: any) {
       console.error('Failed to fetch user:', error);

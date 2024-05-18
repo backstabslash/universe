@@ -13,6 +13,7 @@ export interface Channel {
   name: string;
   content: {
     messages: UserMessage[];
+    users: { id: string; name: string }[];
   };
 }
 
@@ -179,11 +180,16 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     try {
       const { socket, channelGroups } = get();
 
-      const onRecieveChannelMessages = (messages: any[]): void => {
+      const onRecieveChannelMessages = (data: {
+        messages: any[];
+        users: any[];
+      }): void => {
+        const { messages, users } = data;
         for (const channelGroup of channelGroups) {
           for (const channel of channelGroup.items) {
             if (channel.id === channelId) {
               channel.content.messages = messages;
+              channel.content.users = users;
             }
           }
         }

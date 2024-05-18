@@ -15,14 +15,16 @@ import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/user';
 import MessagesContainer from '../components/MessagesContainer';
+import ChannelMembersModal from '../components/ChannelMembersModal';
 
 const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
-
   const {
     socket,
     connectSocket,
+    currentChannel,
     getChannelGroups,
+    channelGroups,
     sendMessage,
     recieveMessage,
   } = useMessengerStore(state => state);
@@ -30,7 +32,7 @@ const MainContent = (): JSX.Element => {
   const [isUserProfileVisible, setisUserProfileVisible] =
     useState<boolean>(true);
 
-  const logout = useAuthStore(state => state.logout);
+  const { logout, userData: authData } = useAuthStore(state => state);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -51,9 +53,13 @@ const MainContent = (): JSX.Element => {
     };
   }, []);
 
-  const { userData } = useUserStore(state => ({
-    userData: state.userData,
-  }));
+  const { fetchUserById } = useUserStore(state => state);
+
+  const currentChannelUsers = channelGroups
+    .find(group =>
+      group.items.some(channel => channel.id === currentChannel?.id)
+    )
+    ?.items.find(channel => channel.id === currentChannel?.id)?.content?.users;
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -153,6 +159,7 @@ const MainContent = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0)' }}
               _active={{ background: 'rgba(0, 0, 0, 0)' }}
               onClick={() => {
+                fetchUserById(authData?.userId);
                 setisUserProfileVisible(true);
               }}
             >
@@ -160,8 +167,8 @@ const MainContent = (): JSX.Element => {
                 w="50px"
                 h="50px"
                 src={
-                  userData?.pfp_url
-                    ? userData.pfp_url
+                  authData?.pfp_url
+                    ? authData.pfp_url
                     : 'https://i.imgur.com/zPKzLoe.gif'
                 }
                 alt="Profile banner"
@@ -200,15 +207,21 @@ const MainContent = (): JSX.Element => {
                 <Text>
                   <b>#general</b>
                 </Text>
-                <Button
-                  size="md"
-                  mr="2"
-                  bg="transparent"
-                  color="zinc400"
-                  _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-                >
-                  <EditIcon boxSize={'4'} /> &nbsp; Canvas
-                </Button>
+                <Flex>
+                  <ChannelMembersModal
+                    users={currentChannelUsers ?? []}
+                    usersCount={currentChannelUsers?.length}
+                  />
+                  <Button
+                    size="md"
+                    mr="2"
+                    bg="transparent"
+                    color="zinc400"
+                    _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+                  >
+                    <EditIcon boxSize={'4'} /> &nbsp; Canvas
+                  </Button>
+                </Flex>
               </Flex>
               <MessagesContainer />
               <Flex

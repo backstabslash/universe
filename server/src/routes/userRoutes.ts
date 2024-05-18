@@ -5,7 +5,7 @@ import rateLimiter from '../middleware/rateLimiter';
 const router = Router();
 
 router.get('/get-by-email', rateLimiter(), userController.getByEmail);
-router.get('/get-by-id', rateLimiter(), userController.getById);
+router.get('/get-by-id/:userId', rateLimiter(), userController.getById);
 router.put('/user', rateLimiter(), userController.updateUserInfo);
 
 export default router;
