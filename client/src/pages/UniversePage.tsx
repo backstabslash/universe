@@ -23,7 +23,6 @@ const MainContent = (): JSX.Element => {
     socket,
     currentChannel,
     connectSocket,
-    currentChannel,
     getChannelGroups,
     channels,
     sendMessage,
@@ -219,7 +218,6 @@ const MainContent = (): JSX.Element => {
                     <EditIcon boxSize={'4'} /> &nbsp; Canvas
                   </Button>
                 </Flex>
-
               </Flex>
               <MessagesContainer />
               <Flex

@@ -41,7 +41,7 @@ const ChannelMembersModal = ({ users, usersCount }: any): any => {
   };
 
   const openProfileOnClick = async (userId: string): Promise<void> => {
-    fetchUserById(userId);
+    await fetchUserById(userId);
     setIsUserProfileVisible(true);
   };
 

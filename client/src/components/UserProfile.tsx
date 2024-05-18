@@ -35,12 +35,14 @@ const UserProfile = (): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
   const {
     userData,
+    fetchUserById,
     fetchUserByEmail,
     updateUserInfo,
     setAxiosPrivate,
     setIsUserProfileVisible,
   } = useUserStore(state => ({
     userData: state.userData,
+    fetchUserById: state.fetchUserById,
     fetchUserByEmail: state.fetchUserByEmail,
     updateUserInfo: state.updateUserInfo,
     error: state.error,
@@ -63,8 +65,12 @@ const UserProfile = (): JSX.Element => {
 
   useEffect(() => {
     setAxiosPrivate(axiosPrivate);
-    fetchUserByEmail();
-  }, [axiosPrivate]);
+    if (userData?.userId) {
+      fetchUserById(userData?.userId);
+    } else {
+      fetchUserByEmail();
+    }
+  }, []);
 
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
