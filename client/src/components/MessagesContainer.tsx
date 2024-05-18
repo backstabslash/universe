@@ -7,31 +7,18 @@ import { useEffect, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 
 const MessagesContainer = (): JSX.Element => {
-  const { channelGroups, currentChannel } = useMessengerStore(state => state);
+  const { channels, currentChannel } = useMessengerStore(state => state);
 
   const [currentChannelMessages, setCurrentChannelMessages] = useState<
     UserMessage[]
   >([]);
 
   useEffect(() => {
-    setCurrentChannelMessages(prevMessages => {
-      const messages: UserMessage[] = [];
-
-      channelGroups?.forEach(channelGroup => {
-        const channel = channelGroup?.items?.find(
-          channel => channel.id === currentChannel?.id
-        );
-        if (channel) {
-          const channelMessages = channel.content.messages;
-          if (Array.isArray(channelMessages)) {
-            messages.push(...channelMessages);
-          }
-        }
-      });
-
-      return messages;
-    });
-  }, [channelGroups, currentChannel]);
+    setCurrentChannelMessages([
+      ...(channels.find(channel => channel.id === currentChannel?.id)
+        ?.messages ?? []),
+    ]);
+  }, [channels, currentChannel]);
 
   return (
     <Box

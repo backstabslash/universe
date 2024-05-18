@@ -21,6 +21,7 @@ const MainContent = (): JSX.Element => {
 
   const {
     socket,
+    currentChannel,
     connectSocket,
     getChannelGroups,
     sendMessage,
@@ -197,9 +198,10 @@ const MainContent = (): JSX.Element => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Text>
-                  <b>#general</b>
+                <Text fontWeight={'bold'}>
+                  {currentChannel && `#${currentChannel?.name}`}
                 </Text>
+
                 <Button
                   size="md"
                   mr="2"
