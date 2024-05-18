@@ -38,7 +38,7 @@ import {
   useSlate,
   Slate,
   useSelected,
-  type ReactEditor,
+  ReactEditor,
 } from 'slate-react';
 import {
   Editor,
@@ -141,6 +141,23 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   };
 
   const [content, setContent] = useState<Descendant[]>(initialValue);
+  const resetEditor = (): void => {
+    const newContent = initialValue;
+    Transforms.delete(editor, {
+      at: {
+        anchor: Editor.start(editor, []),
+        focus: Editor.end(editor, []),
+      },
+    });
+
+    setContent(newContent);
+  };
+
+  const handleSendMessage = (): void => {
+    sendMessage({ textContent: content });
+    resetEditor();
+  };
+
   return (
     <Slate
       editor={editor as ReactEditor}
@@ -238,6 +255,11 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
                 }
               }
             }
+
+            if (event.shiftKey && event.key === 'Enter') {
+              event.preventDefault();
+              handleSendMessage();
+            }
           }}
         />
         <Flex
@@ -271,7 +293,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
               mr="30px"
               mt="5px"
               onClick={() => {
-                sendMessage({ textContent: content });
+                handleSendMessage();
               }}
             />
           </Box>
@@ -437,7 +459,7 @@ const wrapLink = (editor: BaseEditor, url: string): void => {
   }
 };
 
-const Element = (props: ElementProps): JSX.Element => {
+export const Element = (props: ElementProps): JSX.Element => {
   const { attributes, children, element } = props;
   const style = { textAlign: element.align };
   switch (element.type) {
@@ -503,7 +525,11 @@ const Element = (props: ElementProps): JSX.Element => {
   }
 };
 
-const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
+export const Leaf = ({
+  attributes,
+  children,
+  leaf,
+}: LeafProps): JSX.Element => {
   let newChildren = children;
 
   if (leaf.bold === true) {

@@ -5,6 +5,7 @@ import useMessengerStore, {
 } from '../store/messenger';
 import { useEffect, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
+import { Element as EditorElement, Leaf as EditorLeaf } from './TextEditor';
 
 const MessagesContainer = (): JSX.Element => {
   const { channelGroups, currentChannel } = useMessengerStore(state => state);
@@ -33,6 +34,16 @@ const MessagesContainer = (): JSX.Element => {
     });
   }, [channelGroups, currentChannel]);
 
+  const renderMessageContent = content => {
+    return content.map((node, index) => {
+      if (node.type) {
+        return <EditorElement key={index} attributes={{}} element={node} />;
+      } else {
+        return <EditorLeaf key={index} attributes={{}} leaf={node} />;
+      }
+    });
+  };
+
   return (
     <Box
       background="rgba(0, 0, 0, 0.5)"
@@ -57,7 +68,7 @@ const MessagesContainer = (): JSX.Element => {
             ml="18px"
             width="fit-content"
           >
-            <Text>{message?.textContent[0]?.children[0]?.text}</Text>
+            <Text>{renderMessageContent(message.textContent)}</Text>
             <HStack mt={'7px'} spacing={'5px'}>
               <Text color="zinc600">
                 {new Date(message.sendAt).toLocaleTimeString([], {
