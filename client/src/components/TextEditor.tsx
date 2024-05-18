@@ -38,7 +38,7 @@ import {
   useSlate,
   Slate,
   useSelected,
-  type ReactEditor,
+  ReactEditor,
 } from 'slate-react';
 import {
   Editor,
@@ -50,6 +50,7 @@ import {
 import type { BaseEditor, BaseElement, Descendant } from 'slate';
 import { withHistory } from 'slate-history';
 import styled from 'styled-components';
+import useAuthStore from '../store/auth';
 
 interface IconButtonProps extends ButtonProps {
   label: string | JSX.Element;
@@ -63,13 +64,13 @@ interface MarkButtonProps extends IconButtonProps {
   format: string;
 }
 
-interface ElementProps {
+export interface ElementProps {
   attributes: any;
   children: any;
   element: any;
 }
 
-interface LeafProps {
+export interface LeafProps {
   attributes: any;
   children: any;
   leaf: any;
@@ -122,6 +123,8 @@ interface TextEditorProps {
 }
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
+  const { userData } = useAuthStore(state => state);
+
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
     []
@@ -141,6 +144,28 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   };
 
   const [content, setContent] = useState<Descendant[]>(initialValue);
+  const resetEditor = (): void => {
+    if (content) {
+      const newContent = initialValue;
+      Transforms.delete(editor, {
+        at: {
+          anchor: Editor.start(editor, []),
+          focus: Editor.end(editor, []),
+        },
+      });
+
+      setContent(newContent);
+    }
+  };
+
+  const handleSendMessage = (): void => {
+    sendMessage({
+      textContent: content,
+      user: { id: userData?.userId, name: userData?.name },
+    });
+    resetEditor();
+  };
+
   return (
     <Slate
       editor={editor as ReactEditor}
@@ -238,6 +263,11 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
                 }
               }
             }
+
+            if (event.shiftKey && event.key === 'Enter') {
+              event.preventDefault();
+              handleSendMessage();
+            }
           }}
         />
         <Flex
@@ -271,7 +301,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
               mr="30px"
               mt="5px"
               onClick={() => {
-                sendMessage({ textContent: content });
+                handleSendMessage();
               }}
             />
           </Box>
@@ -281,7 +311,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   );
 };
 
-const withInlines = (editor: BaseEditor): BaseEditor => {
+export const withInlines = (editor: BaseEditor): BaseEditor => {
   const { isInline } = editor;
 
   editor.isInline = (element: MyElement) =>
@@ -437,7 +467,7 @@ const wrapLink = (editor: BaseEditor, url: string): void => {
   }
 };
 
-const Element = (props: ElementProps): JSX.Element => {
+export const Element = (props: ElementProps): JSX.Element => {
   const { attributes, children, element } = props;
   const style = { textAlign: element.align };
   switch (element.type) {
@@ -503,7 +533,11 @@ const Element = (props: ElementProps): JSX.Element => {
   }
 };
 
-const Leaf = ({ attributes, children, leaf }: LeafProps): JSX.Element => {
+export const Leaf = ({
+  attributes,
+  children,
+  leaf,
+}: LeafProps): JSX.Element => {
   let newChildren = children;
 
   if (leaf.bold === true) {

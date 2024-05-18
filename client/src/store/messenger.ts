@@ -94,7 +94,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  sendMessage: (message: Message) => {
+  sendMessage: (message: UserMessage) => {
     const { socket, currentChannel, channels } = get();
 
     if (!socket || !currentChannel?.id) {
@@ -102,12 +102,8 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
 
     const newMessage = {
-      textContent: message.textContent,
+      ...message,
       status: MessageStatus.SENDING,
-      user: {
-        id: '',
-        name: '',
-      },
       sendAt: Date.now(),
     };
 
