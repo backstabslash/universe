@@ -24,7 +24,7 @@ const MainContent = (): JSX.Element => {
     connectSocket,
     currentChannel,
     getChannelGroups,
-    channelGroups,
+    channels,
     sendMessage,
     recieveMessage,
   } = useMessengerStore(state => state);
@@ -55,11 +55,9 @@ const MainContent = (): JSX.Element => {
 
   const { fetchUserById } = useUserStore(state => state);
 
-  const currentChannelUsers = channelGroups
-    .find(group =>
-      group.items.some(channel => channel.id === currentChannel?.id)
-    )
-    ?.items.find(channel => channel.id === currentChannel?.id)?.content?.users;
+  const currentChannelUsers = channels.find(
+    (channel: any) => channel.id === currentChannel?.id
+  )?.users;
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -159,7 +157,7 @@ const MainContent = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0)' }}
               _active={{ background: 'rgba(0, 0, 0, 0)' }}
               onClick={() => {
-                fetchUserById(authData?.userId);
+                fetchUserById(authData?.userId ?? '');
                 setisUserProfileVisible(true);
               }}
             >
