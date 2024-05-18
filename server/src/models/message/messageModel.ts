@@ -2,10 +2,12 @@ import { Schema, Document, model } from "mongoose";
 import { IUser } from "../user/userModel";
 import { IChannel } from "../channel/channelModel";
 import { IThread } from "./threadModel";
+import { IAttachment } from "./attachmentModel";
 
 export interface IMessage extends Document {
   user: IUser;
   textContent: any;
+  attachments: IAttachment[];
   channel: IChannel;
   thread: IThread;
   sendAt: number;
@@ -19,6 +21,16 @@ const MessageSchema = new Schema<IMessage>({
   },
   textContent: {
     type: Schema.Types.Mixed,
+    required: true,
+  },
+  attachments: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Attachment",
+      },
+    ],
+    default: [],
     required: true,
   },
   channel: {
