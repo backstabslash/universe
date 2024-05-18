@@ -13,8 +13,8 @@ export const api = {
 };
 
 export const auth = {
-  accessSecret: process.env.ACCESS_TOKEN_SECRET as string,
-  refreshSecret: process.env.REFRESH_TOKEN_SECRET as string,
+  accessSecret: process.env.ACCESS_TOKEN_SECRET!,
+  refreshSecret: process.env.REFRESH_TOKEN_SECRET!,
 };
 
 export const client = {
@@ -22,6 +22,6 @@ export const client = {
 };
 
 export const emailService = {
-  login: process.env.EMAIL_SERVICE_LOGIN as string,
-  pass: process.env.EMAIL_SERVICE_PASS as string,
+  login: process.env.EMAIL_SERVICE_LOGIN!,
+  pass: process.env.EMAIL_SERVICE_PASS!,
 };
