@@ -18,6 +18,8 @@ interface UserState {
   userData: UserData | null;
   axios: AxiosInstance | null;
   error: any;
+  isUserProfileVisible: boolean;
+  setIsUserProfileVisible: (isUserProfileVisible: boolean) => Promise<void>;
   setAxiosPrivate: (axiosPrivate: AxiosInstance) => Promise<void>;
   fetchUserByEmail: () => Promise<void>;
   fetchUserById: (userId: string) => Promise<void>;
@@ -27,10 +29,15 @@ interface UserState {
 const useUserStore = create<UserState>((set, get) => ({
   userData: null,
   axios: null,
+  isUserProfileVisible: true,
   error: null,
 
   setAxiosPrivate: async axiosPrivate => {
     set({ axios: axiosPrivate });
+  },
+
+  setIsUserProfileVisible: async (isUserProfileVisible: boolean) => {
+    set({ isUserProfileVisible });
   },
 
   fetchUserByEmail: async () => {

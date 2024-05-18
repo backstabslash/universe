@@ -9,7 +9,7 @@ import Header from '../components/Header';
 import { EditIcon } from '@chakra-ui/icons';
 import { Box, Flex, Button, Text, Image } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import orgImage from '../../public/org-placeholder.png';
 import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
@@ -28,9 +28,6 @@ const MainContent = (): JSX.Element => {
     sendMessage,
     recieveMessage,
   } = useMessengerStore(state => state);
-
-  const [isUserProfileVisible, setisUserProfileVisible] =
-    useState<boolean>(true);
 
   const { logout, userData: authData } = useAuthStore(state => state);
 
@@ -53,7 +50,8 @@ const MainContent = (): JSX.Element => {
     };
   }, []);
 
-  const { fetchUserById } = useUserStore(state => state);
+  const { fetchUserById, isUserProfileVisible, setIsUserProfileVisible } =
+    useUserStore(state => state);
 
   const currentChannelUsers = channels.find(
     (channel: any) => channel.id === currentChannel?.id
@@ -158,7 +156,7 @@ const MainContent = (): JSX.Element => {
               _active={{ background: 'rgba(0, 0, 0, 0)' }}
               onClick={() => {
                 fetchUserById(authData?.userId ?? '');
-                setisUserProfileVisible(true);
+                setIsUserProfileVisible(true);
               }}
             >
               <Image
@@ -233,9 +231,7 @@ const MainContent = (): JSX.Element => {
                 <TextEditor sendMessage={sendMessage} />
               </Flex>
             </Box>
-            {isUserProfileVisible && (
-              <UserProfile setisUserProfileVisible={setisUserProfileVisible} />
-            )}
+            {isUserProfileVisible && <UserProfile />}
           </Flex>
         </Box>
       </Flex>

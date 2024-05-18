@@ -31,22 +31,23 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
 import useAuthStore from '../store/auth';
 
-interface UserProfileProps {
-  setisUserProfileVisible: (visible: boolean) => void;
-}
-
-const UserProfile = ({
-  setisUserProfileVisible,
-}: UserProfileProps): JSX.Element => {
+const UserProfile = (): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
-  const { userData, fetchUserByEmail, updateUserInfo, setAxiosPrivate } =
-    useUserStore(state => ({
-      userData: state.userData,
-      fetchUserByEmail: state.fetchUserByEmail,
-      updateUserInfo: state.updateUserInfo,
-      error: state.error,
-      setAxiosPrivate: state.setAxiosPrivate,
-    }));
+  const {
+    userData,
+    fetchUserByEmail,
+    updateUserInfo,
+    setAxiosPrivate,
+    setIsUserProfileVisible,
+  } = useUserStore(state => ({
+    userData: state.userData,
+    fetchUserByEmail: state.fetchUserByEmail,
+    updateUserInfo: state.updateUserInfo,
+    error: state.error,
+    setAxiosPrivate: state.setAxiosPrivate,
+    isUserProfileVisible: state.isUserProfileVisible,
+    setIsUserProfileVisible: state.setIsUserProfileVisible,
+  }));
 
   const { userId: authUserId } = useAuthStore(state => ({
     userId: state?.userData?.userId,
@@ -150,7 +151,7 @@ const UserProfile = ({
           <IconButton
             label={<CloseIcon boxSize={'3'} />}
             onClick={() => {
-              setisUserProfileVisible(false);
+              setIsUserProfileVisible(false);
             }}
           />
         </Flex>
@@ -460,7 +461,7 @@ const UserProfile = ({
           <IconButton
             label={<CloseIcon boxSize={'3'} />}
             onClick={() => {
-              setisUserProfileVisible(false);
+              setIsUserProfileVisible(false);
             }}
           />
         </Flex>

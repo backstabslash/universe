@@ -19,7 +19,7 @@ const ChannelMembersModal = ({ users, usersCount }: any): any => {
   const axiosPrivate = useAxiosPrivate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { fetchUserDetails, setAxiosPrivate } = useChannelUsersStore();
-  const { fetchUserById } = useUserStore();
+  const { fetchUserById, setIsUserProfileVisible } = useUserStore();
   const [userDetails, setUserDetails] = useState([]);
 
   const fetchAllUsers = async (): Promise<void> => {
@@ -42,6 +42,7 @@ const ChannelMembersModal = ({ users, usersCount }: any): any => {
 
   const openProfileOnClick = async (userId: string): Promise<void> => {
     fetchUserById(userId);
+    setIsUserProfileVisible(true);
   };
 
   return (
