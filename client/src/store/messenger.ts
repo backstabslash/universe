@@ -38,8 +38,9 @@ export enum MessageStatus {
   SUCCESS,
 }
 
-type MessageTextContent = Descendant & {
+export type MessageTextContent = Descendant & {
   children: any[];
+  type: string;
 };
 
 interface SocketResponse {

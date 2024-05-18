@@ -20,7 +20,6 @@ interface List {
 interface Item {
   id: string;
   name: string;
-  content: any;
 }
 
 const DragAndDropList = ({
