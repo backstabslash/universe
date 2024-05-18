@@ -21,6 +21,7 @@ const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
   const {
     socket,
+    currentChannel,
     connectSocket,
     currentChannel,
     getChannelGroups,
@@ -200,8 +201,8 @@ const MainContent = (): JSX.Element => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Text>
-                  <b>#general</b>
+                <Text fontWeight={'bold'}>
+                  {currentChannel && `#${currentChannel?.name}`}
                 </Text>
                 <Flex>
                   <ChannelMembersModal
@@ -218,6 +219,7 @@ const MainContent = (): JSX.Element => {
                     <EditIcon boxSize={'4'} /> &nbsp; Canvas
                   </Button>
                 </Flex>
+
               </Flex>
               <MessagesContainer />
               <Flex

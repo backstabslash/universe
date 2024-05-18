@@ -50,6 +50,7 @@ import {
 import type { BaseEditor, BaseElement, Descendant } from 'slate';
 import { withHistory } from 'slate-history';
 import styled from 'styled-components';
+import useAuthStore from '../store/auth';
 import { MessageTextContent } from '../store/messenger';
 
 interface IconButtonProps extends ButtonProps {
@@ -123,6 +124,8 @@ interface TextEditorProps {
 }
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
+  const { userData } = useAuthStore(state => state);
+
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
     []
@@ -211,7 +214,10 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     });
 
     if (filteredContent.length > 0) {
-      sendMessage({ textContent: filteredContent });
+      sendMessage({
+        textContent: filteredContent,
+        user: { id: userData?.userId, name: userData?.name },
+      });
     }
     resetEditor();
   };

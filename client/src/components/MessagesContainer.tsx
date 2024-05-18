@@ -3,7 +3,9 @@ import useMessengerStore, {
   UserMessage,
   MessageStatus,
 } from '../store/messenger';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import ClearIcon from '@mui/icons-material/Clear';
 import {
   Element as EditorElement,
@@ -24,12 +26,23 @@ const MessagesContainer = (): JSX.Element => {
     UserMessage[]
   >([]);
 
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     setCurrentChannelMessages([
       ...(channels.find(channel => channel.id === currentChannel?.id)
         ?.messages ?? []),
     ]);
   }, [channels, currentChannel]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [currentChannelMessages]);
 
   const renderElement = useCallback(
     (props: ElementProps) => <EditorElement {...props} />,
@@ -49,6 +62,7 @@ const MessagesContainer = (): JSX.Element => {
 
   return (
     <Box
+      ref={containerRef}
       background="rgba(0, 0, 0, 0.5)"
       h="calc(100vh - 252px)"
       overflowY="auto"
@@ -56,6 +70,7 @@ const MessagesContainer = (): JSX.Element => {
       bgSize="cover"
       bgRepeat="no-repeat"
       bgPosition="center"
+      pb={'18px'}
     >
       {currentChannelMessages.length > 0 &&
         currentChannelMessages.map((message, index) => {
