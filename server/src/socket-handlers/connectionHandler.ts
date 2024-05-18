@@ -16,7 +16,6 @@ class ConnectionHandler {
       const channels = userChannels.map((userChannel) => ({
         name: userChannel.channel.name,
         id: userChannel.channel.id,
-        content: {},
       }));
 
       const channelIds = channels.map((channel) => channel.id);

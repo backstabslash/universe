@@ -1,11 +1,11 @@
 import { Socket } from "socket.io";
 import Message from "../models/message/messageModel";
-import User from "../models/user/userModel";
 
 type Message = {
   textContent: any;
   sendAt: number;
   attachments: any;
+  user: { id: string; name: string };
 };
 class MessagesHandler {
   async sendMessage(
@@ -17,13 +17,11 @@ class MessagesHandler {
       if (!socket.data.userId) {
         return;
       }
-
-      const userName = await User.findById(socket.data.userId).select("name");
-
+      console.log(data);
       socket.broadcast.to(data.channelId).emit("receive-message", {
-        textContent: data.message.textContent,
-        user: { id: socket.data.userId, name: userName },
-        sendAt: data.message.sendAt,
+        message: {
+          ...data.message,
+        },
       });
 
       await Message.create({
