@@ -1,10 +1,12 @@
-import { Schema, Document, model } from "mongoose";
+import { Schema, Document, model } from 'mongoose';
 
 export interface IUser extends Document {
   name: string;
   tag: string;
   email: string;
   password: string;
+  phone: string;
+  pfp_url: string;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -20,12 +22,18 @@ const UserSchema = new Schema<IUser>({
     required: true,
     unique: true,
   },
+  phone: {
+    type: String,
+  },
+  pfp_url: {
+    type: String,
+  },
   password: {
     type: String,
     required: true,
   },
 });
 
-const User = model<IUser>("User", UserSchema);
+const User = model<IUser>('User', UserSchema);
 
 export default User;

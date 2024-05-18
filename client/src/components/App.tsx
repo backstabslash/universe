@@ -6,17 +6,8 @@ import Coworkers from '../pages/reg-pages/CoWorkers';
 import Channels from '../pages/reg-pages/Channels';
 import PersistLogin from './PersistLogin';
 import RegUser from '../pages/reg-pages/RegUser';
-// import { useEffect } from 'react';
-// import useAxiosPrivate from '../hooks/useAxiosPrivate';
-// import useAuthStore from '../store/auth';
 
 const App = (): JSX.Element => {
-  // const axiosPrivate = useAxiosPrivate();
-  // const setAuthAxiosPrivate = useAuthStore(state => state.setAxiosPrivate);
-  // useEffect(() => {
-  //   setAuthAxiosPrivate(axiosPrivate);
-  // }, [axiosPrivate]);
-
   return (
     <Router>
       <Routes>
