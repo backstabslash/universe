@@ -146,7 +146,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
 
   const [content, setContent] = useState<Descendant[]>(initialValue);
   const resetEditor = (): void => {
-    if (content) {
+    console.log(content);
     const hasText = (node: any): boolean => {
       if (!node.children || node.children.length === 0) {
         return false;
@@ -184,10 +184,6 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   };
 
   const handleSendMessage = (): void => {
-  
-     
- 
-
     const hasText = (node: any): boolean => {
       if (!node.children || node.children.length === 0) {
         return false;
@@ -219,7 +215,10 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     });
 
     if (filteredContent.length > 0) {
-      sendMessage({ textContent: filteredContent, user: { id: userData?.userId, name: userData?.name }, });
+      sendMessage({
+        textContent: filteredContent,
+        user: { id: userData?.userId, name: userData?.name },
+      });
     }
     resetEditor();
   };
