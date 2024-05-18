@@ -5,15 +5,18 @@ import { Descendant } from 'slate';
 
 export interface ChannelGroup {
   name: string;
-  items: Channel[];
+  items: Array<Omit<Channel, 'messages'>>;
+}
+
+export interface ChannelMessages extends Channel {
+  id: string;
+  name: string;
+  messages: UserMessage[];
 }
 
 export interface Channel {
   id: string;
   name: string;
-  content: {
-    messages: UserMessage[];
-  };
 }
 
 export type UserMessage = Message & MessageInfo;
@@ -34,8 +37,9 @@ export enum MessageStatus {
   SUCCESS,
 }
 
-type MessageTextContent = Descendant & {
+export type MessageTextContent = Descendant & {
   children: any[];
+  type: string;
 };
 
 interface SocketResponse {
@@ -46,7 +50,8 @@ interface SocketResponse {
 interface MessengerState {
   socket: Socket | null;
   channelGroups: ChannelGroup[];
-  currentChannel: Omit<Channel, 'content'> | null;
+  channels: ChannelMessages[];
+  currentChannel: Omit<Channel, 'messages'> | null;
   error: typeof Error | null;
   connectSocket: () => void;
   getChannelGroups: () => void;
@@ -59,6 +64,7 @@ interface MessengerState {
 const useMessengerStore = create<MessengerState>((set, get) => ({
   socket: null,
   channelGroups: [],
+  channels: [],
   currentChannel: null,
   error: null,
 
@@ -78,7 +84,11 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       const { socket } = get();
 
       socket?.once('send-channels', channelGroups => {
-        set({ channelGroups, error: null });
+        const channels = channelGroups.flatMap((channelGroup: ChannelGroup) => {
+          return channelGroup.items;
+        });
+
+        set({ channelGroups, channels, error: null });
       });
     } catch (error: any) {
       set({ error });
@@ -86,7 +96,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   },
 
   sendMessage: (message: Message) => {
-    const { socket, currentChannel, channelGroups } = get();
+    const { socket, currentChannel, channels } = get();
 
     if (!socket || !currentChannel?.id) {
       return;
@@ -103,22 +113,21 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     };
 
     let messageLink: UserMessage | undefined;
-    for (const channelGroup of channelGroups) {
-      for (const channel of channelGroup.items) {
-        if (channel.id === currentChannel?.id) {
-          const messagesLength = channel.content.messages.push(newMessage);
-          messageLink = channel.content.messages[messagesLength - 1];
-        }
+    for (const channel of channels) {
+      if (channel.id === currentChannel?.id) {
+        const messagesLength = channel.messages.push(newMessage);
+        messageLink = channel.messages[messagesLength - 1];
       }
     }
+
     if (!messageLink) {
       return;
     }
-    set({ channelGroups: [...channelGroups] });
+    set({ channels: [...channels] });
 
     const timeout = setTimeout(() => {
       messageLink.status = MessageStatus.FAILED;
-      set({ channelGroups: [...channelGroups] });
+      set({ channels: [...channels] });
     }, 10000);
 
     socket.emit(
@@ -133,12 +142,12 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         if (response.status === 'error') {
           messageLink.status = MessageStatus.FAILED;
           set({
-            channelGroups: [...channelGroups],
+            channels: [...channels],
           });
         }
         if (response.status === 'success') {
           messageLink.status = MessageStatus.SUCCESS;
-          set({ channelGroups: [...channelGroups] });
+          set({ channels: [...channels] });
         }
       }
     );
@@ -146,18 +155,16 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
   recieveMessage: () => {
     try {
-      const { currentChannel, channelGroups, socket } = get();
+      const { currentChannel, channels, socket } = get();
 
       const onRecieveMessage = (message: any): void => {
-        for (const channelGroup of channelGroups) {
-          for (const channel of channelGroup.items) {
-            if (channel.id === currentChannel?.id) {
-              channel.content.messages.push(message);
-            }
+        for (const channel of channels) {
+          if (channel.id === currentChannel?.id) {
+            channel.messages.push(message);
           }
         }
 
-        set({ channelGroups: [...channelGroups], error: null });
+        set({ channels: [...channels], error: null });
       };
 
       socket?.on('recieve-message', onRecieveMessage);
@@ -177,20 +184,16 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
   getChannelMessages: (channelId: string): void => {
     try {
-      const { socket, channelGroups } = get();
+      const { socket, channels } = get();
 
-      const onRecieveChannelMessages = (messages: any[]): void => {
-        for (const channelGroup of channelGroups) {
-          for (const channel of channelGroup.items) {
-            if (channel.id === channelId) {
-              channel.content.messages = messages;
-            }
+      const onRecieveChannelMessages = (messages: UserMessage[]): void => {
+        for (const channel of channels) {
+          if (channel.id === channelId) {
+            channel.messages = messages;
           }
         }
-
-        set({ channelGroups: [...channelGroups], error: null });
+        set({ channels: [...channels], error: null });
       };
-
       socket?.once('recieve-channel-messages', onRecieveChannelMessages);
       socket?.emit('get-channel-messages', { channelId });
     } catch (error: any) {
