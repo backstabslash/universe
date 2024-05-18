@@ -3,46 +3,48 @@ import useMessengerStore, {
   UserMessage,
   MessageStatus,
 } from '../store/messenger';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
-import { Element as EditorElement, Leaf as EditorLeaf } from './TextEditor';
+import {
+  Element as EditorElement,
+  Leaf as EditorLeaf,
+  ElementProps,
+  LeafProps,
+  withInlines,
+} from './TextEditor';
+import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
+import { withHistory } from 'slate-history';
+import { createEditor } from 'slate';
 
 const MessagesContainer = (): JSX.Element => {
-  const { channelGroups, currentChannel } = useMessengerStore(state => state);
+  const { channels, currentChannel } = useMessengerStore(state => state);
 
   const [currentChannelMessages, setCurrentChannelMessages] = useState<
     UserMessage[]
   >([]);
 
   useEffect(() => {
-    setCurrentChannelMessages(prevMessages => {
-      const messages: UserMessage[] = [];
+    setCurrentChannelMessages([
+      ...(channels.find(channel => channel.id === currentChannel?.id)
+        ?.messages ?? []),
+    ]);
+  }, [channels, currentChannel]);
 
-      channelGroups?.forEach(channelGroup => {
-        const channel = channelGroup?.items?.find(
-          channel => channel.id === currentChannel?.id
-        );
-        if (channel) {
-          const channelMessages = channel.content.messages;
-          if (Array.isArray(channelMessages)) {
-            messages.push(...channelMessages);
-          }
-        }
-      });
-
-      return messages;
-    });
-  }, [channelGroups, currentChannel]);
-
-  const renderMessageContent = content => {
-    return content.map((node, index) => {
-      if (node.type) {
-        return <EditorElement key={index} attributes={{}} element={node} />;
-      } else {
-        return <EditorLeaf key={index} attributes={{}} leaf={node} />;
-      }
-    });
-  };
+  const renderElement = useCallback(
+    (props: ElementProps) => <EditorElement {...props} />,
+    []
+  );
+  const renderLeaf = useCallback(
+    (props: LeafProps) => <EditorLeaf {...props} />,
+    []
+  );
+  const editors = useMemo(
+    () =>
+      currentChannelMessages.map(() =>
+        withInlines(withReact(withHistory(createEditor())))
+      ),
+    [currentChannelMessages]
+  );
 
   return (
     <Box
@@ -55,43 +57,54 @@ const MessagesContainer = (): JSX.Element => {
       bgPosition="center"
     >
       {currentChannelMessages.length > 0 &&
-        currentChannelMessages.map((message, index) => (
-          <HStack
-            key={index}
-            spacing={'12px'}
-            p={'5px 8px 5px 8px'}
-            bg={'zinc800'}
-            borderRadius="md"
-            boxShadow="md"
-            color="zinc300"
-            mb="18px"
-            ml="18px"
-            width="fit-content"
-          >
-            <Text>{renderMessageContent(message.textContent)}</Text>
-            <HStack mt={'7px'} spacing={'5px'}>
-              <Text color="zinc600">
-                {new Date(message.sendAt).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Text>
-
-              {message.status === MessageStatus.FAILED ? (
-                <Icon
-                  mt={'1px'}
-                  fontSize={'20px'}
-                  as={ClearIcon}
-                  color="red.500"
-                  cursor="pointer"
-                  onClick={() => {}}
+        currentChannelMessages.map((message, index) => {
+          return (
+            <HStack
+              key={index}
+              spacing={'12px'}
+              p={'5px 8px 5px 8px'}
+              bg={'zinc800'}
+              borderRadius="md"
+              boxShadow="md"
+              color="zinc300"
+              mb="18px"
+              ml="18px"
+              width="fit-content"
+            >
+              <Slate
+                editor={editors[index] as ReactEditor}
+                initialValue={message.textContent}
+              >
+                <Editable
+                  renderElement={renderElement}
+                  renderLeaf={renderLeaf}
+                  readOnly
                 />
-              ) : message.status === MessageStatus.SENDING ? (
-                <Spinner size={'xs'} />
-              ) : null}
+              </Slate>
+              <HStack mt={'7px'} spacing={'5px'}>
+                <Text color="zinc600">
+                  {new Date(message.sendAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Text>
+
+                {message.status === MessageStatus.FAILED ? (
+                  <Icon
+                    mt={'1px'}
+                    fontSize={'20px'}
+                    as={ClearIcon}
+                    color="red.500"
+                    cursor="pointer"
+                    onClick={() => {}}
+                  />
+                ) : message.status === MessageStatus.SENDING ? (
+                  <Spinner size={'xs'} />
+                ) : null}
+              </HStack>
             </HStack>
-          </HStack>
-        ))}
+          );
+        })}
     </Box>
   );
 };

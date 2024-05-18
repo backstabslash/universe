@@ -63,13 +63,13 @@ interface MarkButtonProps extends IconButtonProps {
   format: string;
 }
 
-interface ElementProps {
+export interface ElementProps {
   attributes: any;
   children: any;
   element: any;
 }
 
-interface LeafProps {
+export interface LeafProps {
   attributes: any;
   children: any;
   leaf: any;
@@ -303,7 +303,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   );
 };
 
-const withInlines = (editor: BaseEditor): BaseEditor => {
+export const withInlines = (editor: BaseEditor): BaseEditor => {
   const { isInline } = editor;
 
   editor.isInline = (element: MyElement) =>
