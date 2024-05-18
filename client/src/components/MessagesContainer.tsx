@@ -3,7 +3,9 @@ import useMessengerStore, {
   UserMessage,
   MessageStatus,
 } from '../store/messenger';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import ClearIcon from '@mui/icons-material/Clear';
 import {
   Element as EditorElement,
@@ -31,7 +33,6 @@ const MessagesContainer = (): JSX.Element => {
       ...(channels.find(channel => channel.id === currentChannel?.id)
         ?.messages ?? []),
     ]);
-    console.log('currentChannelMessages', currentChannelMessages);
   }, [channels, currentChannel]);
 
   useEffect(() => {

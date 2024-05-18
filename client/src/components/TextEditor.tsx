@@ -51,6 +51,7 @@ import type { BaseEditor, BaseElement, Descendant } from 'slate';
 import { withHistory } from 'slate-history';
 import styled from 'styled-components';
 import useAuthStore from '../store/auth';
+import { MessageTextContent } from '../store/messenger';
 
 interface IconButtonProps extends ButtonProps {
   label: string | JSX.Element;
@@ -146,6 +147,30 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const [content, setContent] = useState<Descendant[]>(initialValue);
   const resetEditor = (): void => {
     if (content) {
+    const hasText = (node: any): boolean => {
+      if (!node.children || node.children.length === 0) {
+        return false;
+      }
+
+      return node.children.some((child: any) => {
+        if (child.text) {
+          return child.text.trim() !== '';
+        } else if (child.children) {
+          return hasText(child);
+        }
+        return false;
+      });
+    };
+
+    const filteredContent = (content as MessageTextContent[]).filter(item => {
+      if (item.type === 'numbered-list' || item.type === 'bulleted-list') {
+        return hasText(item);
+      } else {
+        return item.children[0].text.trim() !== '';
+      }
+    });
+
+    if (filteredContent) {
       const newContent = initialValue;
       Transforms.delete(editor, {
         at: {
@@ -159,10 +184,43 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   };
 
   const handleSendMessage = (): void => {
-    sendMessage({
-      textContent: content,
-      user: { id: userData?.userId, name: userData?.name },
+  
+     
+ 
+
+    const hasText = (node: any): boolean => {
+      if (!node.children || node.children.length === 0) {
+        return false;
+      }
+
+      return node.children.some((child: any) => {
+        if (child.text) {
+          return child.text.trim() !== '';
+        } else if (child.children) {
+          return hasText(child);
+        }
+        return false;
+      });
+    };
+
+    const filteredContent = (content as MessageTextContent[]).filter(item => {
+      if (item.type === 'numbered-list' || item.type === 'bulleted-list') {
+        return hasText(item);
+      } else {
+        return item.children.some((child: any) => {
+          if (child.text) {
+            return child.text.trim() !== '';
+          } else if (child.children) {
+            return hasText(child);
+          }
+          return false;
+        });
+      }
     });
+
+    if (filteredContent.length > 0) {
+      sendMessage({ textContent: filteredContent, user: { id: userData?.userId, name: userData?.name }, });
+    }
     resetEditor();
   };
 
