@@ -47,12 +47,37 @@ const UserProfile = ({
       setAxiosPrivate: state.setAxiosPrivate,
     }));
 
+  const [error, setError] = useState('');
+
   useEffect(() => {
     setAxiosPrivate(axiosPrivate);
     fetchUserByEmail();
   }, [axiosPrivate]);
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    onClose: () => {
+      setFormData({
+        tag: '',
+        name: '',
+        pfp_url: '',
+        phone: '',
+      });
+    },
+  });
+
+  const handleOpenModal = (): void => {
+    setError('');
+    if (userData) {
+      setFormData({
+        tag: userData.tag ?? '',
+        name: userData.name ?? '',
+        pfp_url: userData.pfp_url ?? '',
+        phone: userData.phone ?? '',
+      });
+    }
+    onOpen();
+  };
+
   const [formData, setFormData] = useState({
     tag: '',
     name: '',
@@ -63,15 +88,15 @@ const UserProfile = ({
   useEffect(() => {
     if (userData) {
       setFormData({
-        tag: userData.tag || '',
-        name: userData.name || '',
-        pfp_url: userData.pfp_url || '',
-        phone: userData.phone || '',
+        tag: userData.tag ?? '',
+        name: userData.name ?? '',
+        pfp_url: userData.pfp_url ?? '',
+        phone: userData.phone ?? '',
       });
     }
   }, [userData]);
 
-  const handleInputChange = e => {
+  const handleInputChange = (e: any): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -79,10 +104,14 @@ const UserProfile = ({
     }));
   };
 
-  const handleSave = async () => {
-    console.log('formData', formData);
-    updateUserInfo(formData);
-    onClose();
+  const handleSave = async (): Promise<void> => {
+    try {
+      await updateUserInfo(formData);
+      onClose();
+      fetchUserByEmail();
+    } catch (error: any) {
+      setError(error?.message);
+    }
   };
 
   const currentTime = new Date().toLocaleTimeString('en-US', {
@@ -156,13 +185,15 @@ const UserProfile = ({
                   fontSize={'sm'}
                   bg="transparent"
                   color="#23bdff"
-                  onClick={onOpen}
+                  onClick={handleOpenModal}
                   _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
                 >
                   Edit
                 </Button>
               </HStack>
-              <Text> {userData?.tag ? userData.tag : 'username'}</Text>
+              <Text color="#1d9bd1">
+                {userData?.tag ? `@${userData.tag}` : '@username'}
+              </Text>
               <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
                 <Button
                   size="md"
@@ -269,7 +300,7 @@ const UserProfile = ({
                 fontSize={'sm'}
                 color="#23bdff"
                 _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-                onClick={onOpen}
+                onClick={handleOpenModal}
               >
                 Edit
               </Button>
@@ -318,7 +349,7 @@ const UserProfile = ({
                 bg="transparent"
                 color="#23bdff"
                 fontSize={'sm'}
-                onClick={onOpen}
+                onClick={handleOpenModal}
                 _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
               >
                 Edit
@@ -330,7 +361,7 @@ const UserProfile = ({
                 bg="zinc800"
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 color="zinc300"
-                onClick={onOpen}
+                onClick={handleOpenModal}
               >
                 <AddIcon fontSize="13px" /> &nbsp; Add start date
               </Button>
@@ -340,7 +371,7 @@ const UserProfile = ({
       </VStack>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent bg="zinc900" color="zinc200">
           <ModalHeader>Edit Your Profile</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
@@ -377,8 +408,21 @@ const UserProfile = ({
               />
             </FormControl>
           </ModalBody>
+          {error && (
+            <Text ml="7" color="red.500">
+              {error}
+            </Text>
+          )}
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSave}>
+            <Button
+              background="zinc700"
+              _hover={{ background: 'zinc800' }}
+              color="zinc300"
+              mr={3}
+              onClick={() => {
+                handleSave();
+              }}
+            >
               Save
             </Button>
             <Button onClick={onClose}>Cancel</Button>

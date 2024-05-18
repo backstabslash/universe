@@ -61,6 +61,7 @@ const useUserStore = create<UserState>((set, get) => ({
       const response = await axios?.put(`${api.url}/user/user`, updateData);
       set(state => ({
         userData: { ...state.userData, ...response?.data },
+        error: null,
       }));
     } catch (error: any) {
       console.error('Failed to update user:', error);
