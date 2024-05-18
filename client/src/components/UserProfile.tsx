@@ -110,7 +110,8 @@ const UserProfile = ({
       onClose();
       fetchUserByEmail();
     } catch (error: any) {
-      setError(error?.message);
+      console.log(error);
+      setError(error?.response?.data?.message || 'Failed to update user info');
     }
   };
 
