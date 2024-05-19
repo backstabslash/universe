@@ -5,7 +5,7 @@ import { Descendant } from 'slate';
 
 export interface ChannelGroup {
   name: string;
-  items: Array<Omit<Channel, 'messages'>>;
+  items: Record<string, { name: string }>;
 }
 
 export interface ChannelMessages extends Channel {
@@ -87,6 +87,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         const channels = channelGroups.flatMap((channelGroup: ChannelGroup) => {
           return channelGroup.items;
         });
+        console.log(channels);
 
         set({ channelGroups, channels, error: null });
       });
