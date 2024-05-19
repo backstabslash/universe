@@ -6,6 +6,8 @@ interface WorkSpaceData {
   workSpaceName?: string | null;
   ownerEmail?: string | null;
   emailTemplates?: string[] | null;
+  ownerId?: string | null;
+  pfp_url?: string | null;
 }
 
 interface UserData {
@@ -25,7 +27,9 @@ interface WorkSpaceState {
   checkName: (workSpaceData: WorkSpaceData) => Promise<void>;
   addWorkSpace: (workSpaceData: WorkSpaceData) => Promise<void>;
   setWorkSpaceData: (workSpaceData: WorkSpaceData) => void;
-  getWorkspaceUsers: any;
+  getWorkspaceData: () => Promise<void>;
+  getWorkspaceUsers: () => Promise<void>;
+  updateAvatar: (workSpaceData: WorkSpaceData) => Promise<void>;
 }
 
 const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
@@ -58,12 +62,42 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
 
   checkName: async (workSpaceData: WorkSpaceData) => {
     try {
-      const { axiosPrivate } = get();
-      await axiosPrivate?.post(
+      await axios.post(
         `${api.url}/workspace/check-name`,
         workSpaceData
       );
       set({ error: null });
+    } catch (err: any) {
+      const error =
+        err.response?.data?.error || err.message || 'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+
+  updateAvatar: async (workSpaceData: WorkSpaceData) => {
+    try {
+      const { axiosPrivate } = get();
+      await axiosPrivate?.post(
+        `${api.url}/wusers/update-workspace-avatar`,
+        workSpaceData
+      );
+      set({ error: null });
+    } catch (err: any) {
+      const error =
+        err.response?.data?.error || err.message || 'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+  getWorkspaceData: async () => {
+    try {
+      const { axiosPrivate } = get();
+      const response = await axiosPrivate?.get(
+        `${api.url}/wusers/get-workspace-data`
+      );
+
+      set({ workSpaceData: response.data, error: null });
     } catch (err: any) {
       const error =
         err.response?.data?.error || err.message || 'An unknown error occurred';

@@ -4,8 +4,8 @@ import { IUser } from "../user/userModel";
 export interface IWorkSpace extends Document {
   workSpaceName: string;
   owner: IUser;
-  users: IUser[];
   emailTemplates: string[];
+  pfp_url: string;
 }
 
 const WorkSpaceSchema = new Schema<IWorkSpace>({
@@ -19,12 +19,9 @@ const WorkSpaceSchema = new Schema<IWorkSpace>({
     required: true,
     unique: true,
   },
-  users: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
+  pfp_url: {
+    type: String,
+  },
   emailTemplates: [
     {
       type: String,

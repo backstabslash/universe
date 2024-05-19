@@ -7,17 +7,41 @@ import TextEditor from '../components/TextEditor';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { EditIcon } from '@chakra-ui/icons';
-import { Box, Flex, Button, Text, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Button,
+  Text,
+  Image,
+  FormControl,
+  FormLabel,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  useDisclosure,
+} from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import orgImage from '../../public/org-placeholder.png';
 import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/user';
 import MessagesContainer from '../components/MessagesContainer';
 import ChannelMembersModal from '../components/ChannelMembersModal';
+import useWorkSpaceStore from '../store/workSpace';
 
 const MainContent = (): JSX.Element => {
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    ownerId: '',
+    workSpaceName: '',
+    pfp_url: '',
+  });
   const navigate = useNavigate();
   const {
     socket,
@@ -29,6 +53,9 @@ const MainContent = (): JSX.Element => {
   } = useMessengerStore(state => state);
 
   const { logout, userData: authData } = useAuthStore(state => state);
+  const { getWorkspaceData, workSpaceData, updateAvatar } = useWorkSpaceStore(
+    state => state
+  );
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -47,10 +74,56 @@ const MainContent = (): JSX.Element => {
     return () => {
       socket?.disconnect();
     };
-  }, []);
+  }, [formData]);
+
+  useEffect(() => {
+    getWorkspaceData();
+  }, [formData]);
+
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    onClose: () => {
+      setFormData({
+        ownerId: '',
+        workSpaceName: '',
+        pfp_url: '',
+      });
+    },
+  });
 
   const { fetchUserById, isUserProfileVisible, setIsUserProfileVisible } =
     useUserStore(state => state);
+
+  const handleOpenModal = (): void => {
+    if (workSpaceData?.ownerId === authData?.userId) {
+      setError('');
+      if (workSpaceData) {
+        setFormData({
+          ownerId: workSpaceData.ownerId ?? '',
+          workSpaceName: workSpaceData.workSpaceName ?? '',
+          pfp_url: workSpaceData.pfp_url ?? '',
+        });
+      }
+      onOpen();
+    }
+  };
+  const handleInputChange = (e: any): void => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleSave = async (): Promise<void> => {
+    try {
+      await updateAvatar(formData);
+      console.log(1234);
+
+      onClose();
+    } catch (error: any) {
+      console.log(error);
+      setError(error?.response?.data?.message || 'Failed to update user info');
+    }
+  };
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -70,11 +143,12 @@ const MainContent = (): JSX.Element => {
               bg="transparent"
               _hover={{ background: 'transparent' }}
               _active={{ background: 'transparent' }}
+              onClick={handleOpenModal}
             >
               <Image
                 w="50px"
                 h="50px"
-                src={orgImage}
+                src={workSpaceData?.pfp_url ?? orgImage}
                 alt="Organization banner"
                 alignSelf="center"
                 borderRadius="10px"
@@ -226,6 +300,42 @@ const MainContent = (): JSX.Element => {
             {isUserProfileVisible && <UserProfile />}
           </Flex>
         </Box>
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent bg="zinc900" color="zinc200">
+            <ModalHeader>Edit workspace image</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody pb={6}>
+              <FormControl mt={4}>
+                <FormLabel>Profile Picture URL</FormLabel>
+                <Input
+                  name="pfp_url"
+                  value={formData.pfp_url}
+                  onChange={handleInputChange}
+                />
+              </FormControl>
+            </ModalBody>
+            {error && (
+              <Text ml="7" color="red.500">
+                {error}
+              </Text>
+            )}
+            <ModalFooter>
+              <Button
+                background="zinc700"
+                _hover={{ background: 'zinc800' }}
+                color="zinc300"
+                mr={3}
+                onClick={() => {
+                  handleSave();
+                }}
+              >
+                Save
+              </Button>
+              <Button onClick={onClose}>Cancel</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Flex>
     </Flex>
   );

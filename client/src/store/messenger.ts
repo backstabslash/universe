@@ -23,6 +23,7 @@ export interface Channel {
 export type UserMessage = Message & MessageInfo;
 
 export interface MessageInfo {
+  id: string;
   user: { id: string; name: string };
   sendAt: number;
 }
@@ -105,6 +106,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
     const newMessage = {
       ...message,
+      id: generateObjectId(),
       status: MessageStatus.SENDING,
       sendAt: Date.now(),
     };
@@ -187,6 +189,8 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     try {
       const { socket, channels } = get();
 
+      if (!socket) return;
+
       const onRecieveChannelMessages = (data: {
         messages: UserMessage[];
         users: any;
@@ -199,12 +203,28 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         }
         set({ channels: [...channels], error: null });
       };
-      socket?.once('recieve-channel-messages', onRecieveChannelMessages);
-      socket?.emit('get-channel-messages', { channelId });
+      socket.once('recieve-channel-messages', onRecieveChannelMessages);
+      socket.emit('get-channel-messages', { channelId });
     } catch (error: any) {
       set({ error });
     }
   },
 }));
+
+const generateObjectId = (): string => {
+  const timestamp = Math.floor(Date.now() / 1000).toString(16);
+  const randomBytes = [...Array(5)]
+    .map(() =>
+      Math.floor(Math.random() * 256)
+        .toString(16)
+        .padStart(2, '0')
+    )
+    .join('');
+  const increment = Math.floor(Math.random() * 16777216)
+    .toString(16)
+    .padStart(6, '0');
+
+  return timestamp + randomBytes + increment;
+};
 
 export default useMessengerStore;

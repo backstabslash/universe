@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import ChannelUser from "../models/channel/channelUserModel";
+import UserGroup from "../models/user/userGroupModel";
 
 class ConnectionHandler {
   async joinAndSendChannels(socket: Socket) {
@@ -8,20 +9,24 @@ class ConnectionHandler {
         return;
       }
 
-      const userChannels = await ChannelUser.find({ user: socket.data.userId }).populate({
-        path: "channel",
+      const userGroups = await UserGroup.find({ user: socket.data.userId }).populate({
+        path: "channels",
         select: "name _id",
       });
-
-      const channels = userChannels.map((userChannel) => ({
-        name: userChannel.channel.name,
-        id: userChannel.channel.id,
+      const result = userGroups.map(group => ({
+        name: group.name,
+        items: group.channels.map(channel => ({
+          id: channel.id,
+          name: channel.name,
+        })),
       }));
+      const allChannelIds = userGroups.reduce<string[]>((acc, group) => {
+        group.channels.forEach(channel => acc.push(channel.id));
+        return acc;
+      }, []);
 
-      const channelIds = channels.map((channel) => channel.id);
-
-      socket.join(channelIds);
-      socket.emit("send-channels", [{ name: "main", items: channels }]);
+      socket.join(allChannelIds);
+      socket.emit("send-channels", result);
     } catch (error) {
       console.error(error);
     }
