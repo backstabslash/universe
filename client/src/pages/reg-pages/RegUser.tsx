@@ -16,7 +16,6 @@ const emailRules = Joi.string()
   .email({ tlds: { allow: false } })
   .required()
   .trim()
-  .lowercase()
   .messages({
     'string.email': 'Invalid email format',
     'any.required': 'Email is required',

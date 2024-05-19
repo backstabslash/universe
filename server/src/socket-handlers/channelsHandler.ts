@@ -1,5 +1,6 @@
-import { Socket } from "socket.io";
-import Message from "../models/message/messageModel";
+import { Socket } from 'socket.io';
+import Message from '../models/message/messageModel';
+import ChannelUser from '../models/channel/channelUserModel';
 class ChannelsHandler {
   async getMessages(socket: Socket, data: { channelId: string; limit: number; page: number }) {
     try {
@@ -18,8 +19,15 @@ class ChannelsHandler {
         .sort({ sendAt: -1 })
         .skip(skip)
         .limit(data.limit);
-      console.log(messages);
-      socket.emit("recieve-channel-messages", messages);
+      
+      const channelUsers = await ChannelUser.find({
+        channel: data.channelId,
+      }).populate('user', 'name id');
+      
+      socket.emit("recieve-channel-messages",  {
+        messages,
+        users: channelUsers.map((cu) => cu.user),
+      });
     } catch (error) {
       console.error(error);
     }

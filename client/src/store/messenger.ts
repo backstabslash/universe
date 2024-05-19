@@ -13,6 +13,7 @@ export interface ChannelMessages extends Channel {
   name: string;
   messages: UserMessage[];
   page: number;
+  users: any;
 }
 
 export interface Channel {
@@ -23,7 +24,7 @@ export interface Channel {
 export type UserMessage = Message & MessageInfo;
 
 export interface MessageInfo {
-  _id: string;
+  id: string;
   user: { id: string; name: string };
   sendAt: number;
 }
@@ -109,7 +110,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
     const newMessage = {
       ...message,
-      _id: generateObjectId(),
+      id: generateObjectId(),
       status: MessageStatus.SENDING,
       sendAt: Date.now(),
     };
@@ -192,34 +193,31 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
   },
 
-  loadChannelMessages: (): void => {
-    try {
-      const { socket, channels, currentChannel } = get();
+loadChannelMessages: (): void => {
+  try {
+    const { socket, channels, currentChannel } = get();
 
-      if (!socket || !currentChannel) return;
+    if (!socket || !currentChannel) return;
 
-      const currentPage =
-        channels.find(channel => channel.id === currentChannel.id)?.page ?? 0;
+    const currentPage =
+      channels.find(channel => channel.id === currentChannel.id)?.page ?? 0;
 
-      socket.emit('get-channel-messages', {
-        channelId: currentChannel.id,
-        limit: 10,
-        page: currentPage,
-      });
-    } catch (error: any) {
-      set({ error });
-    }
-  },
+    socket.emit('get-channel-messages', {
+      channelId: currentChannel.id,
+      limit: 10,
+      page: currentPage,
+    });
 
-  onRecieveChannelMessages: (newMessages: UserMessage[]): void => {
+  onRecieveChannelMessages: (data: {newMessages: UserMessage[], users: any}): void => {
     const { channels, currentChannel } = get();
 
     const updatedChannels = channels.map(channel => {
       if (channel.id === currentChannel?.id) {
         return {
           ...channel,
-          messages: [...(channel?.messages || []), ...newMessages],
+          messages: [...(channel?.messages || []), ...data.newMessages],
           page: channel.page ? channel.page + 1 : 1,
+          users: data.users
         };
       }
       return channel;
