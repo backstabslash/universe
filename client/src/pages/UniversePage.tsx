@@ -24,7 +24,6 @@ const MainContent = (): JSX.Element => {
     currentChannel,
     connectSocket,
     getChannelGroups,
-    channels,
     sendMessage,
     recieveMessage,
   } = useMessengerStore(state => state);
@@ -52,10 +51,6 @@ const MainContent = (): JSX.Element => {
 
   const { fetchUserById, isUserProfileVisible, setIsUserProfileVisible } =
     useUserStore(state => state);
-
-  const currentChannelUsers = channels.find(
-    (channel: any) => channel.id === currentChannel?.id
-  )?.users;
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -204,10 +199,7 @@ const MainContent = (): JSX.Element => {
                   {currentChannel && `#${currentChannel?.name}`}
                 </Text>
                 <Flex>
-                  <ChannelMembersModal
-                    users={currentChannelUsers ?? []}
-                    usersCount={currentChannelUsers?.length}
-                  />
+                  <ChannelMembersModal />
                   <Button
                     size="md"
                     mr="2"
