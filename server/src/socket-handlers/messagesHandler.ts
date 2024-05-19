@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import Message from "../models/message/messageModel";
 
 type Message = {
@@ -17,12 +17,6 @@ class MessagesHandler {
       if (!socket.data.userId) {
         return;
       }
-      console.log(data);
-      socket.broadcast.to(data.channelId).emit("receive-message", {
-        message: {
-          ...data.message,
-        },
-      });
 
       await Message.create({
         user: socket.data.userId,
@@ -32,6 +26,13 @@ class MessagesHandler {
       });
 
       callback({ status: "success", message: "Message sent" });
+
+      socket.broadcast.to(data.channelId).emit("receive-message", {
+        textContent: data.message.textContent,
+        sendAt: data.message.sendAt,
+        attachments: data.message.attachments,
+        user: data.message.user,
+      });
     } catch (error) {
       callback({ status: "error", message: "Error sending message" });
       console.error(error);
