@@ -95,12 +95,12 @@ const MessagesContainer = (): JSX.Element => {
             >
               <VStack mb={'8px'} spacing={0}>
                 <HStack alignSelf="start">
-                  <Text color="zinc400">{message.user.name}</Text>
+                  <Text color="zinc400">{message?.user?.name}</Text>
                 </HStack>
                 <HStack>
                   <Slate
                     editor={editors[index] as ReactEditor}
-                    initialValue={message.textContent}
+                    initialValue={message?.textContent}
                   >
                     <StyledEditable
                       renderElement={renderElement}

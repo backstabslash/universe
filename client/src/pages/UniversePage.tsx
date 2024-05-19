@@ -9,16 +9,16 @@ import Header from '../components/Header';
 import { EditIcon } from '@chakra-ui/icons';
 import { Box, Flex, Button, Text, Image } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import orgImage from '../../public/org-placeholder.png';
 import useAuthStore from '../store/auth';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/user';
 import MessagesContainer from '../components/MessagesContainer';
+import ChannelMembersModal from '../components/ChannelMembersModal';
 
 const MainContent = (): JSX.Element => {
   const navigate = useNavigate();
-
   const {
     socket,
     currentChannel,
@@ -28,10 +28,7 @@ const MainContent = (): JSX.Element => {
     recieveMessage,
   } = useMessengerStore(state => state);
 
-  const [isUserProfileVisible, setisUserProfileVisible] =
-    useState<boolean>(true);
-
-  const logout = useAuthStore(state => state.logout);
+  const { logout, userData: authData } = useAuthStore(state => state);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -52,9 +49,8 @@ const MainContent = (): JSX.Element => {
     };
   }, []);
 
-  const { userData } = useUserStore(state => ({
-    userData: state.userData,
-  }));
+  const { fetchUserById, isUserProfileVisible, setIsUserProfileVisible } =
+    useUserStore(state => state);
 
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
@@ -154,15 +150,16 @@ const MainContent = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0)' }}
               _active={{ background: 'rgba(0, 0, 0, 0)' }}
               onClick={() => {
-                setisUserProfileVisible(true);
+                fetchUserById(authData?.userId ?? '');
+                setIsUserProfileVisible(true);
               }}
             >
               <Image
                 w="50px"
                 h="50px"
                 src={
-                  userData?.pfp_url
-                    ? userData.pfp_url
+                  authData?.pfp_url
+                    ? authData.pfp_url
                     : 'https://i.imgur.com/zPKzLoe.gif'
                 }
                 alt="Profile banner"
@@ -201,16 +198,18 @@ const MainContent = (): JSX.Element => {
                 <Text fontWeight={'bold'}>
                   {currentChannel && `#${currentChannel?.name}`}
                 </Text>
-
-                <Button
-                  size="md"
-                  mr="2"
-                  bg="transparent"
-                  color="zinc400"
-                  _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-                >
-                  <EditIcon boxSize={'4'} /> &nbsp; Canvas
-                </Button>
+                <Flex>
+                  <ChannelMembersModal />
+                  <Button
+                    size="md"
+                    mr="2"
+                    bg="transparent"
+                    color="zinc400"
+                    _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+                  >
+                    <EditIcon boxSize={'4'} /> &nbsp; Canvas
+                  </Button>
+                </Flex>
               </Flex>
               <MessagesContainer />
               <Flex
@@ -224,9 +223,7 @@ const MainContent = (): JSX.Element => {
                 <TextEditor sendMessage={sendMessage} />
               </Flex>
             </Box>
-            {isUserProfileVisible && (
-              <UserProfile setisUserProfileVisible={setisUserProfileVisible} />
-            )}
+            {isUserProfileVisible && <UserProfile />}
           </Flex>
         </Box>
       </Flex>

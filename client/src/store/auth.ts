@@ -5,6 +5,8 @@ import { api } from '../config/config';
 interface UserData {
   userId?: string | null;
   email?: string | null;
+  pfp_url?: string | null;
+  phone?: string | null;
   accessToken?: string | null;
   tag?: string | null;
   password?: string | null;
@@ -86,7 +88,7 @@ const useAuthStore = create<AuthState>(set => ({
         withCredentials: true,
       });
       set({
-        userData: { accessToken: response?.data.accessToken },
+        userData: { ...response?.data },
         error: null,
       });
       return response?.data?.accessToken;
