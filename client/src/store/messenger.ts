@@ -63,7 +63,10 @@ interface MessengerState {
   loadChannelMessages: () => void;
   sendMessage: (message: any) => void;
   recieveMessage: () => void;
-  onRecieveChannelMessages: (newMessages: UserMessage[]) => void;
+  onRecieveChannelMessages: (data: {
+    newMessages: UserMessage[];
+    users: any;
+  }) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -193,22 +196,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
   },
 
-loadChannelMessages: (): void => {
-  try {
-    const { socket, channels, currentChannel } = get();
+  loadChannelMessages: (): void => {
+    try {
+      const { socket, channels, currentChannel } = get();
 
-    if (!socket || !currentChannel) return;
+      if (!socket || !currentChannel) return;
 
-    const currentPage =
-      channels.find(channel => channel.id === currentChannel.id)?.page ?? 0;
+      const currentPage =
+        channels.find(channel => channel.id === currentChannel.id)?.page ?? 0;
 
-    socket.emit('get-channel-messages', {
-      channelId: currentChannel.id,
-      limit: 10,
-      page: currentPage,
-    });
+      socket.emit('get-channel-messages', {
+        channelId: currentChannel.id,
+        limit: 10,
+        page: currentPage,
+      });
+    } catch (error: any) {
+      set({ error });
+    }
+  },
 
-  onRecieveChannelMessages: (data: {newMessages: UserMessage[], users: any}): void => {
+  onRecieveChannelMessages: (data: {
+    newMessages: UserMessage[];
+    users: any;
+  }): void => {
     const { channels, currentChannel } = get();
 
     const updatedChannels = channels.map(channel => {
@@ -217,7 +227,7 @@ loadChannelMessages: (): void => {
           ...channel,
           messages: [...(channel?.messages || []), ...data.newMessages],
           page: channel.page ? channel.page + 1 : 1,
-          users: data.users
+          users: data.users,
         };
       }
       return channel;
