@@ -6,6 +6,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PersonIcon from '@mui/icons-material/Person';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { Channel, ChannelGroup } from '../store/messenger';
+import useWorkSpaceStore from '../store/workSpace';
 
 const directMessages = ['user1', 'user2', 'user3'];
 
@@ -15,6 +16,7 @@ const Sidebar = (): JSX.Element => {
   const { channelGroups, setCurrentChannel, getChannelMessages } =
     useMessengerStore(state => state);
   const [channelList, setChannelList] = useState<ChannelGroup[]>([]);
+  const { workSpaceData } = useWorkSpaceStore(state => state);
 
   const onChannelClick = (channel: Channel): void => {
     setCurrentChannel(channel);
@@ -51,7 +53,7 @@ const Sidebar = (): JSX.Element => {
         h="60px"
       >
         <Flex>
-          <b>Universe</b>
+          <Heading fontSize="2xl">{workSpaceData?.workSpaceName}</Heading>
           <Box mt="2px">
             <KeyboardArrowDownIcon fontSize="small" />
           </Box>

@@ -14,7 +14,7 @@ interface DragAndDropListProps {
 }
 interface List {
   name: string;
-  items: Record<string, { name: string }>;
+  items: Item[];
 }
 
 interface Item {

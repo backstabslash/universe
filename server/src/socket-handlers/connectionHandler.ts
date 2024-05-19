@@ -13,18 +13,17 @@ class ConnectionHandler {
         path: "channels",
         select: "name _id",
       });
-      const allChannelIds: string[] = [];
-      const result = userGroups.map(group => {
-        const channelsRecord: Record<string, { name: string }> = {};
-        group.channels.forEach(channel => {
-          const channelId = channel._id.toString();
-          channelsRecord[channelId] = { name: channel.name };
-          if (!allChannelIds.includes(channelId)) {
-            allChannelIds.push(channelId);
-          }
-        });
-        return { name: group.name, channels: channelsRecord };
-      });
+      const result = userGroups.map(group => ({
+        name: group.name,
+        items: group.channels.map(channel => ({
+          id: channel.id,
+          name: channel.name,
+        })),
+      }));
+      const allChannelIds = userGroups.reduce<string[]>((acc, group) => {
+        group.channels.forEach(channel => acc.push(channel.id));
+        return acc;
+      }, []);
 
       socket.join(allChannelIds);
       socket.emit("send-channels", result);

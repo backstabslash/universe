@@ -5,7 +5,7 @@ import {
   nameRules,
 } from '../validation/userDataRules';
 import Joi from 'joi';
-import WorkSpace from '../models/workspace/workspaceModel';
+import WorkSpace, { IWorkSpace } from '../models/workspace/workspaceModel';
 import WorkspaceUser from '../models/workspace/workspaceUserModel';
 import User from '../models/user/userModel';
 
@@ -60,9 +60,15 @@ class WorkSpacerController {
         workSpaceName,
         owner: owner?._id,
         emailTemplates,
-        users: [owner?._id],
       });
       await newWorkSpace.save();
+      const workspace = await WorkSpace.findOne({ workSpaceName });
+      const newWorkSpaceUser = new WorkspaceUser({
+        workspace: workspace?._id,
+        user: owner?._id,
+      });
+      await newWorkSpaceUser.save();
+
 
       return res.status(200).json({});
     } catch (error) {
@@ -75,9 +81,8 @@ class WorkSpacerController {
         });
       }
       res.status(403).json({
-        message: `This email template exists ${
-          (error as any)?.keyValue?.emailTemplates
-        }`,
+        message: `This email template exists ${(error as any)?.keyValue?.emailTemplates
+          }`,
       });
     }
   }
@@ -102,6 +107,62 @@ class WorkSpacerController {
       const users = await User.find({ _id: { $in: userIds } }, { password: 0 });
 
       return res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+  async getWorkspaceData(req: Request, res: Response) {
+    try {
+      const { userId } = req.body;
+
+      const workspaceUser = await WorkspaceUser.findOne({ user: userId });
+      if (!workspaceUser) {
+        return res
+          .status(404)
+          .json({ message: 'User does not belong to any workspace.' });
+      }
+
+      const workspace = await WorkSpace.findById(workspaceUser.workspace);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found.' });
+      }
+
+      const { owner, workSpaceName, pfp_url } = workspace;
+      return res.status(200).json({ ownerId: owner, workSpaceName, pfp_url });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async updateWorkspaceAvatar(req: Request, res: Response) {
+    try {
+      const { userId, workSpaceName, pfp_url, ownerId } = req.body;
+      const owner = await WorkSpace.findOne({ workSpaceName });
+
+      if (userId !== ownerId) {
+        console.log(req.body);
+
+        return res.status(403).json({
+          message: 'Forbidden: You are not authorized to perform this action.',
+        });
+      }
+
+      const updatedWorkspace: IWorkSpace | null = await WorkSpace.findOneAndUpdate(
+        { owner: userId },
+        { $set: { pfp_url } },
+        { new: true }
+      );
+
+      if (!updatedWorkspace) {
+        return res.status(404).json({
+          message: 'Workspace not found.',
+        });
+      }
+      return res.status(200).json();
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',

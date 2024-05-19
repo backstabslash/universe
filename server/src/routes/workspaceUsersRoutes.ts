@@ -9,5 +9,11 @@ router.get(
   rateLimiter(),
   workSpaceController.getWorkspaceUsers
 );
+router.get(
+  '/get-workspace-data',
+  rateLimiter(),
+  workSpaceController.getWorkspaceData
+);
+router.post('/update-workspace-avatar', rateLimiter(), workSpaceController.updateWorkspaceAvatar);
 
 export default router;
