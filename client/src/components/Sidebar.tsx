@@ -12,14 +12,13 @@ const directMessages = ['user1', 'user2', 'user3'];
 const Sidebar = (): JSX.Element => {
   const navigate = useNavigate();
 
-  const { channelGroups, setCurrentChannel, getChannelMessages } =
-    useMessengerStore(state => state);
+  const { channelGroups, setCurrentChannel } = useMessengerStore(
+    state => state
+  );
   const [channelList, setChannelList] = useState<ChannelGroup[]>([]);
 
   const onChannelClick = (channel: Channel): void => {
     setCurrentChannel(channel);
-    getChannelMessages(channel.id);
-    // navigate(`${channel.name}`);
   };
 
   useEffect(() => {

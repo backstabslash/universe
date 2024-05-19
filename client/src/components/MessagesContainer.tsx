@@ -1,9 +1,11 @@
 import { Box, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react';
 import useMessengerStore, {
-  UserMessage,
   MessageStatus,
+  UserMessage,
 } from '../store/messenger';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import ClearIcon from '@mui/icons-material/Clear';
 import {
   Element as EditorElement,
@@ -12,126 +14,109 @@ import {
   LeafProps,
   withInlines,
 } from './TextEditor';
-import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { withHistory } from 'slate-history';
+import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
 import styled from 'styled-components';
-import { List } from 'react-virtualized';
 
 const MessagesContainer = (): JSX.Element => {
-  const { channels, currentChannel } = useMessengerStore(state => state);
-
-  const [currentChannelMessages, setCurrentChannelMessages] = useState<
-    UserMessage[]
-  >([]);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const firstMessageRef = useRef<HTMLDivElement | null>(null);
+  const lastMessageRef = useRef<HTMLDivElement | null>(null);
+
+  const [messages, setMessages] = useState<UserMessage[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+
+  const {
+    channels,
+    socket,
+    currentChannel,
+    lastSentMessage,
+    loadChannelMessages,
+    onRecieveChannelMessages,
+  } = useMessengerStore(state => state);
 
   useEffect(() => {
-    setCurrentChannelMessages([
+    if (
+      !currentChannel ||
+      !channels.find(channel => channel.id === currentChannel.id)?.messages
+    ) {
+      return;
+    }
+
+    setMessages([
       ...(channels.find(channel => channel.id === currentChannel?.id)
         ?.messages ?? []),
     ]);
-  }, [channels, currentChannel]);
+  }, [channels]);
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
+    loadChannelMessages();
+  }, [currentChannel]);
+
+  useEffect(() => {
+    const channelMessagesHandler = (newMessages: UserMessage[]): void => {
+      setMessages(prevMessages => [...newMessages, ...prevMessages]);
+      onRecieveChannelMessages(newMessages);
+    };
+
+    socket?.on('recieve-channel-messages', channelMessagesHandler);
+
+    return () => {
+      socket?.off('recieve-channel-messages', channelMessagesHandler);
+    };
+  }, [socket, channels, currentChannel, onRecieveChannelMessages]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !messagesLoading) {
+          setMessagesLoading(true);
+          loadChannelMessages();
+          setMessagesLoading(false);
+        }
+      },
+      {
+        root: null,
+        rootMargin: '-100px 0px 0px 0px',
+        threshold: 0,
+      }
+    );
+
+    if (firstMessageRef.current) {
+      observer.observe(firstMessageRef.current);
     }
-  }, [currentChannelMessages]);
+
+    return () => {
+      if (firstMessageRef.current) {
+        observer.unobserve(firstMessageRef.current);
+      }
+    };
+  }, [messagesLoading, loadChannelMessages, messages]);
+
+  useEffect(() => {
+    if (containerRef.current && lastMessageRef.current) {
+      containerRef.current.scrollTop = lastMessageRef.current.offsetTop;
+    }
+  }, [lastSentMessage]);
 
   const renderElement = useCallback(
     (props: ElementProps) => <EditorElement {...props} />,
     []
   );
+
   const renderLeaf = useCallback(
     (props: LeafProps) => <EditorLeaf {...props} />,
     []
   );
-  const editors = useMemo(
-    () =>
-      currentChannelMessages.map(() =>
-        withInlines(withReact(withHistory(createEditor())))
-      ),
-    [currentChannelMessages]
-  );
 
-  const MemoizedMessage = React.memo(({ message, index }) => {
-    const StyledEditable = styled(Editable)`
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      word-break: break-all;
-      white-space: normal;
-    `;
-    return (
-      <HStack
-        key={message.id}
-        spacing={'10px'}
-        p={'5px 10px 5px 10px'}
-        bg={'zinc800'}
-        borderRadius="md"
-        boxShadow="md"
-        color="zinc300"
-        mt="18px"
-        ml="18px"
-        width="fit-content"
-      >
-        <VStack mb={'8px'} spacing={0}>
-          <HStack alignSelf="start">
-            <Text color="zinc400">{message.user.name}</Text>
-          </HStack>
-          <HStack>
-            <Slate
-              editor={editors[index] as ReactEditor}
-              initialValue={message.textContent}
-            >
-              <StyledEditable
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                readOnly
-              />
-            </Slate>
-          </HStack>
-        </VStack>
-        <VStack alignSelf={'end'}>
-          <HStack spacing={'5px'}>
-            <Text color="zinc600">
-              {new Date(message.sendAt).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
-            {message.status === MessageStatus.FAILED ? (
-              <Icon
-                fontSize={'20px'}
-                as={ClearIcon}
-                color="red.500"
-                cursor="pointer"
-                onClick={() => {}}
-              />
-            ) : message.status === MessageStatus.SENDING ? (
-              <Spinner size={'xs'} />
-            ) : null}
-          </HStack>
-        </VStack>
-      </HStack>
-    );
-  });
-
-  const renderRow = ({ index, isScrolling, key, style }) => {
-    const message = currentChannelMessages[index];
-    return (
-      <MemoizedMessage
-        key={key}
-        message={message}
-        index={index}
-        style={style}
-      />
-    );
-  };
+  const editorsMap = useMemo(() => {
+    const map = new Map();
+    messages.forEach(message => {
+      const editor = withInlines(withReact(createEditor()));
+      map.set(message._id, editor);
+    });
+    return map;
+  }, [messages]);
 
   return (
     <Box
@@ -144,15 +129,86 @@ const MessagesContainer = (): JSX.Element => {
       bgRepeat="no-repeat"
       bgPosition="center"
       pb={'18px'}
+      display="flex"
+      flexDirection="column-reverse"
     >
-      <List
-        width={containerRef.current?.offsetWidth}
-        height={containerRef.current?.offsetHeight}
-        rowCount={currentChannelMessages.length}
-        rowHeight={100}
-        rowRenderer={renderRow}
-        overscanRowCount={10}
-      />
+      {messagesLoading && <Spinner />}
+      {messages.map((message, index) => {
+        const StyledEditable = styled(Editable)`
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          word-break: break-all;
+          white-space: normal;
+        `;
+        return (
+          <>
+            {index === messages.length - 1 && <Box ref={firstMessageRef}></Box>}
+            {index === messages.length - (messages.length - 1) && (
+              <Box ref={lastMessageRef}></Box>
+            )}
+            <HStack
+              key={message._id}
+              spacing={'10px'}
+              p={'5px 10px 5px 10px'}
+              bg={'zinc800'}
+              borderRadius="md"
+              boxShadow="md"
+              color="zinc300"
+              mt="18px"
+              ml="18px"
+              width="fit-content"
+            >
+              <VStack mb={'8px'} spacing={0}>
+                <HStack alignSelf="start">
+                  <Text color="zinc400">{message.user.name}</Text>
+                </HStack>
+                <HStack>
+                  <Slate
+                    editor={editorsMap.get(message._id)}
+                    initialValue={message.textContent}
+                  >
+                    <StyledEditable
+                      renderElement={renderElement}
+                      renderLeaf={renderLeaf}
+                      readOnly
+                    />
+                  </Slate>
+                </HStack>
+              </VStack>
+              <VStack alignSelf={'end'}>
+                <HStack spacing={'5px'}>
+                  <Text color="zinc600">
+                    {new Date(message.sendAt).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                  {message.status === MessageStatus.FAILED ? (
+                    <Icon
+                      fontSize={'20px'}
+                      as={ClearIcon}
+                      color="red.500"
+                      cursor="pointer"
+                      onClick={() => {}}
+                    />
+                  ) : message.status === MessageStatus.SENDING ? (
+                    <Spinner size={'xs'} />
+                  ) : null}
+                </HStack>
+              </VStack>
+            </HStack>
+          </>
+        );
+      })}
+      {messagesLoading && (
+        <Spinner
+          size="lg"
+          position="absolute"
+          top="10px"
+          left="50%"
+          transform="translateX(-50%)"
+        />
+      )}
     </Box>
   );
 };
