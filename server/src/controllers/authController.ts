@@ -14,6 +14,9 @@ import bcrypt from 'bcrypt';
 import EmailService from '../email-service/emailService';
 import UserVerifyCode from '../models/user/userVerifyCodeModel';
 import Joi from 'joi';
+import WorkSpace from '../models/workspace/workspaceModel';
+import WorkspaceUser from '../models/workspace/workspaceUserModel';
+import mongoose from 'mongoose';
 
 class AuthController {
   private readonly accessTokenSecret: string;
@@ -26,6 +29,8 @@ class AuthController {
     this.login = this.login.bind(this);
     this.register = this.register.bind(this);
     this.refreshAccessToken = this.refreshAccessToken.bind(this);
+    this.verify = this.verify.bind(this);
+    this.logout = this.logout.bind(this);
   }
 
   async login(req: Request, res: Response) {
@@ -89,22 +94,39 @@ class AuthController {
       password: passwordRules,
       verifyCode: verifyCodeRules,
     });
+
     const { error } = registerSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         message: error.details[0].message,
       });
     }
+
     const { name, email, tag, password, verifyCode } = req.body;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-      const user = await User.findOne({ email });
+      const user = await User.findOne({ email }).session(session);
       if (user) {
+        await session.abortTransaction();
+        session.endSession();
         return res.status(400).json({
           message: 'User already exists',
         });
       }
-      const existingUserVerifyCode = await UserVerifyCode.findOne({ email });
+
+      const existingUserVerifyCode = await UserVerifyCode.findOne({ email }).session(session);
+
+      const emailTemplate = '@' + email.split('@')[1];
+      const existingTemplate = await WorkSpace.findOne({ emailTemplates: emailTemplate }).session(session);
+      if (!existingTemplate) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          message: 'There is no workspace with this email template',
+        });
+      }
 
       if (existingUserVerifyCode?.verifyCode === verifyCode) {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -116,17 +138,30 @@ class AuthController {
           phone: '',
           password: hashedPassword,
         });
-        await newUser.save();
+        await newUser.save({ session });
 
-        await existingUserVerifyCode?.deleteOne();
+        const savedUser = await User.findOne({ email }).session(session);
+        const newWorkspaceUser = new WorkspaceUser({
+          workspace: existingTemplate._id,
+          user: savedUser?._id,
+        });
+        await newWorkspaceUser.save({ session });
 
+        await existingUserVerifyCode?.deleteOne({ session });
+
+        await session.commitTransaction();
+        session.endSession();
         return res.status(201).json({});
       } else {
+        await session.abortTransaction();
+        session.endSession();
         return res.status(400).json({
           message: 'Verify codes do not match',
         });
       }
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.error(error);
       res.status(500).json({
         message: 'Internal server error',

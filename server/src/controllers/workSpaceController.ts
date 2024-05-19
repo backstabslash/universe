@@ -8,6 +8,7 @@ import Joi from 'joi';
 import WorkSpace, { IWorkSpace } from '../models/workspace/workspaceModel';
 import WorkspaceUser from '../models/workspace/workspaceUserModel';
 import User from '../models/user/userModel';
+import mongoose from 'mongoose';
 
 class WorkSpacerController {
   async checkName(req: Request, res: Response) {
@@ -46,43 +47,61 @@ class WorkSpacerController {
       ownerEmail: emailRules,
       emailTemplates: emailTemplatesRule,
     });
+
     const { error } = addWorkSpaceSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         message: error.details[0].message,
       });
     }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
       const { ownerEmail, workSpaceName, emailTemplates } = req.body;
-      const owner = await User.findOne({ email: ownerEmail });
+      const owner = await User.findOne({ email: ownerEmail }).session(session);
+
+      if (!owner) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          message: 'Owner not found',
+        });
+      }
 
       const newWorkSpace = new WorkSpace({
         workSpaceName,
-        owner: owner?._id,
+        owner: owner._id,
         emailTemplates,
       });
-      await newWorkSpace.save();
-      const workspace = await WorkSpace.findOne({ workSpaceName });
+
+      await newWorkSpace.save({ session });
+
+      const workspace = await WorkSpace.findOne({ workSpaceName }).session(session);
       const newWorkSpaceUser = new WorkspaceUser({
         workspace: workspace?._id,
-        user: owner?._id,
+        user: owner._id,
       });
-      await newWorkSpaceUser.save();
 
+      await newWorkSpaceUser.save({ session });
+
+      await session.commitTransaction();
+      session.endSession();
 
       return res.status(200).json({});
     } catch (error) {
-      try {
-        const { ownerEmail } = req.body;
-        await User.findOneAndDelete({ email: ownerEmail });
-      } catch (error) {
-        res.status(405).json({
-          message: 'Delete error',
+      await session.abortTransaction();
+      session.endSession();
+
+      if ((error as any).code === 11000) {
+        return res.status(409).json({
+          message: `This email template exists ${(error as any).keyValue?.emailTemplates}`,
         });
       }
-      res.status(403).json({
-        message: `This email template exists ${(error as any)?.keyValue?.emailTemplates
-          }`,
+
+      return res.status(500).json({
+        message: 'Internal server error',
       });
     }
   }
@@ -141,7 +160,6 @@ class WorkSpacerController {
   async updateWorkspaceAvatar(req: Request, res: Response) {
     try {
       const { userId, workSpaceName, pfp_url, ownerId } = req.body;
-      const owner = await WorkSpace.findOne({ workSpaceName });
 
       if (userId !== ownerId) {
         console.log(req.body);

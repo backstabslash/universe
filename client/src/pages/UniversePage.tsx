@@ -94,15 +94,17 @@ const MainContent = (): JSX.Element => {
     useUserStore(state => state);
 
   const handleOpenModal = (): void => {
-    setError('');
-    if (workSpaceData) {
-      setFormData({
-        ownerId: workSpaceData.ownerId ?? '',
-        workSpaceName: workSpaceData.workSpaceName ?? '',
-        pfp_url: workSpaceData.pfp_url ?? '',
-      });
+    if (workSpaceData?.ownerId === authData?.userId) {
+      setError('');
+      if (workSpaceData) {
+        setFormData({
+          ownerId: workSpaceData.ownerId ?? '',
+          workSpaceName: workSpaceData.workSpaceName ?? '',
+          pfp_url: workSpaceData.pfp_url ?? '',
+        });
+      }
+      onOpen();
     }
-    onOpen();
   };
   const handleInputChange = (e: any): void => {
     const { name, value } = e.target;
