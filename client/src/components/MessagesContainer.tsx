@@ -3,9 +3,7 @@ import useMessengerStore, {
   UserMessage,
   MessageStatus,
 } from '../store/messenger';
-
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 import {
   Element as EditorElement,
@@ -18,6 +16,7 @@ import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
 import { withHistory } from 'slate-history';
 import { createEditor } from 'slate';
 import styled from 'styled-components';
+import { List } from 'react-virtualized';
 
 const MessagesContainer = (): JSX.Element => {
   const { channels, currentChannel } = useMessengerStore(state => state);
@@ -60,6 +59,80 @@ const MessagesContainer = (): JSX.Element => {
     [currentChannelMessages]
   );
 
+  const MemoizedMessage = React.memo(({ message, index }) => {
+    const StyledEditable = styled(Editable)`
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      white-space: normal;
+    `;
+    return (
+      <HStack
+        key={message.id}
+        spacing={'10px'}
+        p={'5px 10px 5px 10px'}
+        bg={'zinc800'}
+        borderRadius="md"
+        boxShadow="md"
+        color="zinc300"
+        mt="18px"
+        ml="18px"
+        width="fit-content"
+      >
+        <VStack mb={'8px'} spacing={0}>
+          <HStack alignSelf="start">
+            <Text color="zinc400">{message.user.name}</Text>
+          </HStack>
+          <HStack>
+            <Slate
+              editor={editors[index] as ReactEditor}
+              initialValue={message.textContent}
+            >
+              <StyledEditable
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                readOnly
+              />
+            </Slate>
+          </HStack>
+        </VStack>
+        <VStack alignSelf={'end'}>
+          <HStack spacing={'5px'}>
+            <Text color="zinc600">
+              {new Date(message.sendAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </Text>
+            {message.status === MessageStatus.FAILED ? (
+              <Icon
+                fontSize={'20px'}
+                as={ClearIcon}
+                color="red.500"
+                cursor="pointer"
+                onClick={() => {}}
+              />
+            ) : message.status === MessageStatus.SENDING ? (
+              <Spinner size={'xs'} />
+            ) : null}
+          </HStack>
+        </VStack>
+      </HStack>
+    );
+  });
+
+  const renderRow = ({ index, isScrolling, key, style }) => {
+    const message = currentChannelMessages[index];
+    return (
+      <MemoizedMessage
+        key={key}
+        message={message}
+        index={index}
+        style={style}
+      />
+    );
+  };
+
   return (
     <Box
       ref={containerRef}
@@ -72,68 +145,14 @@ const MessagesContainer = (): JSX.Element => {
       bgPosition="center"
       pb={'18px'}
     >
-      {currentChannelMessages.length > 0 &&
-        currentChannelMessages.map((message, index) => {
-          const StyledEditable = styled(Editable)`
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-all;
-            white-space: normal;
-          `;
-          return (
-            <HStack
-              key={index}
-              spacing={'10px'}
-              p={'5px 10px 5px 10px'}
-              bg={'zinc800'}
-              borderRadius="md"
-              boxShadow="md"
-              color="zinc300"
-              mt="18px"
-              ml="18px"
-              width="fit-content"
-            >
-              <VStack mb={'8px'} spacing={0}>
-                <HStack alignSelf="start">
-                  <Text color="zinc400">{message.user.name}</Text>
-                </HStack>
-                <HStack>
-                  <Slate
-                    editor={editors[index] as ReactEditor}
-                    initialValue={message.textContent}
-                  >
-                    <StyledEditable
-                      renderElement={renderElement}
-                      renderLeaf={renderLeaf}
-                      readOnly
-                    />
-                  </Slate>
-                </HStack>
-              </VStack>
-              <VStack alignSelf={'end'}>
-                <HStack spacing={'5px'}>
-                  <Text color="zinc600">
-                    {new Date(message.sendAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
-                  {message.status === MessageStatus.FAILED ? (
-                    <Icon
-                      fontSize={'20px'}
-                      as={ClearIcon}
-                      color="red.500"
-                      cursor="pointer"
-                      onClick={() => {}}
-                    />
-                  ) : message.status === MessageStatus.SENDING ? (
-                    <Spinner size={'xs'} />
-                  ) : null}
-                </HStack>
-              </VStack>
-            </HStack>
-          );
-        })}
+      <List
+        width={containerRef.current?.offsetWidth}
+        height={containerRef.current?.offsetHeight}
+        rowCount={currentChannelMessages.length}
+        rowHeight={100}
+        rowRenderer={renderRow}
+        overscanRowCount={10}
+      />
     </Box>
   );
 };
