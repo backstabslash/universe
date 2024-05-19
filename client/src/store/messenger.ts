@@ -151,19 +151,23 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
   recieveMessage: () => {
     try {
-      const { currentChannel, channels, socket } = get();
+      const { socket } = get();
 
-      const onRecieveMessage = (message: any): void => {
-        for (const channel of channels) {
+      socket?.on('receive-message', (message: any): void => {
+        const { currentChannel, channels } = get();
+
+        const updatedChannels = channels.map(channel => {
           if (channel.id === currentChannel?.id) {
-            channel.messages.push(message);
+            return {
+              ...channel,
+              messages: [...channel.messages, message],
+            };
           }
-        }
+          return channel;
+        });
 
-        set({ channels: [...channels], error: null });
-      };
-
-      socket?.on('recieve-message', onRecieveMessage);
+        set({ channels: updatedChannels, error: null });
+      });
     } catch (error: any) {
       set({ error });
     }
