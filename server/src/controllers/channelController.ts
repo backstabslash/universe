@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Joi from 'joi';
 import mongoose from 'mongoose';
 import { channelNameRules } from '../validation/channelDataRules';
-import { tagRules } from '../validation/userDataRules';
+import { emailRules, tagRules } from '../validation/userDataRules';
 import { uuidRules } from '../validation/commonDataRules';
 import ChannelUser from '../models/channel/channelUserModel';
 import Channel from '../models/channel/channelModel';
@@ -182,6 +182,49 @@ class ChannelController {
       await ChannelUser.deleteOne({ channel: channelId, user: user._id });
 
       return res.status(200).json({});
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+
+  async addUserToChannel(req: Request, res: Response) {
+    const addUserToChannelSchema = Joi.object({
+      channelId: uuidRules,
+      id: uuidRules,
+      userId: uuidRules,
+      email: emailRules,
+    });
+    const { error } = addUserToChannelSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
+    try {
+      const { channelId, id } = req.body;
+
+      const channel = await Channel.findById(channelId);
+      if (!channel) {
+        return res.status(404).json({ message: 'Channel not found' });
+      }
+      const userExists = await ChannelUser.findOne({
+        channel: channelId,
+        user: id,
+      });
+
+      if (userExists) {
+        return res.status(400).json({ message: 'User already in channel' });
+      }
+
+      const newChannelUser = new ChannelUser({
+        user: id,
+        channel: channelId,
+      });
+
+      await newChannelUser.save();
+
+      return res.status(201).json({ message: 'User added to channel' });
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });
     }

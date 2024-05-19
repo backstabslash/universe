@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
-import User from "../models/user/userModel";
-import { UserJwtPayload } from "../utils/utils";
-import { auth } from "../config/config";
+import { Request, Response } from 'express';
+import User from '../models/user/userModel';
+import { UserJwtPayload } from '../utils/utils';
+import { auth } from '../config/config';
 import {
   nameRules,
   emailRules,
@@ -204,8 +204,21 @@ class AuthController {
         { expiresIn: '15m' }
       );
 
-      return res.json({
+      const userData = await User.findOne({ email: user.email });
+      if (!userData) {
+        return res.status(404).json({
+          message: 'User not found',
+        });
+      }
+
+      return res.status(200).json({
         accessToken: newAccessToken,
+        tag: userData.tag,
+        name: userData.name,
+        pfp_url: userData.pfp_url,
+        phone: userData.phone,
+        email: userData.email,
+        userId: userData.id,
       });
     } catch (err) {
       return res.sendStatus(403);

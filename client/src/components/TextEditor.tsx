@@ -146,7 +146,6 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
 
   const [content, setContent] = useState<Descendant[]>(initialValue);
   const resetEditor = (): void => {
-    console.log(content);
     const hasText = (node: any): boolean => {
       if (!node.children || node.children.length === 0) {
         return false;

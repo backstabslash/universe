@@ -29,30 +29,48 @@ import IconButton from './IconButton';
 import { useEffect, useState } from 'react';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
+import useAuthStore from '../store/auth';
 
-interface UserProfileProps {
-  setisUserProfileVisible: (visible: boolean) => void;
-}
-
-const UserProfile = ({
-  setisUserProfileVisible,
-}: UserProfileProps): JSX.Element => {
+const UserProfile = (): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
-  const { userData, fetchUserByEmail, updateUserInfo, setAxiosPrivate } =
-    useUserStore(state => ({
-      userData: state.userData,
-      fetchUserByEmail: state.fetchUserByEmail,
-      updateUserInfo: state.updateUserInfo,
-      error: state.error,
-      setAxiosPrivate: state.setAxiosPrivate,
-    }));
+  const {
+    userData,
+    fetchUserById,
+    fetchUserByEmail,
+    updateUserInfo,
+    setAxiosPrivate,
+    setIsUserProfileVisible,
+  } = useUserStore(state => ({
+    userData: state.userData,
+    fetchUserById: state.fetchUserById,
+    fetchUserByEmail: state.fetchUserByEmail,
+    updateUserInfo: state.updateUserInfo,
+    error: state.error,
+    setAxiosPrivate: state.setAxiosPrivate,
+    isUserProfileVisible: state.isUserProfileVisible,
+    setIsUserProfileVisible: state.setIsUserProfileVisible,
+  }));
+
+  const { userId: authUserId } = useAuthStore(state => ({
+    userId: state?.userData?.userId,
+  }));
+
+  const [isOwnProfile, setIsOwnProfile] = useState(true);
+
+  useEffect(() => {
+    setIsOwnProfile(authUserId?.toString() === userData?.userId?.toString());
+  }, [userData?.userId]);
 
   const [error, setError] = useState('');
 
   useEffect(() => {
     setAxiosPrivate(axiosPrivate);
-    fetchUserByEmail();
-  }, [axiosPrivate]);
+    if (userData?.userId) {
+      fetchUserById(userData?.userId);
+    } else {
+      fetchUserByEmail();
+    }
+  }, []);
 
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
@@ -121,7 +139,7 @@ const UserProfile = ({
     minute: 'numeric',
   });
 
-  return (
+  return isOwnProfile ? (
     <Flex flexDirection={'column'} flex="3">
       <Heading
         background="rgba(0, 0, 0, 0.5)"
@@ -139,7 +157,7 @@ const UserProfile = ({
           <IconButton
             label={<CloseIcon boxSize={'3'} />}
             onClick={() => {
-              setisUserProfileVisible(false);
+              setIsUserProfileVisible(false);
             }}
           />
         </Flex>
@@ -430,6 +448,127 @@ const UserProfile = ({
           </ModalFooter>
         </ModalContent>
       </Modal>
+    </Flex>
+  ) : (
+    <Flex flexDirection={'column'} flex="3">
+      <Heading
+        background="rgba(0, 0, 0, 0.5)"
+        color="zinc300"
+        fontSize="xl"
+        borderBottom="1px"
+        borderLeft={'1px'}
+        borderColor="rgba(29, 29, 32, 1)"
+        p="15px"
+        pt="18px"
+        h="60px"
+      >
+        <Flex justifyContent="space-between" alignItems={'center'}>
+          <b>Profile</b>
+          <IconButton
+            label={<CloseIcon boxSize={'3'} />}
+            onClick={() => {
+              setIsUserProfileVisible(false);
+            }}
+          />
+        </Flex>
+      </Heading>
+      <VStack
+        background="rgba(0, 0, 0, 0.5)"
+        color="zinc300"
+        h="calc(100vh - 102px)"
+        borderLeft="1px"
+        borderColor="rgba(29, 29, 32, 1)"
+        overflowY="auto"
+      >
+        <VStack width="100%">
+          <Image
+            w="260"
+            mt="2"
+            h="260"
+            src={
+              userData?.pfp_url
+                ? userData.pfp_url
+                : 'https://i.imgur.com/zPKzLoe.gif'
+            }
+            alt="Profile banner"
+            alignSelf="center"
+            borderRadius="10px"
+          />
+          <VStack
+            width="100%"
+            align="start"
+            borderBottom="1px"
+            borderColor="rgba(29, 29, 32, 1)"
+            spacing={4}
+            pr="15px"
+            pl="15px"
+            pb="14px"
+          >
+            <VStack width="100%" align="start" spacing={1}>
+              <HStack width="100%" justifyContent="space-between">
+                <Text fontSize="xl" fontWeight="bold">
+                  {userData?.name ? userData.name : 'Name'}
+                </Text>
+              </HStack>
+              <Text color="#1d9bd1">
+                {userData?.tag ? `@${userData.tag}` : '@username'}
+              </Text>
+              <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}></Link>
+            </VStack>
+            <VStack align="start" spacing={1}>
+              <Text>Active</Text>
+              <Text>{currentTime} local time</Text>
+            </VStack>
+          </VStack>
+          <VStack
+            width="100%"
+            align="start"
+            borderBottom="1px"
+            borderColor="rgba(29, 29, 32, 1)"
+            spacing={4}
+            pr="15px"
+            pl="15px"
+            pb="14px"
+          >
+            <HStack width="100%" justifyContent="space-between">
+              <Text fontWeight="bold">Contact information</Text>
+            </HStack>
+            <VStack align="start" spacing={1}>
+              <Text fontSize="small" color="#9e9fa1">
+                Email address
+              </Text>
+              <Link
+                color="#1d9bd1"
+                _hover={{
+                  color: '#23bdff',
+                  textDecoration: 'underline',
+                }}
+              >
+                {userData?.email
+                  ? userData.email
+                  : "Email didn't load properly"}
+              </Link>
+            </VStack>
+            {userData?.phone ? (
+              <Text>{userData?.phone}</Text>
+            ) : (
+              <Text>{"Phone number isn't specified yet"}</Text>
+            )}
+          </VStack>
+          <VStack
+            width="100%"
+            align="start"
+            spacing={4}
+            pr="15px"
+            pl="15px"
+            pb="14px"
+          >
+            <HStack width="100%" justifyContent="space-between">
+              <Text fontWeight="bold">About me</Text>
+            </HStack>
+          </VStack>
+        </VStack>
+      </VStack>
     </Flex>
   );
 };

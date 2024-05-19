@@ -49,28 +49,21 @@ class UserController {
   }
 
   async getById(req: Request, res: Response) {
-    const getUserByIdSchema = Joi.object({
-      userId: uuidRules,
-    });
-    const { error } = getUserByIdSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        message: error.details[0].message,
-      });
-    }
-
     try {
-      const { userId } = req.body;
+      const { userId } = req.params;
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
           message: 'User not found',
         });
       }
-
       return res.status(200).json({
         tag: user.tag,
         name: user.name,
+        email: user.email,
+        pfp_url: user.pfp_url,
+        phone: user.phone,
+        userId,
       });
     } catch (error) {
       res.status(500).json({

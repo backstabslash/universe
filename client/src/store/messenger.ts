@@ -12,6 +12,7 @@ export interface ChannelMessages extends Channel {
   id: string;
   name: string;
   messages: UserMessage[];
+  users: any;
 }
 
 export interface Channel {
@@ -190,10 +191,14 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
       if (!socket) return;
 
-      const onRecieveChannelMessages = (messages: UserMessage[]): void => {
+      const onRecieveChannelMessages = (data: {
+        messages: UserMessage[];
+        users: any;
+      }): void => {
         for (const channel of channels) {
           if (channel.id === channelId) {
-            channel.messages = messages;
+            channel.messages = data.messages;
+            channel.users = data.users;
           }
         }
         set({ channels: [...channels], error: null });
