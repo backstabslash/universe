@@ -100,8 +100,7 @@ const MessagesContainer = (): JSX.Element => {
 
   useEffect(() => {
     if (
-      lastSentMessage &&
-      lastSentMessage.message &&
+      lastSentMessage?.message &&
       lastSentMessage.channelId === currentChannel?.id
     ) {
       setMessages(prevMessages => {

@@ -3,6 +3,9 @@ import {
   emailRules,
   emailTemplatesRule,
   nameRules,
+  passwordRules,
+  tagRules,
+  verifyCodeRules,
 } from '../validation/userDataRules';
 import Joi from 'joi';
 import WorkSpace, { IWorkSpace } from '../models/workspace/workspaceModel';
@@ -11,6 +14,9 @@ import User from '../models/user/userModel';
 import mongoose from 'mongoose';
 import Role from '../models/user/roleModel';
 import UserRole from '../models/user/userRoleModel';
+import UserGroup from '../models/user/userGroupModel';
+import UserVerifyCode from '../models/user/userVerifyCodeModel';
+import bcrypt from 'bcrypt';
 
 class WorkSpacerController {
   async checkName(req: Request, res: Response) {
@@ -44,66 +50,94 @@ class WorkSpacerController {
   }
 
   async addWorkSpace(req: Request, res: Response) {
-    const addWorkSpaceSchema = Joi.object({
+    const registerSchema = Joi.object({
+      name: nameRules,
+      tag: tagRules,
+      email: emailRules,
+      password: passwordRules,
+      verifyCode: verifyCodeRules,
       workSpaceName: nameRules,
-      ownerEmail: emailRules,
       emailTemplates: emailTemplatesRule,
     });
 
-    const { error } = addWorkSpaceSchema.validate(req.body);
+    const { error } = registerSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         message: error.details[0].message,
       });
     }
 
+    const { name, email, tag, password, verifyCode, workSpaceName, emailTemplates } = req.body;
     const session = await mongoose.startSession();
-    session.startTransaction();
 
     try {
-      const { ownerEmail, workSpaceName, emailTemplates } = req.body;
-      const owner = await User.findOne({ email: ownerEmail }).session(session);
+      session.startTransaction();
 
-      if (!owner) {
+      const user = await User.findOne({ email }).session(session);
+      if (user) {
         await session.abortTransaction();
-        session.endSession();
-        return res.status(404).json({
-          message: 'Owner not found',
+        return res.status(400).json({
+          message: "User already exists",
         });
       }
 
+      const existingUserVerifyCode = await UserVerifyCode.findOne({ email }).session(session);
+
+      if (existingUserVerifyCode?.verifyCode !== verifyCode) {
+        await session.abortTransaction();
+        return res.status(400).json({
+          message: "Invalid verification code",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = new User({
+        name,
+        tag,
+        email,
+        pfp_url: "",
+        phone: "",
+        password: hashedPassword,
+      });
+      await newUser.save({ session });
+
+      const userGroup = new UserGroup({
+        user: newUser._id,
+        name: "General",
+      });
+      await userGroup.save({ session });
+
+      const savedUser = await User.findOne({ email }).session(session);
+
       const userRole = await Role.findOne({ name: "administration" }).session(session);
 
-      const updatedUserRole = await UserRole.findOneAndUpdate(
-        { user: owner?._id },
-        { role: userRole?._id },
-        { new: true, upsert: true }
-      );
-      await updatedUserRole.save({ session });
+      const newUserRole = new UserRole({
+        user: savedUser?._id,
+        role: userRole?._id,
+      });
+      await newUserRole.save({ session });
 
+      await existingUserVerifyCode?.deleteOne({ session });
+
+      const owner = await User.findOne({ email }).session(session);
       const newWorkSpace = new WorkSpace({
         workSpaceName,
-        owner: owner._id,
+        owner: owner?._id,
         emailTemplates,
       });
-
       await newWorkSpace.save({ session });
 
       const workspace = await WorkSpace.findOne({ workSpaceName }).session(session);
       const newWorkSpaceUser = new WorkspaceUser({
         workspace: workspace?._id,
-        user: owner._id,
+        user: owner?._id,
       });
-
       await newWorkSpaceUser.save({ session });
 
       await session.commitTransaction();
-      session.endSession();
-
       return res.status(200).json({});
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
 
       if ((error as any).code === 11000) {
         return res.status(409).json({
@@ -114,8 +148,11 @@ class WorkSpacerController {
       return res.status(500).json({
         message: 'Internal server error',
       });
+    } finally {
+      session.endSession();
     }
   }
+
 
   async getWorkspaceUsers(req: Request, res: Response) {
     try {
@@ -173,7 +210,6 @@ class WorkSpacerController {
       const { userId, workSpaceName, pfp_url } = req.body;
 
       const userRole = await UserRole.findOne({ user: userId }).populate('role');
-      console.log(userRole);
 
       if (userRole?.role.name !== "administration") {
         return res.status(403).json({
@@ -182,7 +218,7 @@ class WorkSpacerController {
       }
 
       const updatedWorkspace: IWorkSpace | null = await WorkSpace.findOneAndUpdate(
-        { name: workSpaceName },
+        { workSpaceName },
         { $set: { pfp_url } },
         { new: true }
       );

@@ -16,6 +16,7 @@ const UserSchema = new Schema<IUser>({
   },
   tag: {
     type: String,
+    unique: true,
   },
   email: {
     type: String,

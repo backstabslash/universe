@@ -16,6 +16,8 @@ interface UserData {
   name?: string | null;
   pfp_url?: string | null;
   phone?: string | null;
+  password?: string | null;
+  verifyCode?: string | null;
 }
 
 interface WorkSpaceState {
@@ -25,7 +27,7 @@ interface WorkSpaceState {
   axiosPrivate: any;
   setAxiosPrivate: any;
   checkName: (workSpaceData: WorkSpaceData) => Promise<void>;
-  addWorkSpace: (workSpaceData: WorkSpaceData) => Promise<void>;
+  addWorkSpace: (workSpaceData: WorkSpaceData | UserData) => Promise<void>;
   setWorkSpaceData: (workSpaceData: WorkSpaceData) => void;
   getWorkspaceData: () => Promise<void>;
   getWorkspaceUsers: () => Promise<void>;
@@ -46,7 +48,7 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
     set({ axiosPrivate });
   },
 
-  addWorkSpace: async (workSpaceData: WorkSpaceData) => {
+  addWorkSpace: async (workSpaceData: WorkSpaceData | UserData) => {
     try {
       await axios.post(`${api.url}/workspace/add-workspace`, workSpaceData);
       set({ error: null });
