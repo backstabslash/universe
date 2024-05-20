@@ -7,6 +7,12 @@ export interface IChannel extends Document {
   owner: IUser;
   private: boolean;
   readonly: boolean;
+  type: ChannelType;
+}
+
+export enum ChannelType {
+  CONVERSATION = "CONVERSATION",
+  DM = "DM",
 }
 
 const ChannelSchema = new Schema<IChannel>({
@@ -17,6 +23,11 @@ const ChannelSchema = new Schema<IChannel>({
   owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: Object.values(ChannelType),
     required: true,
   },
   private: {
