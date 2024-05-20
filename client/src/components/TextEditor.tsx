@@ -673,7 +673,7 @@ const BlockButton = ({
       p="1px"
       _hover={{ background: 'zinc900' }}
       {...props}
-      active={isActive}
+      {...(isActive && { active: isActive })}
       onMouseDown={event => {
         event.preventDefault();
         toggleBlock(editor, format);
@@ -707,7 +707,7 @@ const MarkButton = ({
         background: match ? 'rgba(0, 0, 0, 0)' : 'zinc900',
       }}
       {...props}
-      active={isActive}
+      {...(isActive && { active: isActive })}
       disabled={Boolean(match)}
       onMouseDown={event => {
         event.preventDefault();
