@@ -93,18 +93,101 @@ const DragAndDropList = ({
             maxWidth="100%"
             background="rgba(0, 0, 0, 0.1)"
           >
-            {itemLists.map((list, index) => (
-              <Draggable key={list.name} draggableId={list.name} index={index}>
-                {(provided, snapshot) => (
+            {itemLists.length > 1
+              ? itemLists.map((list, index) => (
+                  <Draggable
+                    key={list.name}
+                    draggableId={list.name}
+                    index={index}
+                  >
+                    {(provided, snapshot) => (
+                      <Box
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        bg={
+                          snapshot.isDragging
+                            ? 'rgba(0, 0, 0, 0.4)'
+                            : 'rgba(0, 0, 0, 0.1)'
+                        }
+                        border="1px"
+                        borderColor="rgba(29, 29, 32, 1)"
+                        borderRadius="md"
+                        p="15px"
+                        mb="2"
+                        color="zinc400"
+                        maxWidth="100%"
+                        background="rgba(0, 0, 0, 0.1)"
+                        _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                        _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                      >
+                        <Droppable droppableId={list.name} type="item">
+                          {(provided, snapshot) => (
+                            <Box
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              bg={
+                                snapshot.isDraggingOver
+                                  ? 'rgba(0, 0, 0, 0.2)'
+                                  : 'inherit'
+                              }
+                              p="2"
+                              borderRadius="md"
+                            >
+                              <Heading size="sm" mb="2" color="zinc300">
+                                {list.name}
+                              </Heading>
+                              {list.items.map((item, index) => (
+                                <Draggable
+                                  key={item.id}
+                                  draggableId={item.id}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <Flex
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      bg={
+                                        snapshot.isDragging
+                                          ? 'rgba(0, 0, 0, 0.4)'
+                                          : 'rgba(0, 0, 0, 0.1)'
+                                      }
+                                      p="2"
+                                      borderRadius="md"
+                                      mb="2"
+                                      color="zinc400"
+                                      _hover={{
+                                        background: 'rgba(0, 0, 0, 1)',
+                                      }}
+                                      overflow="hidden"
+                                      textOverflow="ellipsis"
+                                      whiteSpace="nowrap"
+                                      maxWidth="100%"
+                                      alignItems="center"
+                                      onClick={() => onItemClick(item)}
+                                    >
+                                      <TagIcon
+                                        fontSize="small"
+                                        style={{ marginRight: '8px' }}
+                                      />
+                                      <Text>{item.name}</Text>
+                                    </Flex>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </Box>
+                          )}
+                        </Droppable>
+                      </Box>
+                    )}
+                  </Draggable>
+                ))
+              : itemLists.map(list => (
                   <Box
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    bg={
-                      snapshot.isDragging
-                        ? 'rgba(0, 0, 0, 0.4)'
-                        : 'rgba(0, 0, 0, 0.1)'
-                    }
+                    key={list.name}
+                    bg="rgba(0, 0, 0, 0.1)"
                     border="1px"
                     borderColor="rgba(29, 29, 32, 1)"
                     borderRadius="md"
@@ -174,9 +257,7 @@ const DragAndDropList = ({
                       )}
                     </Droppable>
                   </Box>
-                )}
-              </Draggable>
-            ))}
+                ))}
             {provided.placeholder}
           </Flex>
         )}

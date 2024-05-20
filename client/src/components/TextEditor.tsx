@@ -216,7 +216,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     if (filteredContent.length > 0) {
       sendMessage({
         textContent: filteredContent,
-        user: { id: userData?.userId, name: userData?.name },
+        user: { _id: userData?.userId, name: userData?.name },
       });
     }
     resetEditor();
