@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/prefer-optional-chain */
 import {
   Modal,
   ModalOverlay,
@@ -96,7 +95,7 @@ const ChannelMembersModal = (): any => {
     ? workspaceUsers?.filter(
         (user: any) =>
           (user?.name?.toLowerCase().includes(searchQuery) ||
-            (user?.tag && user?.tag?.toLowerCase().includes(searchQuery))) &&
+            user?.tag?.toLowerCase()?.includes(searchQuery)) &&
           !isUserInDetails(user._id)
       )
     : [];
