@@ -17,6 +17,8 @@ import Joi from 'joi';
 import WorkSpace from '../models/workspace/workspaceModel';
 import WorkspaceUser from '../models/workspace/workspaceUserModel';
 import mongoose from 'mongoose';
+import UserRole from '../models/user/userRoleModel';
+import Role from '../models/user/roleModel';
 
 class AuthController {
   private readonly accessTokenSecret: string;
@@ -141,6 +143,15 @@ class AuthController {
         await newUser.save({ session });
 
         const savedUser = await User.findOne({ email }).session(session);
+
+        const userRole = await Role.findOne({ name: "student" }).session(session);
+
+        const newUserRole = new UserRole({
+          user: savedUser?._id,
+          role: userRole?._id
+        })
+        await newUserRole.save({ session });
+
         const newWorkspaceUser = new WorkspaceUser({
           workspace: existingTemplate._id,
           user: savedUser?._id,

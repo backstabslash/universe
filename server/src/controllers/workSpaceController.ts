@@ -9,6 +9,8 @@ import WorkSpace, { IWorkSpace } from '../models/workspace/workspaceModel';
 import WorkspaceUser from '../models/workspace/workspaceUserModel';
 import User from '../models/user/userModel';
 import mongoose from 'mongoose';
+import Role from '../models/user/roleModel';
+import UserRole from '../models/user/userRoleModel';
 
 class WorkSpacerController {
   async checkName(req: Request, res: Response) {
@@ -69,6 +71,15 @@ class WorkSpacerController {
           message: 'Owner not found',
         });
       }
+
+      const userRole = await Role.findOne({ name: "administration" }).session(session);
+
+      const updatedUserRole = await UserRole.findOneAndUpdate(
+        { user: owner?._id },
+        { role: userRole?._id },
+        { new: true, upsert: true }
+      );
+      await updatedUserRole.save({ session });
 
       const newWorkSpace = new WorkSpace({
         workSpaceName,
@@ -159,18 +170,19 @@ class WorkSpacerController {
 
   async updateWorkspaceAvatar(req: Request, res: Response) {
     try {
-      const { userId, workSpaceName, pfp_url, ownerId } = req.body;
+      const { userId, workSpaceName, pfp_url } = req.body;
 
-      if (userId !== ownerId) {
-        console.log(req.body);
+      const userRole = await UserRole.findOne({ user: userId }).populate('role');
+      console.log(userRole);
 
+      if (userRole?.role.name !== "administration") {
         return res.status(403).json({
           message: 'Forbidden: You are not authorized to perform this action.',
         });
       }
 
       const updatedWorkspace: IWorkSpace | null = await WorkSpace.findOneAndUpdate(
-        { owner: userId },
+        { name: workSpaceName },
         { $set: { pfp_url } },
         { new: true }
       );
