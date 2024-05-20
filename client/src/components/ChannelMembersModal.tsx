@@ -54,10 +54,13 @@ const ChannelMembersModal = (): any => {
   };
 
   useEffect(() => {
-    setCurrentChannelUsers(
-      channels.find((channel: any) => channel.id === currentChannel?.id)?.users
-    );
-  }, [channels]);
+    const channelUsers = channels.find(
+      (channel: any) => channel.id === currentChannel?.id
+    )?.users;
+    if (channelUsers && channelUsers.length > 0) {
+      setCurrentChannelUsers(channelUsers);
+    }
+  }, [channels, currentChannel]);
 
   useEffect(() => {
     setAxiosPrivateUser(axiosPrivate);
