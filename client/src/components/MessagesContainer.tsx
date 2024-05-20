@@ -1,4 +1,12 @@
-import { Box, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  HStack,
+  Icon,
+  Spinner,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import useMessengerStore, {
   MessageStatus,
   UserMessage,
@@ -42,13 +50,16 @@ const MessagesContainer = (): JSX.Element => {
   const { userData } = useAuthStore(state => state);
 
   useEffect(() => {
+    if (!currentChannel) return;
     const channelMessages: UserMessage[] | undefined = channels.find(
-      channel => channel.id === currentChannel?.id
+      channel => channel.id === currentChannel.id
     )?.messages;
     if (channelMessages && channelMessages.length > 0) {
       setMessages([...channelMessages]);
     } else {
       setMessages([]);
+
+      setMessagesLoading(true);
       loadChannelMessages();
     }
   }, [currentChannel]);
@@ -62,6 +73,7 @@ const MessagesContainer = (): JSX.Element => {
       setHasMoreMessages(data.hasMoreMessages);
       setMessages(prevMessages => [...prevMessages, ...data.messages]);
       onRecieveChannelMessages(data);
+      setMessagesLoading(false);
     };
 
     socket?.on('recieve-channel-messages', channelMessagesHandler);
@@ -77,7 +89,6 @@ const MessagesContainer = (): JSX.Element => {
         if (entry.isIntersecting && !messagesLoading && hasMoreMessages) {
           setMessagesLoading(true);
           loadChannelMessages();
-          setMessagesLoading(false);
         }
       },
       {
@@ -109,6 +120,10 @@ const MessagesContainer = (): JSX.Element => {
         }
         return prevMessages;
       });
+
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
     }
   }, [lastSentMessage]);
 
@@ -141,89 +156,93 @@ const MessagesContainer = (): JSX.Element => {
       bgSize="cover"
       bgRepeat="no-repeat"
       bgPosition="center"
-      pb={'18px'}
+      pt={'15px'}
+      pb={'10px'}
       display="flex"
       flexDirection="column-reverse"
     >
-      {messagesLoading && <Spinner />}
-      {messages.map((message, index) => {
-        return (
-          <React.Fragment key={message.id}>
-            {index === messages.length - 1 && <Box ref={firstMessageRef}></Box>}
-            {index === messages.length - (messages.length - 1) && (
-              <Box ref={lastMessageRef}></Box>
-            )}
-            <HStack
-              alignSelf={`${message.user._id === userData?.userId ? 'end' : 'start'}`}
-              spacing={'10px'}
-              p={'5px 10px 5px 10px'}
-              bg={`${message.user._id === userData?.userId ? 'zinc700' : 'zinc800'}`}
-              borderRadius="md"
-              boxShadow="md"
-              color="zinc300"
-              mt="18px"
-              ml="18px"
-              mr="18px"
-              width="fit-content"
-            >
-              <VStack mb={'8px'} spacing={0}>
-                <HStack alignSelf={'start'}>
-                  {message.user._id === userData?.userId ? null : (
-                    <Text color="zinc400">{message.user.name}</Text>
-                  )}
-                </HStack>
-                <HStack>
-                  <Slate
-                    editor={editorsMap.get(message.id)}
-                    initialValue={message.textContent}
-                  >
-                    <Editable
-                      style={{
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-all',
-                        whiteSpace: 'normal',
-                      }}
-                      renderElement={renderElement}
-                      renderLeaf={renderLeaf}
-                      readOnly
-                    />
-                  </Slate>
-                </HStack>
-              </VStack>
-              <VStack alignSelf={'end'}>
-                <HStack spacing={'5px'}>
-                  <Text color="zinc500">
-                    {new Date(message.sendAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
-                  {message.status === MessageStatus.FAILED ? (
-                    <Icon
-                      fontSize={'20px'}
-                      as={ClearIcon}
-                      color="red.500"
-                      cursor="pointer"
-                      onClick={() => {}}
-                    />
-                  ) : message.status === MessageStatus.SENDING ? (
-                    <Spinner size={'xs'} />
-                  ) : null}
-                </HStack>
-              </VStack>
-            </HStack>
-          </React.Fragment>
-        );
-      })}
-      {messagesLoading && (
-        <Spinner
-          size="lg"
-          position="absolute"
-          top="10px"
-          left="50%"
-          transform="translateX(-50%)"
-        />
+      {messagesLoading && messages.length === 0 ? (
+        <Flex w="100%" h="100%" justifyContent="center" alignItems="center">
+          <Spinner size={'xl'} thickness="4px" speed="0.5s" />
+        </Flex>
+      ) : (
+        messages.map((message, index) => {
+          return (
+            <React.Fragment key={message.id}>
+              {index === messages.length - 1 && (
+                <Box ref={firstMessageRef}></Box>
+              )}
+              {index === messages.length - (messages.length - 1) && (
+                <Box ref={lastMessageRef}></Box>
+              )}
+              <HStack
+                alignSelf={`${message.user._id === userData?.userId ? 'end' : 'start'}`}
+                spacing={'10px'}
+                p={'5px 10px 5px 10px'}
+                bg={`${message.user._id === userData?.userId ? 'zinc700' : 'zinc800'}`}
+                borderRadius="md"
+                boxShadow="md"
+                color="zinc300"
+                mt="18px"
+                ml="18px"
+                mr="18px"
+                width="fit-content"
+              >
+                <VStack mb={'8px'} spacing={0}>
+                  <HStack alignSelf={'start'}>
+                    {message.user._id === userData?.userId ? null : (
+                      <Text color="zinc400">{message.user.name}</Text>
+                    )}
+                  </HStack>
+                  <HStack alignSelf={'start'}>
+                    <Slate
+                      editor={editorsMap.get(message.id)}
+                      initialValue={message.textContent}
+                    >
+                      <Editable
+                        style={{
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          wordBreak: 'break-all',
+                          whiteSpace: 'normal',
+                        }}
+                        renderElement={renderElement}
+                        renderLeaf={renderLeaf}
+                        readOnly
+                      />
+                    </Slate>
+                  </HStack>
+                </VStack>
+                <VStack alignSelf={'end'}>
+                  <HStack spacing={'5px'}>
+                    <Text color="zinc500">
+                      {new Date(message.sendAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                    {message.status === MessageStatus.FAILED ? (
+                      <Icon
+                        fontSize={'20px'}
+                        as={ClearIcon}
+                        color="red.500"
+                        cursor="pointer"
+                        onClick={() => {}}
+                      />
+                    ) : message.status === MessageStatus.SENDING ? (
+                      <Spinner size={'xs'} thickness="3px" speed="0.5s" />
+                    ) : null}
+                  </HStack>
+                </VStack>
+              </HStack>
+            </React.Fragment>
+          );
+        })
+      )}
+      {messagesLoading && messages.length > 0 && (
+        <Flex justifyContent="center" alignItems="center" w="100%" h="auto">
+          <Spinner size="lg" thickness="4px" speed="0.5s" />
+        </Flex>
       )}
     </Box>
   );

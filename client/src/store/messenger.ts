@@ -228,7 +228,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
       socket.emit('get-channel-messages', {
         channelId: currentChannel.id,
-        limit: 10,
+        limit: 20,
         page: currentPage,
       });
     } catch (error: any) {

@@ -8,7 +8,6 @@ import {
   passwordRules,
   tagRules,
   verifyCodeRules,
-
 } from '../validation/userDataRules';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -21,7 +20,6 @@ import mongoose from 'mongoose';
 import UserRole from '../models/user/userRoleModel';
 import Role from '../models/user/roleModel';
 import UserGroup from "../models/user/userGroupModel";
-
 
 class AuthController {
   private readonly accessTokenSecret: string;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/prefer-optional-chain */
 import {
   Modal,
   ModalOverlay,
@@ -15,6 +14,7 @@ import {
   Text,
   Input,
   Divider,
+  Spinner,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import useChannelUsersStore from '../store/channelusers';
@@ -37,6 +37,7 @@ const ChannelMembersModal = (): any => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
   const [currentChannelUsers, setCurrentChannelUsers] = useState<any>([]);
+  const [dataFetched, setDataFetched] = useState(false);
 
   const {
     setAxiosPrivate: setAxiosPrivateWorkspace,
@@ -68,12 +69,13 @@ const ChannelMembersModal = (): any => {
   }, [axiosPrivate]);
 
   const handleOpen = async (): Promise<void> => {
+    onOpen();
     await fetchAllUsers();
     await getWorkspaceUsers();
+    setDataFetched(true);
     console.log(
       channels.find((channel: any) => channel.id === currentChannel?.id)?.users
     );
-    onOpen();
   };
 
   const openProfileOnClick = async (userId: string): Promise<void> => {
@@ -93,7 +95,7 @@ const ChannelMembersModal = (): any => {
     ? workspaceUsers?.filter(
         (user: any) =>
           (user?.name?.toLowerCase().includes(searchQuery) ||
-            (user?.tag && user?.tag?.toLowerCase().includes(searchQuery))) &&
+            user?.tag?.toLowerCase()?.includes(searchQuery)) &&
           !isUserInDetails(user._id)
       )
     : [];
@@ -227,57 +229,68 @@ const ChannelMembersModal = (): any => {
               mb="3"
               mt="3"
             />
-            <List spacing={3}>
-              {selectedUsers?.map((user: any) => (
-                <ListItem key={user.userId}>
-                  <Flex
-                    align="center"
-                    cursor="pointer"
-                    onClick={() => {
-                      handleUserSelect(user);
-                    }}
-                  >
-                    <Image
-                      borderRadius="full"
-                      boxSize="40px"
-                      src={user.pfp_url || 'https://i.imgur.com/zPKzLoe.gif'}
-                      alt="Profile Image"
-                      mr="12px"
-                    />
-                    <Flex justifyContent={'space-between'} w="100%">
+            {!dataFetched ? (
+              <Flex
+                justifyContent="center"
+                alignItems="center"
+                w="100%"
+                h="auto"
+              >
+                <Spinner size="lg" thickness="4px" speed="0.5s" />
+              </Flex>
+            ) : (
+              <List spacing={3}>
+                {selectedUsers.map((user: any) => (
+                  <ListItem key={user.userId}>
+                    <Flex
+                      align="center"
+                      cursor="pointer"
+                      onClick={() => {
+                        handleUserSelect(user);
+                      }}
+                    >
+                      <Image
+                        borderRadius="full"
+                        boxSize="40px"
+                        src={user.pfp_url || 'https://i.imgur.com/zPKzLoe.gif'}
+                        alt="Profile Image"
+                        mr="12px"
+                      />
+                      <Flex justifyContent={'space-between'} w="100%">
+                        <Text fontWeight="bold">
+                          {user.name} {user.tag ? `@${user.tag}` : ''}
+                        </Text>
+                        <Text fontWeight="bold" color="#2EB67D">
+                          NEW
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </ListItem>
+                ))}
+                {userDetails.map((user: any) => (
+                  <ListItem key={user.userId}>
+                    <Flex
+                      align="center"
+                      cursor="pointer"
+                      onClick={() => {
+                        openProfileOnClick(user.userId);
+                      }}
+                    >
+                      <Image
+                        borderRadius="full"
+                        boxSize="40px"
+                        src={user.pfp_url || 'https://i.imgur.com/zPKzLoe.gif'}
+                        alt="Profile Image"
+                        mr="12px"
+                      />
                       <Text fontWeight="bold">
                         {user.name} {user.tag ? `@${user.tag}` : ''}
                       </Text>
-                      <Text fontWeight="bold" color="#2EB67D">
-                        NEW
-                      </Text>
                     </Flex>
-                  </Flex>
-                </ListItem>
-              ))}
-              {userDetails.map((user: any) => (
-                <ListItem key={user.userId}>
-                  <Flex
-                    align="center"
-                    cursor="pointer"
-                    onClick={() => {
-                      openProfileOnClick(user.userId);
-                    }}
-                  >
-                    <Image
-                      borderRadius="full"
-                      boxSize="40px"
-                      src={user.pfp_url || 'https://i.imgur.com/zPKzLoe.gif'}
-                      alt="Profile Image"
-                      mr="12px"
-                    />
-                    <Text fontWeight="bold">
-                      {user.name} {user.tag ? `@${user.tag}` : ''}
-                    </Text>
-                  </Flex>
-                </ListItem>
-              ))}
-            </List>
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </ModalBody>
         </ModalContent>
       </Modal>
