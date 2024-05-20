@@ -78,11 +78,7 @@ const Coworkers = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const {
-    register,
-    verify,
-    error: registerError,
-  } = useAuthStore(state => state);
+  const { verify, error: registerError } = useAuthStore(state => state);
 
   useEffect(() => {
     validate();
@@ -197,10 +193,12 @@ const Coworkers = (): JSX.Element => {
   const handleRegister = async (): Promise<void> => {
     if (validate()) {
       try {
-        await register({ name, email, password, verifyCode });
         await addWorkSpace({
+          name,
+          email,
+          password,
+          verifyCode,
           workSpaceName: organisationName,
-          ownerEmail: email,
           emailTemplates,
         });
         navigate('/reg/channels');
@@ -228,7 +226,7 @@ const Coworkers = (): JSX.Element => {
             mb="10px"
             color="zinc300"
           >
-            Register your <br /> {organisationName} workspace?
+            Register your <br /> {organisationName} workspace
           </Heading>
           <Box w="400px">
             <Input

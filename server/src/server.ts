@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import connectionHandler from "./socket-handlers/connectionHandler";
 import channelsHandler from "./socket-handlers/channelsHandler";
 import messagesHandler from "./socket-handlers/messagesHandler";
+import Role from "./models/user/roleModel";
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -44,7 +45,6 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
       throw new Error("Mongo URI is not provided");
     }
     await mongoose.connect(db.mongoUri);
-
     console.info("MongoDB connected");
   } catch (error) {
     console.error(error);

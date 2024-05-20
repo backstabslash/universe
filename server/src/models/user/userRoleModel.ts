@@ -1,8 +1,10 @@
 import { Schema, Document, model } from "mongoose";
+import { IUser } from "./userModel";
+import { IRole } from "./roleModel";
 
 export interface IUserRole extends Document {
-  user: Schema.Types.ObjectId;
-  role: Schema.Types.ObjectId;
+  user: IUser;
+  role: IRole;
 }
 
 const UserRoleSchema = new Schema<IUserRole>({
