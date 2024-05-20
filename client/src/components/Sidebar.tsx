@@ -63,7 +63,7 @@ const Sidebar = (): JSX.Element => {
         Channels
       </Heading>
       {channelList.length < 1 ? (
-        <Spinner size={'xl'} thickness="4px" speed="0.5s" color="zinc400" />
+        <Spinner size={'lg'} thickness="4px" speed="0.5s" color="zinc400" />
       ) : (
         <DragAndDropList
           itemLists={channelList}
