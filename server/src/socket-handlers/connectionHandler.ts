@@ -9,19 +9,20 @@ class ConnectionHandler {
         return;
       }
 
-      const userGroups = await UserGroup.find({ user: socket.data.userId }).populate({
+      let userGroups = await UserGroup.find({ user: socket.data.userId }).populate({
         path: "channels",
         select: "name _id",
       });
-      const result = userGroups.map(group => ({
+
+      const result = userGroups.map((group) => ({
         name: group.name,
-        items: group.channels.map(channel => ({
+        items: group.channels.map((channel) => ({
           id: channel.id,
           name: channel.name,
         })),
       }));
       const allChannelIds = userGroups.reduce<string[]>((acc, group) => {
-        group.channels.forEach(channel => acc.push(channel.id));
+        group.channels.forEach((channel) => acc.push(channel.id));
         return acc;
       }, []);
 

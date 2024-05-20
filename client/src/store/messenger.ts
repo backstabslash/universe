@@ -12,6 +12,7 @@ export interface ChannelMessages extends Channel {
   id: string;
   name: string;
   messages: UserMessage[];
+  page: number;
   users: any;
 }
 
@@ -24,7 +25,7 @@ export type UserMessage = Message & MessageInfo;
 
 export interface MessageInfo {
   id: string;
-  user: { id: string; name: string };
+  user: { _id: string; name: string };
   sendAt: number;
 }
 
@@ -53,14 +54,22 @@ interface MessengerState {
   socket: Socket | null;
   channelGroups: ChannelGroup[];
   channels: ChannelMessages[];
+  lastSentMessage: {
+    message: UserMessage | null;
+    channelId: string;
+  };
   currentChannel: Omit<Channel, 'messages'> | null;
   error: typeof Error | null;
   connectSocket: () => void;
   getChannelGroups: () => void;
   setCurrentChannel: (channel: Channel) => void;
-  getChannelMessages: (channelId: string) => void;
+  loadChannelMessages: () => void;
   sendMessage: (message: any) => void;
   recieveMessage: () => void;
+  onRecieveChannelMessages: (data: {
+    messages: UserMessage[];
+    users: any;
+  }) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -69,6 +78,10 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   channels: [],
   currentChannel: null,
   error: null,
+  lastSentMessage: {
+    message: null,
+    channelId: '',
+  },
 
   connectSocket: () => {
     try {
@@ -85,7 +98,9 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     try {
       const { socket } = get();
 
-      socket?.once('send-channels', channelGroups => {
+      if (!socket) return;
+
+      socket.once('send-channels', channelGroups => {
         const channels = channelGroups.flatMap((channelGroup: ChannelGroup) => {
           return channelGroup.items;
         });
@@ -100,9 +115,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   sendMessage: (message: UserMessage) => {
     const { socket, currentChannel, channels } = get();
 
-    if (!socket || !currentChannel?.id) {
-      return;
-    }
+    if (!socket || !currentChannel) return;
 
     const newMessage = {
       ...message,
@@ -113,16 +126,25 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
     let messageLink: UserMessage | undefined;
     for (const channel of channels) {
-      if (channel.id === currentChannel?.id) {
-        const messagesLength = channel.messages.push(newMessage);
-        messageLink = channel.messages[messagesLength - 1];
+      if (channel.id === currentChannel.id) {
+        if (!channel.messages) {
+          channel.messages = [];
+        }
+        channel.messages.unshift(newMessage);
+        messageLink = channel.messages[0];
       }
     }
 
     if (!messageLink) {
       return;
     }
-    set({ channels: [...channels] });
+    set({
+      channels: [...channels],
+      lastSentMessage: {
+        message: messageLink,
+        channelId: currentChannel.id,
+      },
+    });
 
     const timeout = setTimeout(() => {
       messageLink.status = MessageStatus.FAILED;
@@ -156,21 +178,31 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     try {
       const { socket } = get();
 
-      socket?.on('receive-message', (message: any): void => {
-        const { currentChannel, channels } = get();
+      if (!socket) return;
 
-        const updatedChannels = channels.map(channel => {
-          if (channel.id === currentChannel?.id) {
-            return {
-              ...channel,
-              messages: [...channel.messages, message],
-            };
-          }
-          return channel;
-        });
+      socket.on(
+        'receive-message',
+        (data: { channelId: string; message: UserMessage }): void => {
+          const { channels } = get();
 
-        set({ channels: updatedChannels, error: null });
-      });
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: [data.message, ...channel.messages],
+              };
+            }
+            return channel;
+          });
+          set({
+            channels: updatedChannels,
+            lastSentMessage: {
+              ...data,
+            },
+            error: null,
+          });
+        }
+      );
     } catch (error: any) {
       set({ error });
     }
@@ -185,29 +217,44 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
   },
 
-  getChannelMessages: (channelId: string): void => {
+  loadChannelMessages: (): void => {
     try {
-      const { socket, channels } = get();
+      const { socket, channels, currentChannel } = get();
 
-      if (!socket) return;
+      if (!socket || !currentChannel) return;
 
-      const onRecieveChannelMessages = (data: {
-        messages: UserMessage[];
-        users: any;
-      }): void => {
-        for (const channel of channels) {
-          if (channel.id === channelId) {
-            channel.messages = data.messages;
-            channel.users = data.users;
-          }
-        }
-        set({ channels: [...channels], error: null });
-      };
-      socket.once('recieve-channel-messages', onRecieveChannelMessages);
-      socket.emit('get-channel-messages', { channelId });
+      const currentPage =
+        channels.find(channel => channel.id === currentChannel.id)?.page ?? 0;
+
+      socket.emit('get-channel-messages', {
+        channelId: currentChannel.id,
+        limit: 10,
+        page: currentPage,
+      });
     } catch (error: any) {
       set({ error });
     }
+  },
+
+  onRecieveChannelMessages: (data: {
+    messages: UserMessage[];
+    users: any;
+  }): void => {
+    const { channels, currentChannel } = get();
+
+    const updatedChannels = channels.map(channel => {
+      if (channel.id === currentChannel?.id) {
+        return {
+          ...channel,
+          messages: [...(channel?.messages || []), ...data.messages],
+          page: channel.page ? channel.page + 1 : 1,
+          users: data.users,
+        };
+      }
+      return channel;
+    });
+
+    set({ channels: updatedChannels });
   },
 }));
 

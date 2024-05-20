@@ -1,11 +1,16 @@
 import { Box, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react';
 import useMessengerStore, {
-  UserMessage,
   MessageStatus,
+  UserMessage,
 } from '../store/messenger';
-
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import useAuthStore from '../store/auth';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 import {
   Element as EditorElement,
@@ -14,51 +19,118 @@ import {
   LeafProps,
   withInlines,
 } from './TextEditor';
-import { Editable, ReactEditor, Slate, withReact } from 'slate-react';
-import { withHistory } from 'slate-history';
+import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
-import styled from 'styled-components';
 
 const MessagesContainer = (): JSX.Element => {
-  const { channels, currentChannel } = useMessengerStore(state => state);
-
-  const [currentChannelMessages, setCurrentChannelMessages] = useState<
-    UserMessage[]
-  >([]);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const firstMessageRef = useRef<HTMLDivElement | null>(null);
+  const lastMessageRef = useRef<HTMLDivElement | null>(null);
+
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [messages, setMessages] = useState<UserMessage[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+
+  const {
+    channels,
+    socket,
+    currentChannel,
+    lastSentMessage,
+    loadChannelMessages,
+    onRecieveChannelMessages,
+  } = useMessengerStore(state => state);
+  const { userData } = useAuthStore(state => state);
 
   useEffect(() => {
-    setCurrentChannelMessages([
-      ...(channels.find(channel => channel.id === currentChannel?.id)
-        ?.messages ?? []),
-    ]);
-  }, [channels, currentChannel]);
+    const channelMessages: UserMessage[] | undefined = channels.find(
+      channel => channel.id === currentChannel?.id
+    )?.messages;
+    if (channelMessages && channelMessages.length > 0) {
+      setMessages([...channelMessages]);
+    } else {
+      setMessages([]);
+      loadChannelMessages();
+    }
+  }, [currentChannel]);
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior: 'smooth',
+    const channelMessagesHandler = (data: {
+      messages: UserMessage[];
+      hasMoreMessages: boolean;
+      users: any;
+    }): void => {
+      setHasMoreMessages(data.hasMoreMessages);
+      setMessages(prevMessages => [...prevMessages, ...data.messages]);
+      onRecieveChannelMessages(data);
+    };
+
+    socket?.on('recieve-channel-messages', channelMessagesHandler);
+
+    return () => {
+      socket?.off('recieve-channel-messages', channelMessagesHandler);
+    };
+  }, [socket, channels, currentChannel, onRecieveChannelMessages]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !messagesLoading && hasMoreMessages) {
+          setMessagesLoading(true);
+          loadChannelMessages();
+          setMessagesLoading(false);
+        }
+      },
+      {
+        root: null,
+        rootMargin: '-100px 0px 0px 0px',
+        threshold: 0,
+      }
+    );
+
+    if (firstMessageRef.current) {
+      observer.observe(firstMessageRef.current);
+    }
+
+    return () => {
+      if (firstMessageRef.current) {
+        observer.unobserve(firstMessageRef.current);
+      }
+    };
+  }, [messagesLoading, loadChannelMessages, messages]);
+
+  useEffect(() => {
+    if (
+      lastSentMessage &&
+      lastSentMessage.message &&
+      lastSentMessage.channelId === currentChannel?.id
+    ) {
+      setMessages(prevMessages => {
+        if (lastSentMessage.message) {
+          return [lastSentMessage.message, ...prevMessages];
+        }
+        return prevMessages;
       });
     }
-  }, [currentChannelMessages]);
+  }, [lastSentMessage]);
 
   const renderElement = useCallback(
     (props: ElementProps) => <EditorElement {...props} />,
     []
   );
+
   const renderLeaf = useCallback(
     (props: LeafProps) => <EditorLeaf {...props} />,
     []
   );
-  const editors = useMemo(
-    () =>
-      currentChannelMessages.map(() =>
-        withInlines(withReact(withHistory(createEditor())))
-      ),
-    [currentChannelMessages]
-  );
+
+  const editorsMap = useMemo(() => {
+    const map = new Map();
+    messages.forEach(message => {
+      const editor = withInlines(withReact(createEditor()));
+      map.set(message.id, editor);
+    });
+    return map;
+  }, [messages]);
 
   return (
     <Box
@@ -71,38 +143,48 @@ const MessagesContainer = (): JSX.Element => {
       bgRepeat="no-repeat"
       bgPosition="center"
       pb={'18px'}
+      display="flex"
+      flexDirection="column-reverse"
     >
-      {currentChannelMessages.length > 0 &&
-        currentChannelMessages.map((message, index) => {
-          const StyledEditable = styled(Editable)`
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-all;
-            white-space: normal;
-          `;
-          return (
+      {messagesLoading && <Spinner />}
+      {messages.map((message, index) => {
+        return (
+          <React.Fragment key={message.id}>
+            {index === messages.length - 1 && <Box ref={firstMessageRef}></Box>}
+            {index === messages.length - (messages.length - 1) && (
+              <Box ref={lastMessageRef}></Box>
+            )}
             <HStack
-              key={index}
+              alignSelf={`${message.user._id === userData?.userId ? 'end' : 'start'}`}
               spacing={'10px'}
               p={'5px 10px 5px 10px'}
-              bg={'zinc800'}
+              bg={`${message.user._id === userData?.userId ? 'zinc700' : 'zinc800'}`}
               borderRadius="md"
               boxShadow="md"
               color="zinc300"
               mt="18px"
               ml="18px"
+              mr="18px"
               width="fit-content"
             >
               <VStack mb={'8px'} spacing={0}>
-                <HStack alignSelf="start">
-                  <Text color="zinc400">{message?.user?.name}</Text>
+                <HStack alignSelf={'start'}>
+                  {message.user._id === userData?.userId ? null : (
+                    <Text color="zinc400">{message.user.name}</Text>
+                  )}
                 </HStack>
                 <HStack>
                   <Slate
-                    editor={editors[index] as ReactEditor}
-                    initialValue={message?.textContent}
+                    editor={editorsMap.get(message.id)}
+                    initialValue={message.textContent}
                   >
-                    <StyledEditable
+                    <Editable
+                      style={{
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-all',
+                        whiteSpace: 'normal',
+                      }}
                       renderElement={renderElement}
                       renderLeaf={renderLeaf}
                       readOnly
@@ -112,7 +194,7 @@ const MessagesContainer = (): JSX.Element => {
               </VStack>
               <VStack alignSelf={'end'}>
                 <HStack spacing={'5px'}>
-                  <Text color="zinc600">
+                  <Text color="zinc500">
                     {new Date(message.sendAt).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -132,8 +214,18 @@ const MessagesContainer = (): JSX.Element => {
                 </HStack>
               </VStack>
             </HStack>
-          );
-        })}
+          </React.Fragment>
+        );
+      })}
+      {messagesLoading && (
+        <Spinner
+          size="lg"
+          position="absolute"
+          top="10px"
+          left="50%"
+          transform="translateX(-50%)"
+        />
+      )}
     </Box>
   );
 };
