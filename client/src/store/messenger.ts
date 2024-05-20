@@ -25,7 +25,7 @@ export type UserMessage = Message & MessageInfo;
 
 export interface MessageInfo {
   id: string;
-  user: { id: string; name: string };
+  user: { _id: string; name: string };
   sendAt: number;
 }
 
@@ -64,7 +64,7 @@ interface MessengerState {
   sendMessage: (message: any) => void;
   recieveMessage: () => void;
   onRecieveChannelMessages: (data: {
-    newMessages: UserMessage[];
+    messages: UserMessage[];
     users: any;
   }) => void;
 }
@@ -216,7 +216,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   },
 
   onRecieveChannelMessages: (data: {
-    newMessages: UserMessage[];
+    messages: UserMessage[];
     users: any;
   }): void => {
     const { channels, currentChannel } = get();
@@ -225,7 +225,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       if (channel.id === currentChannel?.id) {
         return {
           ...channel,
-          messages: [...(channel?.messages || []), ...data.newMessages],
+          messages: [...(channel?.messages || []), ...data.messages],
           page: channel.page ? channel.page + 1 : 1,
           users: data.users,
         };

@@ -3,9 +3,14 @@ import useMessengerStore, {
   MessageStatus,
   UserMessage,
 } from '../store/messenger';
-
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import useAuthStore from '../store/auth';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 import {
   Element as EditorElement,
@@ -16,13 +21,13 @@ import {
 } from './TextEditor';
 import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
-import styled from 'styled-components';
 
 const MessagesContainer = (): JSX.Element => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
 
@@ -34,6 +39,7 @@ const MessagesContainer = (): JSX.Element => {
     loadChannelMessages,
     onRecieveChannelMessages,
   } = useMessengerStore(state => state);
+  const { userData } = useAuthStore(state => state);
 
   useEffect(() => {
     if (
@@ -54,9 +60,14 @@ const MessagesContainer = (): JSX.Element => {
   }, [currentChannel]);
 
   useEffect(() => {
-    const channelMessagesHandler = (newMessages: UserMessage[]): void => {
-      setMessages(prevMessages => [...newMessages, ...prevMessages]);
-      onRecieveChannelMessages(newMessages);
+    const channelMessagesHandler = (data: {
+      messages: UserMessage[];
+      hasMoreMessages: boolean;
+      users: any;
+    }): void => {
+      setHasMoreMessages(data.hasMoreMessages);
+      setMessages(prevMessages => [...data.messages, ...prevMessages]);
+      onRecieveChannelMessages(data);
     };
 
     socket?.on('recieve-channel-messages', channelMessagesHandler);
@@ -69,7 +80,7 @@ const MessagesContainer = (): JSX.Element => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !messagesLoading) {
+        if (entry.isIntersecting && !messagesLoading && hasMoreMessages) {
           setMessagesLoading(true);
           loadChannelMessages();
           setMessagesLoading(false);
@@ -95,7 +106,7 @@ const MessagesContainer = (): JSX.Element => {
 
   useEffect(() => {
     if (containerRef.current && lastMessageRef.current) {
-      containerRef.current.scrollTop = lastMessageRef.current.offsetTop;
+      containerRef.current.scrollTop = 0;
     }
   }, [lastSentMessage]);
 
@@ -113,7 +124,7 @@ const MessagesContainer = (): JSX.Element => {
     const map = new Map();
     messages.forEach(message => {
       const editor = withInlines(withReact(createEditor()));
-      map.set(message._id, editor);
+      map.set(message.id, editor);
     });
     return map;
   }, [messages]);
@@ -134,70 +145,78 @@ const MessagesContainer = (): JSX.Element => {
     >
       {messagesLoading && <Spinner />}
       {messages.map((message, index) => {
-        const StyledEditable = styled(Editable)`
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          word-break: break-all;
-          white-space: normal;
-        `;
         return (
-          <>
-            {index === messages.length - 1 && <Box ref={firstMessageRef}></Box>}
-            {index === messages.length - (messages.length - 1) && (
-              <Box ref={lastMessageRef}></Box>
-            )}
-            <HStack
-              key={message._id}
-              spacing={'10px'}
-              p={'5px 10px 5px 10px'}
-              bg={'zinc800'}
-              borderRadius="md"
-              boxShadow="md"
-              color="zinc300"
-              mt="18px"
-              ml="18px"
-              width="fit-content"
-            >
-              <VStack mb={'8px'} spacing={0}>
-                <HStack alignSelf="start">
-                  <Text color="zinc400">{message?.user?.name}</Text>
-                </HStack>
-                <HStack>
-                  <Slate
-                    editor={editorsMap.get(message._id)}
-                    initialValue={message.textContent}
-                  >
-                    <StyledEditable
-                      renderElement={renderElement}
-                      renderLeaf={renderLeaf}
-                      readOnly
-                    />
-                  </Slate>
-                </HStack>
-              </VStack>
-              <VStack alignSelf={'end'}>
-                <HStack spacing={'5px'}>
-                  <Text color="zinc600">
-                    {new Date(message.sendAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
-                  {message.status === MessageStatus.FAILED ? (
-                    <Icon
-                      fontSize={'20px'}
-                      as={ClearIcon}
-                      color="red.500"
-                      cursor="pointer"
-                      onClick={() => {}}
-                    />
-                  ) : message.status === MessageStatus.SENDING ? (
-                    <Spinner size={'xs'} />
-                  ) : null}
-                </HStack>
-              </VStack>
-            </HStack>
-          </>
+          console.log(message.user, userData?.userId),
+          (
+            <React.Fragment key={message.id}>
+              {index === messages.length - 1 && (
+                <Box ref={firstMessageRef}></Box>
+              )}
+              {index === messages.length - (messages.length - 1) && (
+                <Box ref={lastMessageRef}></Box>
+              )}
+              <HStack
+                alignSelf={`${message.user._id === userData?.userId ? 'end' : 'start'}`}
+                spacing={'10px'}
+                p={'5px 10px 5px 10px'}
+                bg={`${message.user._id === userData?.userId ? 'zinc700' : 'zinc800'}`}
+                borderRadius="md"
+                boxShadow="md"
+                color="zinc300"
+                mt="18px"
+                ml="18px"
+                mr="18px"
+                width="fit-content"
+              >
+                <VStack mb={'8px'} spacing={0}>
+                  <HStack alignSelf={'start'}>
+                    {message.user._id === userData?.userId ? null : (
+                      <Text color="zinc400">{message.user.name}</Text>
+                    )}
+                  </HStack>
+                  <HStack>
+                    <Slate
+                      editor={editorsMap.get(message.id)}
+                      initialValue={message.textContent}
+                    >
+                      <Editable
+                        style={{
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          wordBreak: 'break-all',
+                          whiteSpace: 'normal',
+                        }}
+                        renderElement={renderElement}
+                        renderLeaf={renderLeaf}
+                        readOnly
+                      />
+                    </Slate>
+                  </HStack>
+                </VStack>
+                <VStack alignSelf={'end'}>
+                  <HStack spacing={'5px'}>
+                    <Text color="zinc500">
+                      {new Date(message.sendAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                    {message.status === MessageStatus.FAILED ? (
+                      <Icon
+                        fontSize={'20px'}
+                        as={ClearIcon}
+                        color="red.500"
+                        cursor="pointer"
+                        onClick={() => {}}
+                      />
+                    ) : message.status === MessageStatus.SENDING ? (
+                      <Spinner size={'xs'} />
+                    ) : null}
+                  </HStack>
+                </VStack>
+              </HStack>
+            </React.Fragment>
+          )
         );
       })}
       {messagesLoading && (
