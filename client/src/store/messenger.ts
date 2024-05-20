@@ -54,7 +54,10 @@ interface MessengerState {
   socket: Socket | null;
   channelGroups: ChannelGroup[];
   channels: ChannelMessages[];
-  lastSentMessage: UserMessage | null;
+  lastSentMessage: {
+    message: UserMessage | null;
+    channelId: string;
+  };
   currentChannel: Omit<Channel, 'messages'> | null;
   error: typeof Error | null;
   connectSocket: () => void;
@@ -75,7 +78,10 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   channels: [],
   currentChannel: null,
   error: null,
-  lastSentMessage: null,
+  lastSentMessage: {
+    message: null,
+    channelId: '',
+  },
 
   connectSocket: () => {
     try {
@@ -132,7 +138,13 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     if (!messageLink) {
       return;
     }
-    set({ channels: [...channels], lastSentMessage: messageLink });
+    set({
+      channels: [...channels],
+      lastSentMessage: {
+        message: messageLink,
+        channelId: currentChannel.id,
+      },
+    });
 
     const timeout = setTimeout(() => {
       messageLink.status = MessageStatus.FAILED;
@@ -168,20 +180,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
       if (!socket) return;
 
-      socket.on('receive-message', (message: any): void => {
-        const { currentChannel, channels } = get();
-        const updatedChannels = channels.map(channel => {
-          if (channel.id === currentChannel?.id) {
-            return {
-              ...channel,
-              messages: [...channel.messages, message],
-            };
-          }
-          return channel;
-        });
+      socket.on(
+        'receive-message',
+        (data: { channelId: string; message: UserMessage }): void => {
+          const { channels } = get();
 
-        set({ channels: updatedChannels, error: null });
-      });
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: [data.message, ...channel.messages],
+              };
+            }
+            return channel;
+          });
+          set({
+            channels: updatedChannels,
+            lastSentMessage: {
+              ...data,
+            },
+            error: null,
+          });
+        }
+      );
     } catch (error: any) {
       set({ error });
     }

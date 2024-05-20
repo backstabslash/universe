@@ -6,7 +6,7 @@ type Message = {
   textContent: any;
   sendAt: number;
   attachments: any;
-  user: { id: string; name: string };
+  user: { _id: string; name: string };
 };
 class MessagesHandler {
   async sendMessage(
@@ -30,11 +30,14 @@ class MessagesHandler {
       callback({ status: "success", message: "Message sent" });
 
       socket.broadcast.to(data.channelId).emit("receive-message", {
-        id: message.id,
-        textContent: message.textContent,
-        sendAt: message.sendAt,
-        attachments: message.attachments,
-        user: message.user,
+        message: {
+          id: message.id,
+          textContent: message.textContent,
+          sendAt: message.sendAt,
+          attachments: message.attachments,
+          user: data.message.user,
+        },
+        channelId: data.channelId,
       });
     } catch (error) {
       callback({ status: "error", message: "Error sending message" });

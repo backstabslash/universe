@@ -69,7 +69,7 @@ const MessagesContainer = (): JSX.Element => {
     return () => {
       socket?.off('recieve-channel-messages', channelMessagesHandler);
     };
-  }, [socket, channels, onRecieveChannelMessages]);
+  }, [socket, channels, currentChannel, onRecieveChannelMessages]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -99,12 +99,17 @@ const MessagesContainer = (): JSX.Element => {
   }, [messagesLoading, loadChannelMessages, messages]);
 
   useEffect(() => {
-    if (lastSentMessage) {
-      setMessages(prevMessages => [lastSentMessage, ...prevMessages]);
-    }
-
-    if (containerRef.current && lastMessageRef.current) {
-      containerRef.current.scrollTop = 0;
+    if (
+      lastSentMessage &&
+      lastSentMessage.message &&
+      lastSentMessage.channelId === currentChannel?.id
+    ) {
+      setMessages(prevMessages => {
+        if (lastSentMessage.message) {
+          return [lastSentMessage.message, ...prevMessages];
+        }
+        return prevMessages;
+      });
     }
   }, [lastSentMessage]);
 
