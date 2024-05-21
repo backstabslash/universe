@@ -7,15 +7,12 @@ import {
   Button,
   Spinner,
   Image,
-  Text,
 } from '@chakra-ui/react';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import PersonIcon from '@mui/icons-material/Person';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
 import useWorkSpaceStore from '../store/workSpace';
-import useAuthStore from '../store/auth';
 
 const Sidebar = (): JSX.Element => {
   const { channelGroups, setCurrentChannel, dmsWithUsers } = useMessengerStore(
@@ -23,7 +20,6 @@ const Sidebar = (): JSX.Element => {
   );
   const [conversationList, setConversationList] = useState<ChannelGroup[]>([]);
   const { workSpaceData } = useWorkSpaceStore(state => state);
-  const { userData } = useAuthStore(state => state);
 
   const onChannelClick = (id: string, name: string, userId: string): void => {
     setCurrentChannel(id, name, userId);
@@ -100,27 +96,18 @@ const Sidebar = (): JSX.Element => {
             onChannelClick(dm.channel, dm.user.name, dm.user._id);
           }}
         >
-          {dm.user._id !== userData?.userId ? (
-            <>
-              <Image
-                borderRadius="full"
-                src={
-                  dm.user.pfp_url
-                    ? dm.user.pfp_url
-                    : 'https://i.imgur.com/zPKzLoe.gif'
-                }
-                alt="Profile icon"
-                objectFit="cover"
-                boxSize="30px"
-              />
-              {`${dm.user.name}`}
-            </>
-          ) : (
-            <>
-              <PersonIcon />
-              <Text>You</Text>
-            </>
-          )}
+          <Image
+            borderRadius="full"
+            src={
+              dm.user.pfp_url
+                ? dm.user.pfp_url
+                : 'https://i.imgur.com/zPKzLoe.gif'
+            }
+            alt="Profile icon"
+            objectFit="cover"
+            boxSize="30px"
+          />
+          {`${dm.user.name}`}
         </Button>
       ))}
     </VStack>

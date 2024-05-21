@@ -31,11 +31,10 @@ class ConnectionHandler {
         return acc;
       }, []);
 
-
       const userChannels = await ChannelUser.find({ user: socket.data.userId }).populate("channel");
-      const dms = userChannels.map(userChannel => {
+      const dms = userChannels.map((userChannel) => {
         if (userChannel.channel.type === ChannelType.DM) {
-          return userChannel.channel.id
+          return userChannel.channel.id;
         }
       });
       const dmsWithUsers = await ChannelUser.find({ channel: { $in: dms } }).populate({
@@ -44,18 +43,22 @@ class ConnectionHandler {
       });
       const filteredDms: any[] = [];
       for (const dmWithUser of dmsWithUsers) {
-        const alreadyInFilteredDm = filteredDms.find(filteredDm => filteredDm.channel.toString() === dmWithUser.channel.toString())
-        if (alreadyInFilteredDm) continue
-        const dublicateDm = dmsWithUsers.find(dm => dmWithUser.channel.toString() === dm.channel.toString() && dmWithUser.id !== dm.id)
+        const alreadyInFilteredDm = filteredDms.find(
+          (filteredDm) => filteredDm.channel.toString() === dmWithUser.channel.toString()
+        );
+        if (alreadyInFilteredDm) continue;
+        const dublicateDm = dmsWithUsers.find(
+          (dm) => dmWithUser.channel.toString() === dm.channel.toString() && dmWithUser.id !== dm.id
+        );
 
         if (dublicateDm && dublicateDm.user.id !== socket.data.userId) {
-          filteredDms.push(dublicateDm)
+          filteredDms.push(dublicateDm);
         } else {
-          filteredDms.push(dmWithUser)
+          filteredDms.push(dmWithUser);
         }
       }
 
-      const dmsForLastMessage = filteredDms.map(dmsWithUser => dmsWithUser.channel)
+      const dmsForLastMessage = filteredDms.map((dmsWithUser) => dmsWithUser.channel);
       const latestMessages = await Message.aggregate([
         {
           $match: {
@@ -82,17 +85,27 @@ class ConnectionHandler {
 
       latestMessages.sort((a, b) => b.sendAt - a.sendAt);
 
-      const latestChannelIds = latestMessages.map(message => message.channel.toString());
+      const latestChannelIds = latestMessages.map((message) => message.channel.toString());
 
       filteredDms.sort((a, b) => {
         const channelAIndex = latestChannelIds.indexOf(a.channel.toString());
         const channelBIndex = latestChannelIds.indexOf(b.channel.toString());
         return channelAIndex - channelBIndex;
       });
-      const dmsIds = filteredDms.map(dmsWithUser => dmsWithUser.channel.toString())
+
+      const dmsIds = filteredDms.map((dmsWithUser) => dmsWithUser.channel.toString());
+
+      const notesChannel = filteredDms.find((dm) => dm.user.id === socket.data.userId);
 
       socket.join(allChannelIds.concat(dmsIds));
-      socket.emit("send-channels", { channelGroups, dmsWithUsers: filteredDms });
+      socket.emit("send-channels", {
+        channelGroups,
+        dmsWithUsers: filteredDms.filter((dm) => dm.user.id !== socket.data.userId),
+        notesChannel: {
+          id: notesChannel.channel,
+          name: "Notes",
+        },
+      });
     } catch (error) {
       console.error(error);
     }

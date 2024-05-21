@@ -48,13 +48,16 @@ const MainContent = (): JSX.Element => {
   const {
     socket,
     currentChannel,
+    notesChannel,
+    channelGroups,
     connectSocket,
     getChannelGroups,
     sendMessage,
+    setCurrentChannel,
     recieveMessage,
   } = useMessengerStore(state => state);
 
-  const { logout, userData: authData } = useAuthStore(state => state);
+  const { logout, userData } = useAuthStore(state => state);
   const { getWorkspaceData, workSpaceData, updateAvatar } = useWorkSpaceStore(
     state => state
   );
@@ -98,7 +101,7 @@ const MainContent = (): JSX.Element => {
     useUserStore(state => state);
 
   const handleOpenModal = (): void => {
-    if (workSpaceData?.ownerId === authData?.userId) {
+    if (workSpaceData?.ownerId === userData?.userId) {
       setError('');
       if (workSpaceData) {
         setFormData({
@@ -131,6 +134,22 @@ const MainContent = (): JSX.Element => {
     await setAxiosPrivate(axiosPrivate);
     if (userId) await fetchUserById(userId);
     setIsUserProfileVisible(true);
+  };
+
+  const openCurrentUserProfile = async (): Promise<void> => {
+    await fetchUserById(userData?.userId ?? '');
+    setIsUserProfileVisible(true);
+  };
+
+  const handleClickHome = (): void => {
+    setCurrentChannel(
+      channelGroups[0].items[0].id,
+      channelGroups[0].items[0].name
+    );
+  };
+
+  const openNotes = (): void => {
+    setCurrentChannel(notesChannel.id, notesChannel.name);
   };
 
   return (
@@ -171,9 +190,10 @@ const MainContent = (): JSX.Element => {
               <Button
                 p="1"
                 color={'zinc300'}
-                bg="rgba(0, 0, 0, 0.3)"
+                bg={`${currentChannel?.id !== notesChannel.id ? 'rgba(0, 0, 0, 0.3)' : 'transparent'}`}
                 _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                onClick={handleClickHome}
               >
                 <CottageIcon fontSize="medium" />
               </Button>
@@ -187,13 +207,14 @@ const MainContent = (): JSX.Element => {
               <Button
                 p="1"
                 color={'zinc300'}
-                bg="transparent"
+                bg={`${currentChannel?.id === notesChannel.id ? 'rgba(0, 0, 0, 0.3)' : 'transparent'}`}
                 _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
+                onClick={openNotes}
               >
                 <InboxIcon fontSize="medium" />
               </Button>
-              <Text fontSize={'xs'}>Activity</Text>
+              <Text fontSize={'xs'}>Notes</Text>
             </Flex>
             <Flex
               flexDirection={'column'}
@@ -232,16 +253,15 @@ const MainContent = (): JSX.Element => {
               _hover={{ background: 'rgba(0, 0, 0, 0)' }}
               _active={{ background: 'rgba(0, 0, 0, 0)' }}
               onClick={() => {
-                fetchUserById(authData?.userId ?? '');
-                setIsUserProfileVisible(true);
+                openCurrentUserProfile();
               }}
             >
               <Image
                 w="50px"
                 h="50px"
                 src={
-                  authData?.pfp_url
-                    ? authData.pfp_url
+                  userData?.pfp_url
+                    ? userData.pfp_url
                     : 'https://i.imgur.com/zPKzLoe.gif'
                 }
                 alt="Profile banner"
@@ -277,11 +297,10 @@ const MainContent = (): JSX.Element => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                {!currentChannel?.user?._id ? (
+                {!currentChannel?.user?._id &&
+                currentChannel?.id !== notesChannel.id ? (
                   <>
-                    <Text fontWeight={'bold'}>
-                      {currentChannel && `#${currentChannel?.name}`}
-                    </Text>
+                    <Text fontWeight={'bold'}>#{currentChannel?.name}</Text>
                     <Flex>
                       <ChannelMembersModal />
                       <Button
@@ -312,7 +331,7 @@ const MainContent = (): JSX.Element => {
                         openProfileOnClick(currentChannel?.user?._id);
                       }}
                     >
-                      {currentChannel && `#${currentChannel?.name}`}
+                      {currentChannel && `${currentChannel?.name}`}
                     </Button>
                   </HStack>
                 )}

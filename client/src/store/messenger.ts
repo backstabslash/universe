@@ -58,6 +58,7 @@ interface MessengerState {
   socket: Socket | null;
   channelGroups: ChannelGroup[];
   dmsWithUsers: DmWithUser[];
+  notesChannel: Channel;
   channels: ChannelMessages[];
   lastSentMessage: {
     message: UserMessage | null;
@@ -81,6 +82,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   socket: null,
   channelGroups: [],
   dmsWithUsers: [],
+  notesChannel: { id: '', name: 'Notes' },
   channels: [],
   currentChannel: null,
   error: null,
@@ -117,10 +119,15 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             return { id: dm.channel };
           })
         );
+        channels.push(data.notesChannel);
 
         set({
           channelGroups: data.channelGroups,
           dmsWithUsers: data.dmsWithUsers,
+          notesChannel: data.notesChannel,
+          currentChannel: {
+            ...data.notesChannel,
+          },
           channels,
           error: null,
         });
