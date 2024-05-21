@@ -17,6 +17,8 @@ import UserRole from '../models/user/userRoleModel';
 import UserGroup from '../models/user/userGroupModel';
 import UserVerifyCode from '../models/user/userVerifyCodeModel';
 import bcrypt from 'bcrypt';
+import Channel, { ChannelType } from '../models/channel/channelModel';
+import ChannelUser from '../models/channel/channelUserModel';
 
 class WorkSpacerController {
   async checkName(req: Request, res: Response) {
@@ -117,12 +119,25 @@ class WorkSpacerController {
       });
       await newUserRole.save({ session });
 
+      const newChannel = new Channel({
+        name: name + ' dm',
+        owner: savedUser?._id,
+        type: ChannelType.DM,
+        private: true,
+        readonly: false
+      })
+      await newChannel.save({ session });
+
+      const savedChannel = await Channel.findOne({ owner: savedUser?._id }).session(session);
+      const newChannelUser = new ChannelUser({
+        user: savedUser?._id,
+        channel: savedChannel?._id
+      })
       await existingUserVerifyCode?.deleteOne({ session });
 
-      const owner = await User.findOne({ email }).session(session);
       const newWorkSpace = new WorkSpace({
         workSpaceName,
-        owner: owner?._id,
+        owner: savedUser?._id,
         emailTemplates,
       });
       await newWorkSpace.save({ session });
@@ -130,7 +145,7 @@ class WorkSpacerController {
       const workspace = await WorkSpace.findOne({ workSpaceName }).session(session);
       const newWorkSpaceUser = new WorkspaceUser({
         workspace: workspace?._id,
-        user: owner?._id,
+        user: savedUser?._id,
       });
       await newWorkSpaceUser.save({ session });
 
