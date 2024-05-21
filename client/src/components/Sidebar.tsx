@@ -1,30 +1,32 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { VStack, Heading, Flex, Box, Button, Spinner } from '@chakra-ui/react';
+import {
+  VStack,
+  Heading,
+  Flex,
+  Box,
+  Button,
+  Spinner,
+  Image,
+} from '@chakra-ui/react';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import PersonIcon from '@mui/icons-material/Person';
 import DragAndDropList from './custom-elements/DragAndDropList';
-import useMessengerStore, { Channel, ChannelGroup } from '../store/messenger';
+import useMessengerStore, { ChannelGroup } from '../store/messenger';
 import useWorkSpaceStore from '../store/workSpace';
 
-const directMessages = ['user1', 'user2', 'user3'];
-
 const Sidebar = (): JSX.Element => {
-  const navigate = useNavigate();
-
-  const { channelGroups, setCurrentChannel } = useMessengerStore(
+  const { channelGroups, setCurrentChannel, dmsWithUsers } = useMessengerStore(
     state => state
   );
-  const [channelList, setChannelList] = useState<ChannelGroup[]>([]);
+  const [conversationList, setConversationList] = useState<ChannelGroup[]>([]);
   const { workSpaceData } = useWorkSpaceStore(state => state);
 
-  const onChannelClick = (channel: Channel): void => {
-    setCurrentChannel(channel);
+  const onChannelClick = (id: string, name: string, userId: string): void => {
+    setCurrentChannel(id, name, userId);
   };
 
   useEffect(() => {
-    setChannelList(channelGroups);
+    setConversationList(channelGroups);
   }, [channelGroups]);
 
   return (
@@ -62,12 +64,12 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Channels
       </Heading>
-      {channelList.length < 1 ? (
+      {conversationList.length === 0 ? (
         <Spinner size={'lg'} thickness="4px" speed="0.5s" color="zinc400" />
       ) : (
         <DragAndDropList
-          itemLists={channelList}
-          setItemLists={setChannelList}
+          itemLists={conversationList}
+          setItemLists={setConversationList}
           onItemClick={onChannelClick}
         />
       )}
@@ -75,9 +77,9 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" mt="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Direct Messages
       </Heading>
-      {directMessages.map(user => (
+      {dmsWithUsers?.map(dm => (
         <Button
-          key={user}
+          key={dm.channel}
           p="2"
           borderRadius="md"
           background="rgba(0, 0, 0, 0.1)"
@@ -91,11 +93,21 @@ const Sidebar = (): JSX.Element => {
           justifyContent={'flex-start'}
           gap="5px"
           onClick={() => {
-            navigate(`${user}`);
+            onChannelClick(dm.channel, dm.user.name, dm.user._id);
           }}
         >
-          <PersonIcon fontSize="small" />
-          {`${user}`}
+          <Image
+            borderRadius="full"
+            src={
+              dm.user.pfp_url
+                ? dm.user.pfp_url
+                : 'https://i.imgur.com/zPKzLoe.gif'
+            }
+            alt="Profile icon"
+            objectFit="cover"
+            boxSize="30px"
+          />
+          {`${dm.user.name}`}
         </Button>
       ))}
     </VStack>

@@ -33,6 +33,8 @@ class ChannelsHandler {
         channel: data.channelId,
       }).populate("user", "name id");
 
+
+
       socket.emit("recieve-channel-messages", {
         messages: formattedMessages,
         hasMoreMessages,

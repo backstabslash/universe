@@ -7,10 +7,13 @@ export interface ChannelGroup {
   name: string;
   items: Array<Omit<Channel, 'messages'>>;
 }
+export interface DmWithUser {
+  channel: string;
+  user: { _id: string; name: string; pfp_url: string };
+}
 
 export interface ChannelMessages extends Channel {
   id: string;
-  name: string;
   messages: UserMessage[];
   page: number;
   users: any;
@@ -19,6 +22,7 @@ export interface ChannelMessages extends Channel {
 export interface Channel {
   id: string;
   name: string;
+  user?: { _id?: string };
 }
 
 export type UserMessage = Message & MessageInfo;
@@ -53,6 +57,8 @@ interface SocketResponse {
 interface MessengerState {
   socket: Socket | null;
   channelGroups: ChannelGroup[];
+  dmsWithUsers: DmWithUser[];
+  notesChannel: Channel;
   channels: ChannelMessages[];
   lastSentMessage: {
     message: UserMessage | null;
@@ -62,7 +68,7 @@ interface MessengerState {
   error: typeof Error | null;
   connectSocket: () => void;
   getChannelGroups: () => void;
-  setCurrentChannel: (channel: Channel) => void;
+  setCurrentChannel: (id: string, name: string, userId?: string) => void;
   loadChannelMessages: () => void;
   sendMessage: (message: any) => void;
   recieveMessage: () => void;
@@ -75,6 +81,8 @@ interface MessengerState {
 const useMessengerStore = create<MessengerState>((set, get) => ({
   socket: null,
   channelGroups: [],
+  dmsWithUsers: [],
+  notesChannel: { id: '', name: 'Notes' },
   channels: [],
   currentChannel: null,
   error: null,
@@ -100,12 +108,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
       if (!socket) return;
 
-      socket.once('send-channels', channelGroups => {
-        const channels = channelGroups.flatMap((channelGroup: ChannelGroup) => {
-          return channelGroup.items;
-        });
+      socket.once('send-channels', data => {
+        const channels = data.channelGroups.flatMap(
+          (channelGroup: ChannelGroup) => {
+            return channelGroup.items;
+          }
+        );
+        channels.push(
+          ...data.dmsWithUsers.map((dm: DmWithUser) => {
+            return { id: dm.channel };
+          })
+        );
+        channels.push(data.notesChannel);
 
-        set({ channelGroups, channels, error: null });
+        set({
+          channelGroups: data.channelGroups,
+          dmsWithUsers: data.dmsWithUsers,
+          notesChannel: data.notesChannel,
+          currentChannel: {
+            ...data.notesChannel,
+          },
+          channels,
+          error: null,
+        });
       });
     } catch (error: any) {
       set({ error });
@@ -113,7 +138,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   },
 
   sendMessage: (message: UserMessage) => {
-    const { socket, currentChannel, channels } = get();
+    const { socket, currentChannel, channels, dmsWithUsers } = get();
 
     if (!socket || !currentChannel) return;
 
@@ -159,7 +184,16 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       },
       (response: SocketResponse) => {
         clearTimeout(timeout);
-
+        const updatedDm = dmsWithUsers.find(
+          dm => dm.channel === currentChannel.id
+        );
+        const updatedDmIndex = dmsWithUsers.findIndex(
+          dm => dm.channel === currentChannel.id
+        );
+        if (updatedDm) {
+          dmsWithUsers.splice(updatedDmIndex, 1);
+          set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] });
+        }
         if (response.status === 'error') {
           messageLink.status = MessageStatus.FAILED;
           set({
@@ -183,10 +217,13 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       socket.on(
         'receive-message',
         (data: { channelId: string; message: UserMessage }): void => {
-          const { channels } = get();
+          const { channels, dmsWithUsers } = get();
 
           const updatedChannels = channels.map(channel => {
             if (channel.id === data.channelId) {
+              if (!channel.messages) {
+                channel.messages = [];
+              }
               return {
                 ...channel,
                 messages: [data.message, ...channel.messages],
@@ -194,6 +231,17 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             }
             return channel;
           });
+          const updatedDm = dmsWithUsers.find(
+            dm => dm.channel === data.channelId
+          );
+          const updatedDmIndex = dmsWithUsers.findIndex(
+            dm => dm.channel === data.channelId
+          );
+          if (updatedDm) {
+            dmsWithUsers.splice(updatedDmIndex, 1);
+            set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] });
+          }
+
           set({
             channels: updatedChannels,
             lastSentMessage: {
@@ -208,11 +256,12 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  setCurrentChannel: (channel: Channel) => {
+  setCurrentChannel: (id: string, name: string, userId?: string) => {
     set({
       currentChannel: {
-        id: channel.id,
-        name: channel.name,
+        id,
+        name,
+        user: { _id: userId },
       },
     });
   },

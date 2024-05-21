@@ -20,6 +20,8 @@ import mongoose from 'mongoose';
 import UserRole from '../models/user/userRoleModel';
 import Role from '../models/user/roleModel';
 import UserGroup from "../models/user/userGroupModel";
+import ChannelUser from "../models/channel/channelUserModel";
+import Channel, { ChannelType } from "../models/channel/channelModel";
 
 class AuthController {
   private readonly accessTokenSecret: string;
@@ -161,6 +163,22 @@ class AuthController {
         })
         await newUserRole.save({ session });
 
+        const newChannel = new Channel({
+          name: name + ' dm',
+          owner: savedUser?._id,
+          type: ChannelType.DM,
+          private: true,
+          readonly: false
+        })
+        await newChannel.save({ session });
+
+        const savedChannel = await Channel.findOne({ owner: savedUser?._id }).session(session);
+        const newChannelUser = new ChannelUser({
+          user: savedUser?._id,
+          channel: savedChannel?._id
+        })
+
+        await newChannelUser.save({ session });
         const newWorkspaceUser = new WorkspaceUser({
           workspace: existingTemplate._id,
           user: savedUser?._id,

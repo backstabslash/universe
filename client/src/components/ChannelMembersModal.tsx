@@ -32,7 +32,7 @@ const ChannelMembersModal = (): any => {
     addUserToChannel,
   } = useChannelUsersStore();
   const { fetchUserById, setIsUserProfileVisible } = useUserStore();
-  const { currentChannel, channels } = useMessengerStore();
+  const { currentChannel, notesChannel, channels } = useMessengerStore();
   const [userDetails, setUserDetails] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
@@ -73,9 +73,6 @@ const ChannelMembersModal = (): any => {
     await fetchAllUsers();
     await getWorkspaceUsers();
     setDataFetched(true);
-    console.log(
-      channels.find((channel: any) => channel.id === currentChannel?.id)?.users
-    );
   };
 
   const openProfileOnClick = async (userId: string): Promise<void> => {
@@ -145,7 +142,7 @@ const ChannelMembersModal = (): any => {
         }}
         _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
       >
-        {currentChannelUsers?.length
+        {currentChannel?.id !== notesChannel.id && currentChannelUsers?.length
           ? `${currentChannelUsers?.length} members`
           : ''}
       </Button>
