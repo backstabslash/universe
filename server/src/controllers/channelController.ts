@@ -5,7 +5,7 @@ import { channelNameRules } from "../validation/channelDataRules";
 import { emailRules, tagRules } from "../validation/userDataRules";
 import { uuidRules } from "../validation/commonDataRules";
 import ChannelUser from "../models/channel/channelUserModel";
-import Channel from "../models/channel/channelModel";
+import Channel, { ChannelType } from "../models/channel/channelModel";
 import UserGroup from "../models/user/userGroupModel";
 
 class ChannelController {
@@ -225,7 +225,6 @@ class ChannelController {
         { $push: { channels: channelId } },
         { upsert: true }
       );
-
       return res.status(201).json({ message: "User added to channel" });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });

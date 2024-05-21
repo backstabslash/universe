@@ -10,7 +10,7 @@ import TagIcon from '@mui/icons-material/Tag';
 interface DragAndDropListProps {
   itemLists: List[];
   setItemLists: (itemLists: List[]) => void;
-  onItemClick: (item: Item) => void;
+  onItemClick: (id: string, name: string, userId: string) => void;
 }
 interface List {
   name: string;
@@ -165,7 +165,9 @@ const DragAndDropList = ({
                                       whiteSpace="nowrap"
                                       maxWidth="100%"
                                       alignItems="center"
-                                      onClick={() => onItemClick(item)}
+                                      onClick={() =>
+                                        onItemClick(item.id, item.name, '')
+                                      }
                                     >
                                       <TagIcon
                                         fontSize="small"
@@ -241,7 +243,9 @@ const DragAndDropList = ({
                                   whiteSpace="nowrap"
                                   maxWidth="100%"
                                   alignItems="center"
-                                  onClick={() => onItemClick(item)}
+                                  onClick={() =>
+                                    onItemClick(item.id, item.name, '')
+                                  }
                                 >
                                   <TagIcon
                                     fontSize="small"

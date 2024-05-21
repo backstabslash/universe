@@ -24,6 +24,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
+  HStack,
 } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
 import { useEffect, useState } from 'react';
@@ -123,6 +124,11 @@ const MainContent = (): JSX.Element => {
       console.log(error);
       setError(error?.response?.data?.message || 'Failed to update user info');
     }
+  };
+
+  const openProfileOnClick = async (userId?: string): Promise<void> => {
+    if (userId) await fetchUserById(userId);
+    setIsUserProfileVisible(true);
   };
 
   return (
@@ -269,21 +275,45 @@ const MainContent = (): JSX.Element => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Text fontWeight={'bold'}>
-                  {currentChannel && `#${currentChannel?.name}`}
-                </Text>
-                <Flex>
-                  <ChannelMembersModal />
-                  <Button
-                    size="md"
-                    mr="2"
-                    bg="transparent"
-                    color="zinc400"
-                    _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+                {!currentChannel?.user?._id ? (
+                  <>
+                    <Text fontWeight={'bold'}>
+                      {currentChannel && `#${currentChannel?.name}`}
+                    </Text>
+                    <Flex>
+                      <ChannelMembersModal />
+                      <Button
+                        size="md"
+                        mr="2"
+                        bg="transparent"
+                        color="zinc200"
+                        _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+                      >
+                        <EditIcon boxSize={'4'} /> &nbsp; Canvas
+                      </Button>
+                    </Flex>
+                  </>
+                ) : (
+                  <HStack
+                    alignContent={'start'}
+                    justifyContent="flex-start"
+                    width="100%"
                   >
-                    <EditIcon boxSize={'4'} /> &nbsp; Canvas
-                  </Button>
-                </Flex>
+                    <Button
+                      fontWeight={'bold'}
+                      fontSize={'lg'}
+                      color="zinc300"
+                      bg="transparent"
+                      _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+                      padding={'0'}
+                      onClick={() => {
+                        openProfileOnClick(currentChannel?.user?._id);
+                      }}
+                    >
+                      {currentChannel && `#${currentChannel?.name}`}
+                    </Button>
+                  </HStack>
+                )}
               </Flex>
               <MessagesContainer />
               <Flex
