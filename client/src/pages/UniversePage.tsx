@@ -190,7 +190,7 @@ const MainContent = (): JSX.Element => {
               <Button
                 p="1"
                 color={'zinc300'}
-                bg={`${currentChannel?.id !== notesChannel.id ? 'rgba(0, 0, 0, 0.3)' : 'transparent'}`}
+                bg={`${currentChannel && currentChannel.id !== notesChannel.id ? 'rgba(0, 0, 0, 0.3)' : 'transparent'}`}
                 _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 onClick={handleClickHome}
