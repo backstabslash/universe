@@ -8,17 +8,17 @@ import {
   passwordRules,
   tagRules,
   verifyCodeRules,
-} from '../validation/userDataRules';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import EmailService from '../email-service/emailService';
-import UserVerifyCode from '../models/user/userVerifyCodeModel';
-import Joi from 'joi';
-import WorkSpace from '../models/workspace/workspaceModel';
-import WorkspaceUser from '../models/workspace/workspaceUserModel';
-import mongoose from 'mongoose';
-import UserRole from '../models/user/userRoleModel';
-import Role from '../models/user/roleModel';
+} from "../validation/userDataRules";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import EmailService from "../email-service/emailService";
+import UserVerifyCode from "../models/user/userVerifyCodeModel";
+import Joi from "joi";
+import WorkSpace from "../models/workspace/workspaceModel";
+import WorkspaceUser from "../models/workspace/workspaceUserModel";
+import mongoose from "mongoose";
+import UserRole from "../models/user/userRoleModel";
+import Role from "../models/user/roleModel";
 import UserGroup from "../models/user/userGroupModel";
 import ChannelUser from "../models/channel/channelUserModel";
 import Channel, { ChannelType } from "../models/channel/channelModel";
@@ -159,24 +159,24 @@ class AuthController {
 
         const newUserRole = new UserRole({
           user: savedUser?._id,
-          role: userRole?._id
-        })
+          role: userRole?._id,
+        });
         await newUserRole.save({ session });
 
         const newChannel = new Channel({
-          name: name + ' dm',
+          name: "Notes",
           owner: savedUser?._id,
           type: ChannelType.DM,
           private: true,
-          readonly: false
-        })
+          readonly: false,
+        });
         await newChannel.save({ session });
 
         const savedChannel = await Channel.findOne({ owner: savedUser?._id }).session(session);
         const newChannelUser = new ChannelUser({
           user: savedUser?._id,
-          channel: savedChannel?._id
-        })
+          channel: savedChannel?._id,
+        });
 
         await newChannelUser.save({ session });
         const newWorkspaceUser = new WorkspaceUser({
