@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import MainContent from '../pages/UniversePage';
 import MainPage from '../pages/MainPage';
 import CompanyName from '../pages/reg-pages/CompanyName';
@@ -17,8 +22,9 @@ const App = (): JSX.Element => {
         <Route path="/reg/channels" element={<Channels />} />
         <Route path="/reg/reguser" element={<RegUser />} />
         <Route element={<PersistLogin />}>
-          <Route path="/client" element={<MainContent />} />
+          <Route path="/client/*" element={<MainContent />} />
         </Route>
+        <Route path="*" element={<Navigate to="/client" />} />
       </Routes>
     </Router>
   );

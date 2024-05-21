@@ -16,7 +16,7 @@ const PersistLogin = (): JSX.Element => {
     try {
       await refresh();
     } catch (err) {
-      navigate('/');
+      navigate('/main');
     } finally {
       setIsLoading(false);
     }
