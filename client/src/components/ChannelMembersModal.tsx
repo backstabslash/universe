@@ -73,9 +73,6 @@ const ChannelMembersModal = (): any => {
     await fetchAllUsers();
     await getWorkspaceUsers();
     setDataFetched(true);
-    console.log(
-      channels.find((channel: any) => channel.id === currentChannel?.id)?.users
-    );
   };
 
   const openProfileOnClick = async (userId: string): Promise<void> => {

@@ -9,7 +9,7 @@ export interface ChannelGroup {
 }
 export interface DmWithUser {
   channel: string;
-  user: { _id: string, name: string, pfp_url: string };
+  user: { _id: string; name: string; pfp_url: string };
 }
 
 export interface ChannelMessages extends Channel {
@@ -107,12 +107,23 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       if (!socket) return;
 
       socket.once('send-channels', data => {
-        const channels = data.channelGroups.flatMap((channelGroup: ChannelGroup) => {
-          return channelGroup.items;
-        });
-        channels.push(...data.dmsWithUsers.map((dm: DmWithUser) => { return { id: dm.channel } }))
+        const channels = data.channelGroups.flatMap(
+          (channelGroup: ChannelGroup) => {
+            return channelGroup.items;
+          }
+        );
+        channels.push(
+          ...data.dmsWithUsers.map((dm: DmWithUser) => {
+            return { id: dm.channel };
+          })
+        );
 
-        set({ channelGroups: data.channelGroups, dmsWithUsers: data.dmsWithUsers, channels, error: null });
+        set({
+          channelGroups: data.channelGroups,
+          dmsWithUsers: data.dmsWithUsers,
+          channels,
+          error: null,
+        });
       });
     } catch (error: any) {
       set({ error });
@@ -166,11 +177,15 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       },
       (response: SocketResponse) => {
         clearTimeout(timeout);
-        const updatedDm = dmsWithUsers.find(dm => dm.channel === currentChannel.id)
-        const updatedDmIndex = dmsWithUsers.findIndex(dm => dm.channel === currentChannel.id)
+        const updatedDm = dmsWithUsers.find(
+          dm => dm.channel === currentChannel.id
+        );
+        const updatedDmIndex = dmsWithUsers.findIndex(
+          dm => dm.channel === currentChannel.id
+        );
         if (updatedDm) {
-          dmsWithUsers.splice(updatedDmIndex, 1)
-          set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] })
+          dmsWithUsers.splice(updatedDmIndex, 1);
+          set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] });
         }
         if (response.status === 'error') {
           messageLink.status = MessageStatus.FAILED;
@@ -200,7 +215,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           const updatedChannels = channels.map(channel => {
             if (channel.id === data.channelId) {
               if (!channel.messages) {
-                channel.messages = []
+                channel.messages = [];
               }
               return {
                 ...channel,
@@ -209,13 +224,16 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             }
             return channel;
           });
-          const updatedDm = dmsWithUsers.find(dm => dm.channel === data.channelId)
-          const updatedDmIndex = dmsWithUsers.findIndex(dm => dm.channel === data.channelId)
+          const updatedDm = dmsWithUsers.find(
+            dm => dm.channel === data.channelId
+          );
+          const updatedDmIndex = dmsWithUsers.findIndex(
+            dm => dm.channel === data.channelId
+          );
           if (updatedDm) {
-            dmsWithUsers.splice(updatedDmIndex, 1)
-            set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] })
+            dmsWithUsers.splice(updatedDmIndex, 1);
+            set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] });
           }
-          console.log('goidaSVO');
 
           set({
             channels: updatedChannels,

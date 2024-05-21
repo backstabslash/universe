@@ -21,12 +21,9 @@ const useAxiosPrivate = (): AxiosInstance => {
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
       config => {
-        console.log(config.headers, '123');
-
         if (!config.headers['authorization']) {
           config.headers['authorization'] = `Bearer ${userData?.accessToken}`;
         }
-        console.log(config.headers);
         return config;
       },
       error => Promise.reject(error)

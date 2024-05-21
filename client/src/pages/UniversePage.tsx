@@ -35,6 +35,7 @@ import useUserStore from '../store/user';
 import MessagesContainer from '../components/MessagesContainer';
 import ChannelMembersModal from '../components/ChannelMembersModal';
 import useWorkSpaceStore from '../store/workSpace';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 const MainContent = (): JSX.Element => {
   const [error, setError] = useState('');
@@ -57,6 +58,8 @@ const MainContent = (): JSX.Element => {
   const { getWorkspaceData, workSpaceData, updateAvatar } = useWorkSpaceStore(
     state => state
   );
+  const axiosPrivate = useAxiosPrivate();
+  const setAxiosPrivate = useUserStore(state => state.setAxiosPrivate);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -117,8 +120,6 @@ const MainContent = (): JSX.Element => {
   const handleSave = async (): Promise<void> => {
     try {
       await updateAvatar(formData);
-      console.log(1234);
-
       onClose();
     } catch (error: any) {
       console.log(error);
@@ -127,6 +128,7 @@ const MainContent = (): JSX.Element => {
   };
 
   const openProfileOnClick = async (userId?: string): Promise<void> => {
+    await setAxiosPrivate(axiosPrivate);
     if (userId) await fetchUserById(userId);
     setIsUserProfileVisible(true);
   };
