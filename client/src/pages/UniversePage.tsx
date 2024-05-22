@@ -81,7 +81,7 @@ const MainContent = (): JSX.Element => {
     return () => {
       socket?.disconnect();
     };
-  }, [formData]);
+  }, []);
 
   useEffect(() => {
     getWorkspaceData();
@@ -153,7 +153,7 @@ const MainContent = (): JSX.Element => {
   };
 
   return (
-    <Flex flexDirection={'column'} alignItems={'center'}>
+    <Flex flexDirection={'column'} alignItems={'center'} overflow={'hidden'}>
       <Header />
       <Flex>
         <Flex
@@ -337,14 +337,7 @@ const MainContent = (): JSX.Element => {
                 )}
               </Flex>
               <MessagesContainer />
-              <Flex
-                background="rgba(0, 0, 0, 0.5)"
-                pr="4"
-                pl="4"
-                pb="4"
-                h="170px"
-                width="100%"
-              >
+              <Flex background="rgba(0, 0, 0, 0.5)" pr="4" pl="4" pb="4">
                 <TextEditor sendMessage={sendMessage} />
               </Flex>
             </Box>

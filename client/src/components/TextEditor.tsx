@@ -236,7 +236,8 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         _hover={{ borderColor: 'zinc600' }}
         _focusVisible={{ borderColor: 'zinc600' }}
         width="100%"
-        h="140px"
+        maxH="134px"
+        h={'140px'}
         alignItems="center"
         justifyContent="center"
         flexDirection={'column'}

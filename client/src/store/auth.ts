@@ -91,6 +91,7 @@ const useAuthStore = create<AuthState>(set => ({
         userData: { ...response?.data },
         error: null,
       });
+
       return response?.data?.accessToken;
     } catch (err: any) {
       const error =

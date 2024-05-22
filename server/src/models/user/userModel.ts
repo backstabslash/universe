@@ -1,4 +1,5 @@
-import { Schema, Document, model } from 'mongoose';
+import { Schema, Document, model } from "mongoose";
+import { IUserGroup } from "./userGroupModel";
 
 export interface IUser extends Document {
   name: string;
@@ -7,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   phone: string;
   pfp_url: string;
+  groupsOrder: IUserGroup[];
 }
 
 const UserSchema = new Schema<IUser>({
@@ -33,8 +35,14 @@ const UserSchema = new Schema<IUser>({
     type: String,
     required: true,
   },
+  groupsOrder: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "UserGroup",
+    },
+  ],
 });
 
-const User = model<IUser>('User', UserSchema);
+const User = model<IUser>("User", UserSchema);
 
 export default User;

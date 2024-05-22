@@ -2,10 +2,8 @@ import { Socket } from "socket.io";
 import ChannelUser from "../models/channel/channelUserModel";
 import UserGroup from "../models/user/userGroupModel";
 import { ChannelType } from "../models/channel/channelModel";
-import mongoose from "mongoose";
 import User from "../models/user/userModel";
 import Message from "../models/message/messageModel";
-const { ObjectId } = mongoose.Types;
 
 class ConnectionHandler {
   async joinAndSendChannels(socket: Socket) {
@@ -14,9 +12,18 @@ class ConnectionHandler {
         return;
       }
 
-      let userGroups = await UserGroup.find({ user: socket.data.userId }).populate({
-        path: "channels",
+      const user = await User.findById(socket.data.userId).populate({
+        path: "groupsOrder",
         select: "name _id",
+      });
+      if (!user) {
+        return;
+      }
+      const userGroupsIds = user.groupsOrder.map((group) => group.id);
+
+      const userGroups = await UserGroup.find({ _id: { $in: userGroupsIds } }).populate({
+        path: "channels",
+        select: "name id",
       });
 
       const channelGroups = userGroups.map((group) => ({

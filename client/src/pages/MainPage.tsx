@@ -1,12 +1,10 @@
 import {
   Button,
   Flex,
-  Stack,
   Text,
   VStack,
   HStack,
   Box,
-  Spacer,
   Input,
 } from '@chakra-ui/react';
 
@@ -21,7 +19,8 @@ const MainPage = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const { login, error, setErrorNull } = useAuthStore(state => state);
+  const { login, setErrorNull } = useAuthStore(state => state);
+  const [error, setError] = useState<string>();
 
   const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -40,16 +39,17 @@ const MainPage = (): JSX.Element => {
       await login({ email, password });
       navigate('/client');
     } catch (error) {
+      setError('Login or password is incorrect');
       console.error('Failed to log in:', error);
     }
   };
 
   return (
-    <VStack h="100vh" w="100vw" bg="zinc900">
-      <VStack spacing="2rem" mt="3rem">
-        <HStack mb="2rem">
+    <VStack minH={'100vh'} bg="zinc900" p={'25px'}>
+      <VStack spacing={'20px'}>
+        <HStack>
           <Flex justify="end">
-            <Stack align="start" w="70%" justify="center" mr="1rm">
+            <VStack align="start" w="70%" justify="center" spacing={'20px'}>
               <Text fontSize="3rem" fontWeight={600} color="zinc300">
                 Get started on Universe
               </Text>
@@ -58,25 +58,20 @@ const MainPage = (): JSX.Element => {
                 It&apos;s faster, better organized, and more secure than email -
                 and it&apos;s free to try.
               </Text>
-              <Spacer></Spacer>
-              <Spacer></Spacer>
-              <Stack>
-                <Button
-                  type="submit"
-                  height="40px"
-                  bg="zinc800"
-                  color="zinc300"
-                  _hover={{ bg: 'zinc700' }}
-                  onClick={() => {
-                    navigate('/reg/companyname');
-                  }}
-                  size="md"
-                >
-                  {'Create Workspace'}
-                </Button>
-              </Stack>
-            </Stack>
-            <Flex align="center" justify="center"></Flex>
+              <Button
+                type="submit"
+                height="40px"
+                bg="zinc800"
+                color="zinc300"
+                _hover={{ bg: 'zinc700' }}
+                onClick={() => {
+                  navigate('/reg/companyname');
+                }}
+                size="md"
+              >
+                {'Create Workspace'}
+              </Button>
+            </VStack>
           </Flex>
           <Flex align="center" justify="start" w="60%">
             <MainpageSvg />
@@ -88,9 +83,8 @@ const MainPage = (): JSX.Element => {
           border="1px"
           borderColor="zinc700"
           p="1.4rem"
-          mt="0.1 rem"
         >
-          <VStack align="center" gap="2">
+          <VStack align="center">
             <Text
               fontWeight="bold"
               color="zinc300"
@@ -131,11 +125,10 @@ const MainPage = (): JSX.Element => {
               mb="10px"
               color="zinc300"
             />
-            {error && (
-              <Text fontSize="sm" color="red.500" mt="0.5rem">
-                {'Login or password is incorrect'}
-              </Text>
-            )}
+            <Text fontSize="sm" h={'18px'} color="red.500">
+              {error}
+            </Text>
+
             <Button
               onClick={() => {
                 handleLogin();
