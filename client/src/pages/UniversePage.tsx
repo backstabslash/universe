@@ -26,7 +26,6 @@ import {
   HStack,
   Menu,
   MenuButton,
-  MenuList,
 } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
 import { useEffect, useState } from 'react';
@@ -326,9 +325,7 @@ const MainContent = (): JSX.Element => {
                         >
                           ⋮
                         </MenuButton>
-                        <MenuList bg="zinc800" border="none" minWidth="auto">
-                          <DeleteChannelModal />
-                        </MenuList>
+                        <DeleteChannelModal />
                       </Menu>
                     </HStack>
                   </>

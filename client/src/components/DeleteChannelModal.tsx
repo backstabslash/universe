@@ -12,14 +12,16 @@ import {
   ModalFooter,
   Text,
   MenuItem,
+  MenuList,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import useMessengerStore from '../store/messenger';
-import { DeleteIcon } from '@chakra-ui/icons';
+import { DeleteIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import useUserStore from '../store/user';
 
 const DeleteChannelModal = (): any => {
   const [formError, setformError] = useState<string>('');
+  const [leaveOrDelete, setleaveOrDelete] = useState<boolean>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { deleteChannel, leaveChannel, currentChannel, channels } =
     useMessengerStore(state => state);
@@ -65,32 +67,50 @@ const DeleteChannelModal = (): any => {
 
   return (
     <>
-      <MenuItem
-        w="fit-content"
-        background="rgba(0, 0, 0, 0)"
-        _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
-        _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
-        color="red.500"
-        as={Button}
-        leftIcon={<DeleteIcon />}
-        fontWeight={'bold'}
-        fontSize={'md'}
-        borderRadius={0}
-        onClick={() => {
-          handleOpen();
-        }}
-      >
-        {checkOwner() ? (
-          <Text>Delete channel</Text>
-        ) : (
+      <MenuList bg="zinc800" border="none" minWidth="auto">
+        <MenuItem
+          w="fit-content"
+          background="rgba(0, 0, 0, 0)"
+          _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+          _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+          color="red.500"
+          as={Button}
+          leftIcon={<SmallCloseIcon />}
+          fontWeight={'bold'}
+          fontSize={'md'}
+          borderRadius={0}
+          onClick={() => {
+            handleOpen();
+            setleaveOrDelete(false);
+          }}
+        >
           <Text>Leave channel</Text>
+        </MenuItem>
+        {checkOwner() && (
+          <MenuItem
+            w="fit-content"
+            background="rgba(0, 0, 0, 0)"
+            _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+            _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+            color="red.500"
+            as={Button}
+            leftIcon={<DeleteIcon />}
+            fontWeight={'bold'}
+            fontSize={'md'}
+            borderRadius={0}
+            onClick={() => {
+              handleOpen();
+              setleaveOrDelete(true);
+            }}
+          >
+            <Text>Delete channel</Text>
+          </MenuItem>
         )}
-      </MenuItem>
-
+      </MenuList>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="zinc900" color="zinc200">
-          {checkOwner() ? (
+          {leaveOrDelete ? (
             <ModalHeader>Delete current channel</ModalHeader>
           ) : (
             <ModalHeader>Leave current channel</ModalHeader>
@@ -98,7 +118,7 @@ const DeleteChannelModal = (): any => {
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl>
-              {checkOwner() ? (
+              {leaveOrDelete ? (
                 <FormLabel>
                   Are you sure you want to delete {currentChannel?.name}? This
                   action is IRREVERSIBLE and the channel will be PERMANENTLY
