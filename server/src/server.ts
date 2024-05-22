@@ -33,6 +33,14 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
     channelsHandler.createChannel(socket, data, callback);
   })
 
+  socket.on('delete-channel', (data, callback) => {
+    channelsHandler.deleteChannel(data, callback, io);
+  })
+
+  socket.on('leave-channel', (data, callback) => {
+    channelsHandler.leaveChannel(socket, data, callback);
+  })
+
   socket.on("disconnect", () => {
     console.info("User disconnected");
   });

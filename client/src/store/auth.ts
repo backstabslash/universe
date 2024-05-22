@@ -24,11 +24,16 @@ interface AuthState {
   verify: (userData: UserData) => Promise<void>;
   register: (userData: UserData) => Promise<void>;
   setErrorNull: () => void;
+  setUserData: (userData: UserData) => void;
 }
 
 const useAuthStore = create<AuthState>(set => ({
   userData: null,
   error: null,
+
+  setUserData: (userData: UserData) => {
+    set({ userData });
+  },
 
   setErrorNull: () => {
     set({ error: null });

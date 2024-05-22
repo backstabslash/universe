@@ -55,7 +55,6 @@ const CreateChannelModal = (): any => {
     } catch (error: any) {
       setformError(error);
       console.log(error);
-      //   setError(error?.response?.data?.message || 'Failed to update user info');
     }
   };
 

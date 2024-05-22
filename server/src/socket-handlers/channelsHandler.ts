@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import Message from "../models/message/messageModel";
 import ChannelUser from "../models/channel/channelUserModel";
 import mongoose from "mongoose";
@@ -92,6 +92,57 @@ class ChannelsHandler {
       callback({ status: "success", data: savedChannel });
     } catch (error) {
       await session.abortTransaction();
+      console.error(error);
+      callback({ status: "error" });
+    } finally {
+      session.endSession();
+    }
+  }
+  async deleteChannel(id: string, callback: Function, io: Server) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+
+      await UserGroup.updateMany(
+        { channels: id },
+        { $pull: { channels: id } }
+      );
+      await Message.deleteMany({ channel: id });
+
+      await Channel.deleteOne({ channel: id })
+      await session.commitTransaction();
+      io.sockets.socketsLeave(id);
+      callback({ status: "success" });
+    } catch (error) {
+      session.abortTransaction()
+      console.error(error);
+      callback({ status: "error" });
+    } finally {
+      session.endSession();
+    }
+  }
+  async leaveChannel(socket: Socket, id: string, callback: Function) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const user = await User.findById(socket.data.userId).populate('groupsOrder').exec();
+      if (!user) {
+        console.error("User not found");
+        return;
+      }
+
+      for (const group of user.groupsOrder) {
+        group.channels = group.channels.filter(channel => String(channel._id) !== id);
+        await group.save();
+      }
+      await ChannelUser.findOneAndDelete({
+        user: socket.data.userId,
+        channel: id,
+      });
+      await session.commitTransaction();
+      callback({ status: "success" });
+    } catch (error) {
+      session.abortTransaction()
       console.error(error);
       callback({ status: "error" });
     } finally {
