@@ -13,6 +13,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
 import useWorkSpaceStore from '../store/workSpace';
+import CreateChannelModal from './CreateChannelModal';
 
 const Sidebar = (): JSX.Element => {
   const { channelGroups, setCurrentChannel, dmsWithUsers } = useMessengerStore(
@@ -64,6 +65,7 @@ const Sidebar = (): JSX.Element => {
       <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Channels
       </Heading>
+      <CreateChannelModal></CreateChannelModal>
       {conversationList.length === 0 ? (
         <Spinner size={'lg'} thickness="4px" speed="0.5s" color="zinc400" />
       ) : (

@@ -29,6 +29,10 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
     messagesHandler.sendMessage(socket, data, callback);
   });
 
+  socket.on('create-channel', (data, callback) => {
+    channelsHandler.createChannel(socket, data, callback);
+  })
+
   socket.on("disconnect", () => {
     console.info("User disconnected");
   });

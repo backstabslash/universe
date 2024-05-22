@@ -65,7 +65,7 @@ interface MessengerState {
     channelId: string;
   };
   currentChannel: Omit<Channel, 'messages'> | null;
-  error: typeof Error | null;
+  error: Error | null;
   connectSocket: () => void;
   getChannelGroups: () => void;
   setCurrentChannel: (id: string, name: string, userId?: string) => void;
@@ -76,6 +76,7 @@ interface MessengerState {
     messages: UserMessage[];
     users: any;
   }) => void;
+  createChannel: (data: { name: string, private: boolean, readonly: boolean }) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -304,6 +305,31 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
 
     set({ channels: updatedChannels });
+  },
+
+  createChannel: (data: { name: string, private: boolean, readonly: boolean }): void => {
+    const { socket, channelGroups, channels } = get();
+
+    if (!socket) return;
+    socket.emit('create-channel', data, (response: any) => {
+      if (response.status === 'success') {
+        const updatedChannel = { id: response.data._id, messages: [], page: 0, users: response.data.owner, name: response.data.name }
+        const updatedChannelGroups = channelGroups.map(channelGroup => {
+          if (channelGroup.name === 'General') {
+            channelGroup.items.push({ id: response.data._id, name: response.data.name })
+          }
+          return channelGroup;
+        })
+        set({
+          channels: [updatedChannel, ...channels],
+          channelGroups: updatedChannelGroups,
+          currentChannel: {
+            id: response.data._id,
+            name: response.data.name
+          }
+        })
+      }
+    })
   },
 }));
 
