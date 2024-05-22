@@ -98,7 +98,7 @@ class WorkSpacerController {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({
         name,
-        tag: email,
+        tag: email.replace("@", "_"),
         email,
         pfp_url: "",
         phone: "",

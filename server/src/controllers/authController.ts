@@ -144,7 +144,7 @@ class AuthController {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
           name,
-          tag,
+          tag: email.replace("@", "_"),
           email,
           pfp_url: "",
           phone: "",

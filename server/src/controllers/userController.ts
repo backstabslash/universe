@@ -1,14 +1,14 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import {
   emailRules,
   phoneRules,
   pfpUrlSchema,
   tagRules,
   nameRules,
-} from '../validation/userDataRules';
-import { uuidRules } from '../validation/commonDataRules';
-import User from '../models/user/userModel';
-import Joi from 'joi';
+} from "../validation/userDataRules";
+import { uuidRules } from "../validation/commonDataRules";
+import User from "../models/user/userModel";
+import Joi from "joi";
 
 class UserController {
   async getByEmail(req: Request, res: Response) {
@@ -29,7 +29,7 @@ class UserController {
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({
-          message: 'User not found',
+          message: "User not found",
         });
       }
 
@@ -43,7 +43,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
@@ -54,7 +54,7 @@ class UserController {
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
-          message: 'User not found',
+          message: "User not found",
         });
       }
       return res.status(200).json({
@@ -67,7 +67,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
@@ -83,6 +83,7 @@ class UserController {
     });
 
     const { error, value } = updateUserSchema.validate(req.body);
+    console.log(error);
     if (error) {
       return res.status(400).json({
         message: error.details[0].message,
@@ -100,7 +101,7 @@ class UserController {
 
       if (!updatedUser) {
         return res.status(404).json({
-          message: 'User not found',
+          message: "User not found",
         });
       }
 
@@ -113,7 +114,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }

@@ -81,7 +81,7 @@ const MainContent = (): JSX.Element => {
     return () => {
       socket?.disconnect();
     };
-  }, [formData]);
+  }, []);
 
   useEffect(() => {
     getWorkspaceData();
