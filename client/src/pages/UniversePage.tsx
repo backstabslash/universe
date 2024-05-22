@@ -62,7 +62,11 @@ const MainContent = (): JSX.Element => {
     state => state
   );
   const axiosPrivate = useAxiosPrivate();
-  const setAxiosPrivate = useUserStore(state => state.setAxiosPrivate);
+  const {
+    setAxiosPrivate,
+    fetchUserByEmail,
+    userData: workspaceUserData,
+  } = useUserStore(state => state);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -101,7 +105,8 @@ const MainContent = (): JSX.Element => {
     useUserStore(state => state);
 
   const handleOpenModal = (): void => {
-    if (workSpaceData?.ownerId === userData?.userId) {
+    fetchUserByEmail();
+    if (workspaceUserData?.userRole === 'administration') {
       setError('');
       if (workSpaceData) {
         setFormData({
