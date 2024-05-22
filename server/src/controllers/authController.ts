@@ -136,6 +136,11 @@ class AuthController {
       }
 
       if (existingUserVerifyCode?.verifyCode === verifyCode) {
+        const userGroup = new UserGroup({
+          name: "General",
+        });
+        const newUserGroup = await userGroup.save({ session });
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
           name,
@@ -144,16 +149,9 @@ class AuthController {
           pfp_url: "",
           phone: "",
           password: hashedPassword,
+          groupsOrder: [newUserGroup._id],
         });
-        await newUser.save({ session });
-
-        const userGroup = new UserGroup({
-          user: newUser._id,
-          name: "General",
-        });
-        await userGroup.save({ session });
-
-        const savedUser = await User.findOne({ email }).session(session);
+        const savedUser = await newUser.save({ session });
 
         const userRole = await Role.findOne({ name: "student" }).session(session);
 
@@ -170,9 +168,8 @@ class AuthController {
           private: true,
           readonly: false,
         });
-        await newChannel.save({ session });
+        const savedChannel = await newChannel.save({ session });
 
-        const savedChannel = await Channel.findOne({ owner: savedUser?._id }).session(session);
         const newChannelUser = new ChannelUser({
           user: savedUser?._id,
           channel: savedChannel?._id,

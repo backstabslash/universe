@@ -4,7 +4,6 @@ import {
   emailTemplatesRule,
   nameRules,
   passwordRules,
-  tagRules,
   verifyCodeRules,
 } from "../validation/userDataRules";
 import Joi from "joi";
@@ -91,6 +90,11 @@ class WorkSpacerController {
         });
       }
 
+      const userGroup = new UserGroup({
+        name: "General",
+      });
+      const newUserGroup = await userGroup.save({ session });
+
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({
         name,
@@ -99,16 +103,9 @@ class WorkSpacerController {
         pfp_url: "",
         phone: "",
         password: hashedPassword,
+        groupsOrder: [newUserGroup._id],
       });
-      await newUser.save({ session });
-
-      const userGroup = new UserGroup({
-        user: newUser._id,
-        name: "General",
-      });
-      await userGroup.save({ session });
-
-      const savedUser = await User.findOne({ email }).session(session);
+      const savedUser = await newUser.save({ session });
 
       const userRole = await Role.findOne({ name: "administration" }).session(session);
 
@@ -125,9 +122,8 @@ class WorkSpacerController {
         private: true,
         readonly: false,
       });
-      await newChannel.save({ session });
+      const savedChannel = await newChannel.save({ session });
 
-      const savedChannel = await Channel.findOne({ owner: savedUser?._id }).session(session);
       const newChannelUser = new ChannelUser({
         user: savedUser?._id,
         channel: savedChannel?._id,
@@ -141,9 +137,8 @@ class WorkSpacerController {
         owner: savedUser?._id,
         emailTemplates,
       });
-      await newWorkSpace.save({ session });
+      const workspace = await newWorkSpace.save({ session });
 
-      const workspace = await WorkSpace.findOne({ workSpaceName }).session(session);
       const newWorkSpaceUser = new WorkspaceUser({
         workspace: workspace?._id,
         user: savedUser?._id,
