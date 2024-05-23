@@ -50,7 +50,7 @@ const Sidebar = (): JSX.Element => {
         updateChannelGroups(conversationList);
         setGroupsChanged(false);
       }
-    }, 5000);
+    }, 3000);
 
     return () => {
       clearTimeout(changeGroupstimeoutRef.current);
@@ -62,18 +62,12 @@ const Sidebar = (): JSX.Element => {
   };
 
   useEffect(() => {
-    let groupName = 'New Group';
-    let i = 1;
-    while (conversationList.find(group => group.name === groupName)) {
-      groupName = `New Group ${i}`;
-      i++;
-    }
-
-    setNewGroupName(groupName);
+    setNewGroupName('New Group');
   }, [addingAGroup]);
 
   const onBlurGroupNameInput = (): void => {
     let groupName = newGroupName;
+    let newGroupId = '0';
     if (
       !groupName ||
       conversationList.find(conversation => conversation.name === groupName)
@@ -84,10 +78,12 @@ const Sidebar = (): JSX.Element => {
         groupName = `New Group ${i}`;
         i++;
       }
+
+      newGroupId = i.toString();
     }
 
     setConversationList([
-      { id: '', name: groupName, items: [] },
+      { id: newGroupId, name: groupName, items: [] },
       ...conversationList,
     ]);
     setAddingAGroup(false);
@@ -164,6 +160,12 @@ const Sidebar = (): JSX.Element => {
             _active={{ background: 'none' }}
             _focusVisible={{ background: 'none' }}
             color="zinc300"
+            isDisabled={
+              addingAGroup ||
+              !!conversationList.find(
+                group => group.name !== 'General' && group.items.length === 0
+              )
+            }
             onClick={() => setAddingAGroup(true)}
           >
             <AddIcon fontSize="10px" mt={'2px'} />

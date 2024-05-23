@@ -124,7 +124,7 @@ class ChannelsHandler {
       await Channel.deleteOne({ _id: id });
       await session.commitTransaction();
 
-      socket.broadcast.to(id).emit('channel-deleted', { channel: id })
+      socket.broadcast.to(id).emit("channel-deleted", { channel: id });
 
       io.sockets.socketsLeave(id);
       callback({ status: "success" });
@@ -158,7 +158,9 @@ class ChannelsHandler {
 
       socket.leave(id);
       callback({ status: "success" });
-      socket.broadcast.to(id).emit("user-left-channel", { channel: id, userId: socket.data.userId })
+      socket.broadcast
+        .to(id)
+        .emit("user-left-channel", { channel: id, userId: socket.data.userId });
     } catch (error) {
       session.abortTransaction();
       console.error(error);
@@ -227,7 +229,7 @@ class ChannelsHandler {
           id: data.channelId,
           name: channel?.name,
           users: channelUsers.map((cu) => cu.user),
-          owner: channel?.owner
+          owner: channel?.owner,
         },
         userId: data.id,
       });
@@ -261,7 +263,9 @@ class ChannelsHandler {
         }).session(session);
       }
 
-      const newChannelGroups = data.updChannelGroups.filter((group) => !group.id);
+      const newChannelGroups = data.updChannelGroups.filter(
+        (group) => group.id && group.id.length < 24
+      );
       if (newChannelGroups.length > 0) {
         const createdGroups = await UserGroup.insertMany(
           newChannelGroups.map((group) => ({
