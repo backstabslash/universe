@@ -12,6 +12,7 @@ interface UserData {
   name?: string | null;
   pfp_url?: string | null;
   phone?: string | null;
+  userRole?: string[] | null;
 }
 
 interface UserState {

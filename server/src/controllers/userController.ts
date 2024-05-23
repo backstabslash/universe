@@ -9,6 +9,7 @@ import {
 import { uuidRules } from "../validation/commonDataRules";
 import User from "../models/user/userModel";
 import Joi from "joi";
+import UserRole from "../models/user/userRoleModel";
 
 class UserController {
   async getByEmail(req: Request, res: Response) {
@@ -32,7 +33,9 @@ class UserController {
           message: "User not found",
         });
       }
+      const userRoles = await UserRole.find({ user: user.id }).populate('role')
 
+      const roles = userRoles.map(userRole => userRole.role.name)
       return res.status(200).json({
         tag: user.tag,
         name: user.name,
@@ -40,6 +43,7 @@ class UserController {
         phone: user.phone,
         email: user.email,
         userId: user.id,
+        userRole: roles
       });
     } catch (error) {
       res.status(500).json({

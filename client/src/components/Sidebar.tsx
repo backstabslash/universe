@@ -3,17 +3,20 @@ import {
   VStack,
   Heading,
   Flex,
-  Box,
   Button,
   Spinner,
   Image,
   HStack,
+  Menu,
+  MenuButton,
+  MenuList,
   Input,
 } from '@chakra-ui/react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
 import useWorkSpaceStore from '../store/workSpace';
+import CreateChannelModal from './CreateChannelModal';
 import { AddIcon } from '@chakra-ui/icons';
 import { css } from '@emotion/react';
 
@@ -116,12 +119,24 @@ const Sidebar = (): JSX.Element => {
         alignItems={'center'}
         h="60px"
       >
-        <HStack w={'100%'} justifyContent={'space-between'}>
-          <HStack>
-            <Heading fontSize="2xl">{workSpaceData?.workSpaceName}</Heading>
-            <Box mt="2px">
-              <KeyboardArrowDownIcon fontSize="small" />
-            </Box>
+        <HStack w={'100%'} justifyContent={'space-between'} alignItems="center">
+          <Heading fontSize="2xl">{workSpaceData?.workSpaceName}</Heading>
+          <HStack mt="2px">
+            <Menu placement="bottom-end">
+              <MenuButton
+                as={Button}
+                color="zinc300"
+                bg="transparent"
+                _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                alignSelf={'end'}
+              >
+                ⋮
+              </MenuButton>
+              <MenuList bg="zinc800" border="none" minWidth="auto">
+                <CreateChannelModal />
+              </MenuList>
+            </Menu>
           </HStack>
         </HStack>
       </Flex>

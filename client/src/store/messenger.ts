@@ -25,6 +25,7 @@ export interface Channel {
   id: string;
   name: string;
   user?: { _id?: string };
+  ownerId?: string;
 }
 
 export type UserMessage = Message & MessageInfo;
@@ -67,7 +68,7 @@ interface MessengerState {
     channelId: string;
   };
   currentChannel: Omit<Channel, 'messages'> | null;
-  error: typeof Error | null;
+  error: Error | null;
   connectSocket: () => void;
   getChannelGroups: () => void;
   setCurrentChannel: (id: string, name: string, userId?: string) => void;
@@ -348,6 +349,93 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
 
     set({ channels: updatedChannels });
+  },
+
+  createChannel: (data: {
+    name: string;
+    private: boolean;
+    readonly: boolean;
+  }): void => {
+    const { socket, channelGroups, channels } = get();
+
+    if (!socket) return;
+    socket.emit('create-channel', data, (response: any) => {
+      if (response.status === 'success') {
+        const updatedChannel = {
+          id: response.data._id,
+          messages: [],
+          page: 0,
+          users: response.data.owner,
+          name: response.data.name,
+          ownerId: response.data.owner,
+        };
+        const updatedChannelGroups = channelGroups.map(channelGroup => {
+          if (channelGroup.name === 'General') {
+            channelGroup.items.push({
+              id: response.data._id,
+              name: response.data.name,
+            });
+          }
+          return channelGroup;
+        });
+        set({
+          channels: [updatedChannel, ...channels],
+          channelGroups: updatedChannelGroups,
+          currentChannel: {
+            id: response.data._id,
+            name: response.data.name,
+          },
+        });
+      }
+    });
+  },
+  deleteChannel: (id: string): void => {
+    const { socket, channelGroups, channels, notesChannel } = get();
+
+    if (!socket) return;
+    socket.emit('delete-channel', id, (response: any) => {
+      if (response.status === 'success') {
+        const updatedChannels = channels.filter(channel => channel.id !== id);
+
+        const updatedChannelGroups = channelGroups.map(channelGroup => ({
+          ...channelGroup,
+          items: channelGroup.items.filter(item => item.id !== id),
+        }));
+
+        set({
+          channels: updatedChannels,
+          channelGroups: updatedChannelGroups,
+          currentChannel: {
+            id: notesChannel.id,
+            name: notesChannel.name,
+          },
+        });
+      }
+    });
+  },
+  leaveChannel: (id: string): void => {
+    const { socket, channelGroups, channels, notesChannel } = get();
+
+    if (!socket) return;
+    socket.emit('leave-channel', id, (response: any) => {
+      if (response.status === 'success') {
+        const updatedChannels = channels.filter(channel => channel.id !== id);
+
+        const updatedChannelGroups = channelGroups.map(channelGroup => ({
+          ...channelGroup,
+          items: channelGroup.items.filter(item => item.id !== id),
+        }));
+
+        set({
+          channels: updatedChannels,
+          channelGroups: updatedChannelGroups,
+          currentChannel: {
+            id: notesChannel.id,
+            name: notesChannel.name,
+          },
+        });
+      }
+    });
   },
 }));
 

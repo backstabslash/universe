@@ -23,7 +23,7 @@ class ConnectionHandler {
 
       const userGroups = await UserGroup.find({ _id: { $in: userGroupsIds } }).populate({
         path: "channels",
-        select: "name id",
+        select: "name id owner",
       });
 
       const orderedUserGroups = userGroupsIds.map((id) =>
@@ -36,6 +36,7 @@ class ConnectionHandler {
         items: group?.channels.map((channel) => ({
           id: channel.id,
           name: channel.name,
+          ownerId: channel.owner
         })),
       }));
       const allChannelIds = orderedUserGroups.reduce<string[]>((acc, group) => {
