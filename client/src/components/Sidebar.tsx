@@ -11,8 +11,8 @@ import {
   MenuButton,
   MenuList,
   Input,
+  Box,
 } from '@chakra-ui/react';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
 import useWorkSpaceStore from '../store/workSpace';

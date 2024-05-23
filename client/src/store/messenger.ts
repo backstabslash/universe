@@ -80,6 +80,13 @@ interface MessengerState {
     users: any;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
+  createChannel: (data: {
+    name: string;
+    private: boolean;
+    readonly: boolean;
+  }) => void;
+  deleteChannel: (id: string) => void;
+  leaveChannel: (id: string) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
