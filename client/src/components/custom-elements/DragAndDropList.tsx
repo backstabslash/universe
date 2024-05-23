@@ -4,15 +4,19 @@ import {
   Draggable,
   type DropResult,
 } from 'react-beautiful-dnd';
-import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import { Box, Flex, HStack, Heading, Text, IconButton } from '@chakra-ui/react';
 import TagIcon from '@mui/icons-material/Tag';
+import { DeleteIcon } from '@chakra-ui/icons';
 
 interface DragAndDropListProps {
   itemLists: List[];
   setItemLists: (itemLists: List[]) => void;
   onItemClick: (id: string, name: string, userId: string) => void;
+  setGroupsChanged: (groupsChanged: boolean) => void;
+  onDeleteList: (id: string) => void;
 }
 interface List {
+  id: string;
   name: string;
   items: Item[];
 }
@@ -26,6 +30,8 @@ const DragAndDropList = ({
   itemLists,
   setItemLists,
   onItemClick,
+  setGroupsChanged,
+  onDeleteList,
 }: DragAndDropListProps): JSX.Element => {
   const onDragEnd = (result: DropResult): void => {
     if (!result.destination) {
@@ -37,6 +43,7 @@ const DragAndDropList = ({
       const [movedList] = reorderedLists.splice(result.source.index, 1);
       reorderedLists.splice(result.destination.index, 0, movedList);
       setItemLists(reorderedLists);
+      setGroupsChanged(true);
       return;
     }
 
@@ -59,6 +66,7 @@ const DragAndDropList = ({
             : list
         )
       );
+      setGroupsChanged(true);
     } else {
       const sourceListCopy = [...(sourceList?.items ?? [])];
       const destinationListCopy = [...(destinationList?.items ?? [])];
@@ -75,26 +83,24 @@ const DragAndDropList = ({
               : list
         )
       );
+      setGroupsChanged(true);
     }
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="lists" type="list" direction="vertical">
-        {(provided, snapshot) => (
-          <Flex
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            bg={snapshot.isDraggingOver ? 'rgba(0, 0, 0, 0.2)' : 'inherit'}
-            p="15px"
-            flexDirection="column"
-            gap="4"
-            minWidth="100%"
-            maxWidth="100%"
-            background="rgba(0, 0, 0, 0.1)"
-          >
-            {itemLists.length > 1
-              ? itemLists.map((list, index) => (
+    <Flex w={'100%'}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="lists" type="list" direction="vertical">
+          {provided => (
+            <Flex
+              ref={provided.innerRef}
+              width={'100%'}
+              flexDirection="column"
+              overflow={'auto'}
+              {...provided.droppableProps}
+            >
+              {itemLists.length > 0 &&
+                itemLists.map((list, index) => (
                   <Draggable
                     key={list.name}
                     draggableId={list.name}
@@ -105,21 +111,10 @@ const DragAndDropList = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        bg={
-                          snapshot.isDragging
-                            ? 'rgba(0, 0, 0, 0.4)'
-                            : 'rgba(0, 0, 0, 0.1)'
-                        }
-                        border="1px"
-                        borderColor="rgba(29, 29, 32, 1)"
-                        borderRadius="md"
-                        p="15px"
-                        mb="2"
+                        bg={`${snapshot.isDragging ? 'zinc950' : 'zinc925'}`}
+                        p="10px"
                         color="zinc400"
-                        maxWidth="100%"
-                        background="rgba(0, 0, 0, 0.1)"
-                        _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-                        _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                        width={'100%'}
                       >
                         <Droppable droppableId={list.name} type="item">
                           {(provided, snapshot) => (
@@ -131,12 +126,30 @@ const DragAndDropList = ({
                                   ? 'rgba(0, 0, 0, 0.2)'
                                   : 'inherit'
                               }
-                              p="2"
                               borderRadius="md"
                             >
-                              <Heading size="sm" mb="2" color="zinc300">
-                                {list.name}
-                              </Heading>
+                              <HStack
+                                w={'100%'}
+                                justifyContent={'space-between'}
+                                mb={'10px'}
+                              >
+                                <Heading size="sm" ml={'10px'} color="zinc300">
+                                  {list.name}
+                                </Heading>
+                                {list.name !== 'General' &&
+                                  list.items.length === 0 && (
+                                    <IconButton
+                                      aria-label="DeleteGroup"
+                                      icon={<DeleteIcon />}
+                                      bg="transparent"
+                                      _hover={{ background: 'none' }}
+                                      _active={{ background: 'none' }}
+                                      color={'zinc400'}
+                                      onClick={() => onDeleteList(list.id)}
+                                    />
+                                  )}
+                              </HStack>
+
                               {list.items.map((item, index) => (
                                 <Draggable
                                   key={item.id}
@@ -153,7 +166,7 @@ const DragAndDropList = ({
                                           ? 'rgba(0, 0, 0, 0.4)'
                                           : 'rgba(0, 0, 0, 0.1)'
                                       }
-                                      p="2"
+                                      p={'10px'}
                                       borderRadius="md"
                                       mb="2"
                                       color="zinc400"
@@ -185,88 +198,13 @@ const DragAndDropList = ({
                       </Box>
                     )}
                   </Draggable>
-                ))
-              : itemLists.map(list => (
-                  <Box
-                    key={list.name}
-                    bg="rgba(0, 0, 0, 0.1)"
-                    border="1px"
-                    borderColor="rgba(29, 29, 32, 1)"
-                    borderRadius="md"
-                    p="15px"
-                    mb="2"
-                    color="zinc400"
-                    maxWidth="100%"
-                    background="rgba(0, 0, 0, 0.1)"
-                    _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-                    _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                  >
-                    <Droppable droppableId={list.name} type="item">
-                      {(provided, snapshot) => (
-                        <Box
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          bg={
-                            snapshot.isDraggingOver
-                              ? 'rgba(0, 0, 0, 0.2)'
-                              : 'inherit'
-                          }
-                          p="2"
-                          borderRadius="md"
-                        >
-                          <Heading size="sm" mb="2" color="zinc300">
-                            {list.name}
-                          </Heading>
-                          {list.items.map((item, index) => (
-                            <Draggable
-                              key={item.id}
-                              draggableId={item.id}
-                              index={index}
-                            >
-                              {(provided, snapshot) => (
-                                <Flex
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  bg={
-                                    snapshot.isDragging
-                                      ? 'rgba(0, 0, 0, 0.4)'
-                                      : 'rgba(0, 0, 0, 0.1)'
-                                  }
-                                  p="2"
-                                  borderRadius="md"
-                                  mb="2"
-                                  color="zinc400"
-                                  _hover={{ background: 'rgba(0, 0, 0, 1)' }}
-                                  overflow="hidden"
-                                  textOverflow="ellipsis"
-                                  whiteSpace="nowrap"
-                                  maxWidth="100%"
-                                  alignItems="center"
-                                  onClick={() =>
-                                    onItemClick(item.id, item.name, '')
-                                  }
-                                >
-                                  <TagIcon
-                                    fontSize="small"
-                                    style={{ marginRight: '8px' }}
-                                  />
-                                  <Text>{item.name}</Text>
-                                </Flex>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </Box>
-                      )}
-                    </Droppable>
-                  </Box>
                 ))}
-            {provided.placeholder}
-          </Flex>
-        )}
-      </Droppable>
-    </DragDropContext>
+              {provided.placeholder}
+            </Flex>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </Flex>
   );
 };
 

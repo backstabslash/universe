@@ -26,16 +26,21 @@ class ConnectionHandler {
         select: "name id owner",
       });
 
-      const channelGroups = userGroups.map((group) => ({
-        name: group.name,
-        items: group.channels.map((channel) => ({
+      const orderedUserGroups = userGroupsIds.map((id) =>
+        userGroups.find((group) => group.id === id)
+      );
+
+      const channelGroups = orderedUserGroups.map((group) => ({
+        id: group?.id,
+        name: group?.name,
+        items: group?.channels.map((channel) => ({
           id: channel.id,
           name: channel.name,
           ownerId: channel.owner
         })),
       }));
-      const allChannelIds = userGroups.reduce<string[]>((acc, group) => {
-        group.channels.forEach((channel) => acc.push(channel.id));
+      const allChannelIds = orderedUserGroups.reduce<string[]>((acc, group) => {
+        group?.channels.forEach((channel) => acc.push(channel.id));
         return acc;
       }, []);
 

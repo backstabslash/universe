@@ -2,8 +2,10 @@ import io, { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 import { api } from '../config/config';
 import { Descendant } from 'slate';
+import lodash from 'lodash';
 
 export interface ChannelGroup {
+  id: string;
   name: string;
   items: Array<Omit<Channel, 'messages'>>;
 }
@@ -77,7 +79,12 @@ interface MessengerState {
     messages: UserMessage[];
     users: any;
   }) => void;
-  createChannel: (data: { name: string, private: boolean, readonly: boolean }) => void;
+  updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
+  createChannel: (data: {
+    name: string;
+    private: boolean;
+    readonly: boolean;
+  }) => void;
   deleteChannel: (id: string) => void;
   leaveChannel: (id: string) => void;
 }
@@ -270,6 +277,44 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
   },
 
+  updateChannelGroupsOrder: (updChannelGroups: ChannelGroup[]) => {
+    const { socket, channelGroups } = get();
+
+    if (!socket) {
+      return;
+    }
+
+    const hasGroupsChanged = !lodash.isEqual(
+      channelGroups.map(group => ({
+        id: group.id,
+        name: group.name,
+        items: group.items.map(item => item.id),
+      })),
+      updChannelGroups.map(group => ({
+        id: group.id,
+        name: group.name,
+        items: group.items.map(item => item.id),
+      }))
+    );
+
+    if (!hasGroupsChanged) {
+      return;
+    }
+
+    socket.emit(
+      'update-channel-groups-order',
+      {
+        channelGroups,
+        updChannelGroups,
+      },
+      (response: SocketResponse) => {
+        if (response.status === 'success') {
+          set({ channelGroups: [...updChannelGroups] });
+        }
+      }
+    );
+  },
+
   loadChannelMessages: (): void => {
     try {
       const { socket, channels, currentChannel } = get();
@@ -310,29 +355,43 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     set({ channels: updatedChannels });
   },
 
-  createChannel: (data: { name: string, private: boolean, readonly: boolean }): void => {
+  createChannel: (data: {
+    name: string;
+    private: boolean;
+    readonly: boolean;
+  }): void => {
     const { socket, channelGroups, channels } = get();
 
     if (!socket) return;
     socket.emit('create-channel', data, (response: any) => {
       if (response.status === 'success') {
-        const updatedChannel = { id: response.data._id, messages: [], page: 0, users: response.data.owner, name: response.data.name, ownerId: response.data.owner }
+        const updatedChannel = {
+          id: response.data._id,
+          messages: [],
+          page: 0,
+          users: response.data.owner,
+          name: response.data.name,
+          ownerId: response.data.owner,
+        };
         const updatedChannelGroups = channelGroups.map(channelGroup => {
           if (channelGroup.name === 'General') {
-            channelGroup.items.push({ id: response.data._id, name: response.data.name })
+            channelGroup.items.push({
+              id: response.data._id,
+              name: response.data.name,
+            });
           }
           return channelGroup;
-        })
+        });
         set({
           channels: [updatedChannel, ...channels],
           channelGroups: updatedChannelGroups,
           currentChannel: {
             id: response.data._id,
-            name: response.data.name
-          }
-        })
+            name: response.data.name,
+          },
+        });
       }
-    })
+    });
   },
   deleteChannel: (id: string): void => {
     const { socket, channelGroups, channels, notesChannel } = get();
@@ -347,16 +406,18 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           items: channelGroup.items.filter(item => item.id !== id),
         }));
 
+        console.log(updatedChannelGroups);
+
         set({
           channels: updatedChannels,
           channelGroups: updatedChannelGroups,
           currentChannel: {
             id: notesChannel.id,
-            name: notesChannel.name
-          }
+            name: notesChannel.name,
+          },
         });
       }
-    })
+    });
   },
   leaveChannel: (id: string): void => {
     const { socket, channelGroups, channels, notesChannel } = get();
@@ -376,12 +437,12 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           channelGroups: updatedChannelGroups,
           currentChannel: {
             id: notesChannel.id,
-            name: notesChannel.name
-          }
+            name: notesChannel.name,
+          },
         });
       }
-    })
-  }
+    });
+  },
 }));
 
 const generateObjectId = (): string => {

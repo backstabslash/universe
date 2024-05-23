@@ -28,18 +28,20 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
   socket.on("send-message", (data, callback) => {
     messagesHandler.sendMessage(socket, data, callback);
   });
-
-  socket.on('create-channel', (data, callback) => {
+  socket.on("create-channel", (data, callback) => {
     channelsHandler.createChannel(socket, data, callback);
-  })
+  });
 
-  socket.on('delete-channel', (data, callback) => {
+  socket.on("delete-channel", (data, callback) => {
     channelsHandler.deleteChannel(data, callback, io);
-  })
+  });
 
-  socket.on('leave-channel', (data, callback) => {
+  socket.on("leave-channel", (data, callback) => {
     channelsHandler.leaveChannel(socket, data, callback);
-  })
+  });
+  socket.on("update-channel-groups-order", (data, callback) => {
+    channelsHandler.updateChannelGroupsOrder(socket, data, callback);
+  });
 
   socket.on("disconnect", () => {
     console.info("User disconnected");
