@@ -128,7 +128,7 @@ const UserProfile = (): JSX.Element => {
       onClose();
       fetchUserByEmail();
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
       setError(error?.response?.data?.message || 'Failed to update user info');
     }
   };

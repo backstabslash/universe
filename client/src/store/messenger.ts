@@ -80,6 +80,8 @@ interface MessengerState {
     users: any;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
+  addUserToChannel: (id: string) => void;
+  onUserJoinChannel: (currentUserId: string) => void;
   createChannel: (data: {
     name: string;
     private: boolean;
@@ -355,6 +357,86 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     set({ channels: updatedChannels });
   },
 
+  addUserToChannel: (id: string) => {
+    const { socket, channels, currentChannel } = get();
+
+    if (!socket) return;
+
+    socket.emit(
+      'add-user-to-channel',
+      {
+        channelId: currentChannel?.id,
+        id,
+      },
+      (response: any) => {
+        if (response.status === 'success') {
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === currentChannel?.id) {
+              return {
+                ...channel,
+                users: [...channel.users, id],
+              };
+            }
+            return channel;
+          });
+          set({ channels: updatedChannels });
+        }
+      }
+    );
+  },
+
+  onUserJoinChannel: (currentUserId: string) => {
+    const { socket } = get();
+    if (!socket) return;
+
+    socket.on(
+      'user-joined-channel',
+      (data: {
+        channel: {
+          id: string;
+          name: string;
+          users: string[];
+        };
+        userId: string;
+      }) => {
+        const { channels, channelGroups } = get();
+
+        if (currentUserId !== data.userId) {
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channel.id) {
+              return {
+                ...channel,
+                users: data.channel.users,
+              };
+            }
+            return channel;
+          });
+          set({ channels: [...updatedChannels] });
+        } else {
+          const newChannel = {
+            id: data.channel.id,
+            messages: [],
+            page: 0,
+            users: data.channel.users,
+            name: data.channel.name,
+            ownerId: data.userId,
+          };
+
+          const generalGroup = channelGroups.find(
+            group => group.name === 'General'
+          );
+          generalGroup?.items.push(data.channel);
+          if (generalGroup) {
+            set({
+              channels: [newChannel, ...channels],
+              channelGroups: [...channelGroups, generalGroup],
+            });
+          }
+        }
+      }
+    );
+  },
+
   createChannel: (data: {
     name: string;
     private: boolean;
@@ -393,6 +475,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
     });
   },
+
   deleteChannel: (id: string): void => {
     const { socket, channelGroups, channels, notesChannel } = get();
 
@@ -406,8 +489,6 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           items: channelGroup.items.filter(item => item.id !== id),
         }));
 
-        console.log(updatedChannelGroups);
-
         set({
           channels: updatedChannels,
           channelGroups: updatedChannelGroups,
@@ -419,6 +500,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
     });
   },
+
   leaveChannel: (id: string): void => {
     const { socket, channelGroups, channels, notesChannel } = get();
 

@@ -36,7 +36,7 @@ class ConnectionHandler {
         items: group?.channels.map((channel) => ({
           id: channel.id,
           name: channel.name,
-          ownerId: channel.owner
+          ownerId: channel.owner,
         })),
       }));
       const allChannelIds = orderedUserGroups.reduce<string[]>((acc, group) => {

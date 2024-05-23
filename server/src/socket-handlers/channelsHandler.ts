@@ -5,6 +5,7 @@ import Channel, { ChannelType } from "../models/channel/channelModel";
 import mongoose from "mongoose";
 import User from "../models/user/userModel";
 import UserGroup from "../models/user/userGroupModel";
+import { string } from "joi";
 
 interface ChannelGroup {
   id?: string;
@@ -160,6 +161,78 @@ class ChannelsHandler {
       session.endSession();
     }
   }
+
+  async addUserToChannel(
+    io: Server,
+    socket: Socket,
+    data: {
+      channelId: string;
+      id: string;
+    },
+    callback: Function
+  ) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const channelUser = new ChannelUser({
+        user: data.id,
+        channel: data.channelId,
+      });
+      await channelUser.save({ session });
+
+      const user = await User.findById(data.id).populate("groupsOrder").exec();
+      if (!user) {
+        console.error("User not found");
+        return;
+      }
+
+      const userGroup = user.groupsOrder.find((group) => group.name === "General");
+      if (!userGroup) {
+        console.error("Group not found");
+        return;
+      }
+
+      await UserGroup.findOneAndUpdate(
+        { _id: userGroup._id },
+        { $addToSet: { channels: data.channelId } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      callback({ status: "success" });
+
+      let userSocket;
+      for (let [id, socket] of io.of("/").sockets) {
+        if (socket.data.userId === data.id) {
+          userSocket = socket;
+        }
+      }
+      if (userSocket) {
+        userSocket.join(data.channelId);
+      }
+
+      const channelName = await Channel.findById(data.channelId).select("name").exec();
+      const channelUsers = await ChannelUser.find({
+        channel: data.channelId,
+      }).populate("user", "name id");
+
+      socket.broadcast.to(data.channelId).emit("user-joined-channel", {
+        channel: {
+          id: data.channelId,
+          name: channelName?.name,
+          users: channelUsers.map((cu) => cu.user.id),
+        },
+        userId: data.id,
+      });
+    } catch (error) {
+      session.abortTransaction();
+      console.error(error);
+      callback({ status: "error" });
+    } finally {
+      session.endSession();
+    }
+  }
+
   async updateChannelGroupsOrder(
     socket: Socket,
     data: {

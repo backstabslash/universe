@@ -26,13 +26,11 @@ import useMessengerStore from '../store/messenger';
 const ChannelMembersModal = (): any => {
   const axiosPrivate = useAxiosPrivate();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    fetchUserDetails,
-    setAxiosPrivate: setAxiosPrivateUser,
-    addUserToChannel,
-  } = useChannelUsersStore();
+  const { fetchUserDetails, setAxiosPrivate: setAxiosPrivateUser } =
+    useChannelUsersStore();
   const { fetchUserById, setIsUserProfileVisible } = useUserStore();
-  const { currentChannel, notesChannel, channels } = useMessengerStore();
+  const { currentChannel, notesChannel, channels, addUserToChannel } =
+    useMessengerStore();
   const [userDetails, setUserDetails] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
@@ -58,6 +56,7 @@ const ChannelMembersModal = (): any => {
     const channelUsers = channels.find(
       (channel: any) => channel.id === currentChannel?.id
     )?.users;
+
     if (channelUsers && channelUsers.length > 0) {
       setCurrentChannelUsers(channelUsers);
     }
@@ -114,13 +113,12 @@ const ChannelMembersModal = (): any => {
 
   const handleAddUsersToChannel = async (): Promise<void> => {
     try {
+      if (!currentChannel) return;
+
       await Promise.all(
-        selectedUsers.map((user: any) =>
-          addUserToChannel(currentChannel?.id, user._id)
-        )
+        selectedUsers.map((user: any) => addUserToChannel(user._id))
       );
       await fetchAllUsers();
-      setCurrentChannelUsers([...selectedUsers, ...currentChannelUsers]);
       setUserDetails([...userDetails, ...selectedUsers]);
       setSelectedUsers([]);
       setSearchQuery('');
