@@ -6,7 +6,6 @@ import AddMuiIcon from '@mui/icons-material/Add';
 import TextEditor from '../components/TextEditor';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Flex,
@@ -25,6 +24,9 @@ import {
   ModalOverlay,
   useDisclosure,
   HStack,
+  Menu,
+  MenuButton,
+  MenuList,
 } from '@chakra-ui/react';
 import UserProfile from '../components/UserProfile';
 import { useEffect, useState } from 'react';
@@ -36,6 +38,7 @@ import MessagesContainer from '../components/MessagesContainer';
 import ChannelMembersModal from '../components/ChannelMembersModal';
 import useWorkSpaceStore from '../store/workSpace';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import DeleteChannelModal from '../components/DeleteChannelModal';
 
 const MainContent = (): JSX.Element => {
   const [error, setError] = useState('');
@@ -57,12 +60,16 @@ const MainContent = (): JSX.Element => {
     recieveMessage,
   } = useMessengerStore(state => state);
 
-  const { logout, userData } = useAuthStore(state => state);
+  const { logout, userData, setUserData } = useAuthStore(state => state);
   const { getWorkspaceData, workSpaceData, updateAvatar } = useWorkSpaceStore(
     state => state
   );
   const axiosPrivate = useAxiosPrivate();
-  const setAxiosPrivate = useUserStore(state => state.setAxiosPrivate);
+  const {
+    setAxiosPrivate,
+    fetchUserByEmail,
+    userData: workspaceUserData,
+  } = useUserStore(state => state);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -77,6 +84,7 @@ const MainContent = (): JSX.Element => {
     connectSocket();
     getChannelGroups();
     recieveMessage();
+    getUserData();
 
     return () => {
       socket?.disconnect();
@@ -86,6 +94,11 @@ const MainContent = (): JSX.Element => {
   useEffect(() => {
     getWorkspaceData();
   }, [formData]);
+
+  const getUserData = async (): Promise<void> => {
+    await fetchUserByEmail();
+    if (workspaceUserData) setUserData(workspaceUserData);
+  };
 
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
@@ -101,7 +114,7 @@ const MainContent = (): JSX.Element => {
     useUserStore(state => state);
 
   const handleOpenModal = (): void => {
-    if (workSpaceData?.ownerId === userData?.userId) {
+    if (userData?.userRole === 'administration') {
       setError('');
       if (workSpaceData) {
         setFormData({
@@ -301,18 +314,23 @@ const MainContent = (): JSX.Element => {
                 currentChannel?.id !== notesChannel.id ? (
                   <>
                     <Text fontWeight={'bold'}>#{currentChannel?.name}</Text>
-                    <Flex>
+                    <HStack>
                       <ChannelMembersModal />
-                      <Button
-                        size="md"
-                        mr="2"
-                        bg="transparent"
-                        color="zinc200"
-                        _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-                      >
-                        <EditIcon boxSize={'4'} /> &nbsp; Canvas
-                      </Button>
-                    </Flex>
+                      <Menu placement="bottom-end">
+                        <MenuButton
+                          as={Button}
+                          color="zinc300"
+                          bg="transparent"
+                          _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                          _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                        >
+                          ⋮
+                        </MenuButton>
+                        <MenuList bg="zinc800" border="none" minWidth="auto">
+                          <DeleteChannelModal />
+                        </MenuList>
+                      </Menu>
+                    </HStack>
                   </>
                 ) : (
                   <HStack
@@ -325,6 +343,7 @@ const MainContent = (): JSX.Element => {
                       fontSize={'lg'}
                       color="zinc300"
                       bg="transparent"
+                      _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                       _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
                       padding={'0'}
                       onClick={() => {

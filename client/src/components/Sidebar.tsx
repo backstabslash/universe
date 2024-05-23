@@ -3,16 +3,18 @@ import {
   VStack,
   Heading,
   Flex,
-  Box,
   Button,
   Spinner,
   Image,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuList,
 } from '@chakra-ui/react';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
 import useWorkSpaceStore from '../store/workSpace';
+import CreateChannelModal from './CreateChannelModal';
 
 const Sidebar = (): JSX.Element => {
   const { channelGroups, setCurrentChannel, dmsWithUsers } = useMessengerStore(
@@ -53,17 +55,31 @@ const Sidebar = (): JSX.Element => {
         alignItems={'center'}
         h="60px"
       >
-        <Flex>
+        <HStack w={'100%'} justifyContent={'space-between'} alignItems="center">
           <Heading fontSize="2xl">{workSpaceData?.workSpaceName}</Heading>
-          <Box mt="2px">
-            <KeyboardArrowDownIcon fontSize="small" />
-          </Box>
-        </Flex>
-        <FilterListIcon />
+          <HStack mt="2px">
+            <Menu placement="bottom-end">
+              <MenuButton
+                as={Button}
+                color="zinc300"
+                bg="transparent"
+                _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                alignSelf={'end'}
+              >
+                ⋮
+              </MenuButton>
+              <MenuList bg="zinc800" border="none" minWidth="auto">
+                <CreateChannelModal />
+              </MenuList>
+            </Menu>
+          </HStack>
+        </HStack>
       </Flex>
       <Heading mb="2" fontSize="md" width="100%" pr="15px" pl="15px">
         Channels
       </Heading>
+
       {conversationList.length === 0 ? (
         <Spinner size={'lg'} thickness="4px" speed="0.5s" color="zinc400" />
       ) : (

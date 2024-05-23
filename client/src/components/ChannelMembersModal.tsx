@@ -137,6 +137,7 @@ const ChannelMembersModal = (): any => {
         mr="2"
         bg="transparent"
         color="zinc400"
+        _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
         onClick={() => {
           handleOpen();
         }}
