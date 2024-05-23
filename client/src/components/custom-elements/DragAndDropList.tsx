@@ -4,14 +4,16 @@ import {
   Draggable,
   type DropResult,
 } from 'react-beautiful-dnd';
-import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import { Box, Flex, HStack, Heading, Text, IconButton } from '@chakra-ui/react';
 import TagIcon from '@mui/icons-material/Tag';
+import { DeleteIcon } from '@chakra-ui/icons';
 
 interface DragAndDropListProps {
   itemLists: List[];
   setItemLists: (itemLists: List[]) => void;
   onItemClick: (id: string, name: string, userId: string) => void;
   setGroupsChanged: (groupsChanged: boolean) => void;
+  onDeleteList: (id: string) => void;
 }
 interface List {
   id: string;
@@ -29,6 +31,7 @@ const DragAndDropList = ({
   setItemLists,
   onItemClick,
   setGroupsChanged,
+  onDeleteList,
 }: DragAndDropListProps): JSX.Element => {
   const onDragEnd = (result: DropResult): void => {
     if (!result.destination) {
@@ -96,168 +99,106 @@ const DragAndDropList = ({
               overflow={'auto'}
               {...provided.droppableProps}
             >
-              {itemLists.length > 1
-                ? itemLists.map((list, index) => (
-                    <Draggable
-                      key={list.name}
-                      draggableId={list.name}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <Box
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          bg={`${snapshot.isDragging ? 'zinc950' : 'zinc925'}`}
-                          p="10px"
-                          color="zinc400"
-                          width={'100%'}
-                        >
-                          <Droppable droppableId={list.name} type="item">
-                            {(provided, snapshot) => (
-                              <Box
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                                bg={
-                                  snapshot.isDraggingOver
-                                    ? 'rgba(0, 0, 0, 0.2)'
-                                    : 'inherit'
-                                }
-                                borderRadius="md"
+              {itemLists.length > 0 &&
+                itemLists.map((list, index) => (
+                  <Draggable
+                    key={list.name}
+                    draggableId={list.name}
+                    index={index}
+                  >
+                    {(provided, snapshot) => (
+                      <Box
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        bg={`${snapshot.isDragging ? 'zinc950' : 'zinc925'}`}
+                        p="10px"
+                        color="zinc400"
+                        width={'100%'}
+                      >
+                        <Droppable droppableId={list.name} type="item">
+                          {(provided, snapshot) => (
+                            <Box
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              bg={
+                                snapshot.isDraggingOver
+                                  ? 'rgba(0, 0, 0, 0.2)'
+                                  : 'inherit'
+                              }
+                              borderRadius="md"
+                            >
+                              <HStack
+                                w={'100%'}
+                                justifyContent={'space-between'}
+                                mb={'10px'}
                               >
-                                <Heading
-                                  size="sm"
-                                  ml={'10px'}
-                                  mb="2"
-                                  color="zinc300"
-                                >
+                                <Heading size="sm" ml={'10px'} color="zinc300">
                                   {list.name}
                                 </Heading>
-                                {list.items.map((item, index) => (
-                                  <Draggable
-                                    key={item.id}
-                                    draggableId={item.id}
-                                    index={index}
-                                  >
-                                    {(provided, snapshot) => (
-                                      <Flex
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        bg={
-                                          snapshot.isDragging
-                                            ? 'rgba(0, 0, 0, 0.4)'
-                                            : 'rgba(0, 0, 0, 0.1)'
-                                        }
-                                        p={'10px'}
-                                        borderRadius="md"
-                                        mb="2"
-                                        color="zinc400"
-                                        _hover={{
-                                          background: 'rgba(0, 0, 0, 1)',
-                                        }}
-                                        overflow="hidden"
-                                        textOverflow="ellipsis"
-                                        whiteSpace="nowrap"
-                                        maxWidth="100%"
-                                        alignItems="center"
-                                        onClick={() =>
-                                          onItemClick(item.id, item.name, '')
-                                        }
-                                      >
-                                        <TagIcon
-                                          fontSize="small"
-                                          style={{ marginRight: '8px' }}
-                                        />
-                                        <Text>{item.name}</Text>
-                                      </Flex>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </Box>
-                            )}
-                          </Droppable>
-                        </Box>
-                      )}
-                    </Draggable>
-                  ))
-                : itemLists.map(list => (
-                    <Box
-                      key={list.name}
-                      bg="rgba(0, 0, 0, 0.1)"
-                      border="1px"
-                      borderColor="rgba(29, 29, 32, 1)"
-                      borderRadius="md"
-                      p="15px"
-                      mb="2"
-                      color="zinc400"
-                      maxWidth="100%"
-                      background="rgba(0, 0, 0, 0.1)"
-                      _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-                      _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                    >
-                      <Droppable droppableId={list.name} type="item">
-                        {(provided, snapshot) => (
-                          <Box
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            bg={
-                              snapshot.isDraggingOver
-                                ? 'rgba(0, 0, 0, 0.2)'
-                                : 'inherit'
-                            }
-                            p="2"
-                            borderRadius="md"
-                          >
-                            <Heading size="sm" mb="2" color="zinc300">
-                              {list.name}
-                            </Heading>
-                            {list.items.map((item, index) => (
-                              <Draggable
-                                key={item.id}
-                                draggableId={item.id}
-                                index={index}
-                              >
-                                {(provided, snapshot) => (
-                                  <Flex
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    bg={
-                                      snapshot.isDragging
-                                        ? 'rgba(0, 0, 0, 0.4)'
-                                        : 'rgba(0, 0, 0, 0.1)'
-                                    }
-                                    p="2"
-                                    borderRadius="md"
-                                    mb="2"
-                                    color="zinc400"
-                                    _hover={{ background: 'rgba(0, 0, 0, 1)' }}
-                                    overflow="hidden"
-                                    textOverflow="ellipsis"
-                                    whiteSpace="nowrap"
-                                    maxWidth="100%"
-                                    alignItems="center"
-                                    onClick={() =>
-                                      onItemClick(item.id, item.name, '')
-                                    }
-                                  >
-                                    <TagIcon
-                                      fontSize="small"
-                                      style={{ marginRight: '8px' }}
+                                {list.name !== 'General' &&
+                                  list.items.length === 0 && (
+                                    <IconButton
+                                      aria-label="DeleteGroup"
+                                      icon={<DeleteIcon />}
+                                      bg="transparent"
+                                      _hover={{ background: 'none' }}
+                                      _active={{ background: 'none' }}
+                                      color={'zinc400'}
+                                      onClick={() => onDeleteList(list.id)}
                                     />
-                                    <Text>{item.name}</Text>
-                                  </Flex>
-                                )}
-                              </Draggable>
-                            ))}
-                            {provided.placeholder}
-                          </Box>
-                        )}
-                      </Droppable>
-                    </Box>
-                  ))}
+                                  )}
+                              </HStack>
+
+                              {list.items.map((item, index) => (
+                                <Draggable
+                                  key={item.id}
+                                  draggableId={item.id}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => (
+                                    <Flex
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      bg={
+                                        snapshot.isDragging
+                                          ? 'rgba(0, 0, 0, 0.4)'
+                                          : 'rgba(0, 0, 0, 0.1)'
+                                      }
+                                      p={'10px'}
+                                      borderRadius="md"
+                                      mb="2"
+                                      color="zinc400"
+                                      _hover={{
+                                        background: 'rgba(0, 0, 0, 1)',
+                                      }}
+                                      overflow="hidden"
+                                      textOverflow="ellipsis"
+                                      whiteSpace="nowrap"
+                                      maxWidth="100%"
+                                      alignItems="center"
+                                      onClick={() =>
+                                        onItemClick(item.id, item.name, '')
+                                      }
+                                    >
+                                      <TagIcon
+                                        fontSize="small"
+                                        style={{ marginRight: '8px' }}
+                                      />
+                                      <Text>{item.name}</Text>
+                                    </Flex>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </Box>
+                          )}
+                        </Droppable>
+                      </Box>
+                    )}
+                  </Draggable>
+                ))}
               {provided.placeholder}
             </Flex>
           )}

@@ -90,6 +90,11 @@ const Sidebar = (): JSX.Element => {
     setAddingAGroup(false);
   };
 
+  const onDeleteGroup = (id: string): void => {
+    setGroupsChanged(true);
+    setConversationList(conversationList.filter(group => group.id !== id));
+  };
+
   const hiddenScrollbar = css`
     ::-webkit-scrollbar {
       display: none;
@@ -156,11 +161,6 @@ const Sidebar = (): JSX.Element => {
             _active={{ background: 'none' }}
             _focusVisible={{ background: 'none' }}
             color="zinc300"
-            isDisabled={
-              !!conversationList.find(
-                group => group.items.length === 0 && group.name !== 'General'
-              )
-            }
             onClick={() => setAddingAGroup(true)}
           >
             <AddIcon fontSize="10px" mt={'2px'} />
@@ -201,7 +201,9 @@ const Sidebar = (): JSX.Element => {
               setItemLists={setConversationList}
               onItemClick={onChannelClick}
               setGroupsChanged={setGroupsChanged}
+              onDeleteList={onDeleteGroup}
             />
+
             <Heading mb="2" mt="2" fontSize="lg" width="100%" ml={'30px'}>
               Direct Messages
             </Heading>

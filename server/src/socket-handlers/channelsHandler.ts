@@ -168,6 +168,9 @@ class ChannelsHandler {
     },
     callback: Function
   ) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
       const channelGroupsToDelete = data.channelGroups.filter(
         (group) => !data.updChannelGroups.some((updGroup) => updGroup.id === group.id)
@@ -175,7 +178,7 @@ class ChannelsHandler {
       if (channelGroupsToDelete.length > 0) {
         await UserGroup.deleteMany({
           _id: { $in: channelGroupsToDelete.map((group) => group.id) },
-        });
+        }).session(session);
       }
 
       const newChannelGroups = data.updChannelGroups.filter((group) => !group.id);
@@ -184,7 +187,8 @@ class ChannelsHandler {
           newChannelGroups.map((group) => ({
             name: group.name,
             channels: group.items.map((channel) => channel.id),
-          }))
+          })),
+          { session }
         );
 
         createdGroups.forEach((createdGroup, index) => {
@@ -204,7 +208,7 @@ class ChannelsHandler {
         }));
 
       if (bulkOps.length > 0) {
-        await UserGroup.bulkWrite(bulkOps);
+        await UserGroup.bulkWrite(bulkOps, { session });
       }
 
       const updatedChannelGroups = data.updChannelGroups.map((group) => ({
@@ -217,10 +221,15 @@ class ChannelsHandler {
 
       await User.findByIdAndUpdate(socket.data.userId, {
         $set: { groupsOrder: groupsOrder },
-      });
+      }).session(session);
+
+      await session.commitTransaction();
+      session.endSession();
 
       callback(null, updatedChannelGroups);
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       console.error(error);
       callback(error);
     }

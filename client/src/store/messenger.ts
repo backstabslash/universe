@@ -280,10 +280,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   updateChannelGroupsOrder: (updChannelGroups: ChannelGroup[]) => {
     const { socket, channelGroups } = get();
 
-    const hasEmptyGroup = updChannelGroups.find(
-      group => group.items.length === 0 && group.name !== 'General'
-    );
-    if (!socket || hasEmptyGroup) {
+    if (!socket) {
       return;
     }
 
@@ -408,6 +405,8 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           ...channelGroup,
           items: channelGroup.items.filter(item => item.id !== id),
         }));
+
+        console.log(updatedChannelGroups);
 
         set({
           channels: updatedChannels,
