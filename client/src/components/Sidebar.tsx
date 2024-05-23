@@ -74,7 +74,10 @@ const Sidebar = (): JSX.Element => {
 
   const onBlurGroupNameInput = (): void => {
     let groupName = newGroupName;
-    if (!groupName) {
+    if (
+      !groupName ||
+      conversationList.find(conversation => conversation.name === groupName)
+    ) {
       groupName = 'New Group';
       let i = 1;
       while (conversationList.find(group => group.name === groupName)) {

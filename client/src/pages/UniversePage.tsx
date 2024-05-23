@@ -58,7 +58,9 @@ const MainContent = (): JSX.Element => {
     sendMessage,
     setCurrentChannel,
     recieveMessage,
-    onUserJoinChannel,
+    onUserJoinedChannel,
+    onUserLeftChannel,
+    onDeletedChannel,
   } = useMessengerStore(state => state);
 
   const { logout, userData, setUserData } = useAuthStore(state => state);
@@ -87,7 +89,9 @@ const MainContent = (): JSX.Element => {
     recieveMessage();
     getUserData();
     if (userData?.userId) {
-      onUserJoinChannel(userData.userId);
+      onUserJoinedChannel(userData.userId);
+      onUserLeftChannel();
+      onDeletedChannel();
     }
 
     return () => {
@@ -98,10 +102,16 @@ const MainContent = (): JSX.Element => {
   useEffect(() => {
     getWorkspaceData();
   }, [formData]);
+  useEffect(() => {
+    if (workspaceUserData) setUserData(workspaceUserData);
+  }, [workspaceUserData]);
 
   const getUserData = async (): Promise<void> => {
-    await fetchUserByEmail();
-    if (workspaceUserData) setUserData(workspaceUserData);
+    try {
+      await fetchUserByEmail();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure({

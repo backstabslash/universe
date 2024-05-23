@@ -114,15 +114,18 @@ class ChannelsHandler {
       session.endSession();
     }
   }
-  async deleteChannel(id: string, callback: Function, io: Server) {
+  async deleteChannel(id: string, callback: Function, io: Server, socket: Socket) {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
       await UserGroup.updateMany({ channels: id }, { $pull: { channels: id } });
       await Message.deleteMany({ channel: id });
 
-      await Channel.deleteOne({ channel: id });
+      await Channel.deleteOne({ _id: id });
       await session.commitTransaction();
+
+      socket.broadcast.to(id).emit('channel-deleted', { channel: id })
+
       io.sockets.socketsLeave(id);
       callback({ status: "success" });
     } catch (error) {
@@ -152,7 +155,10 @@ class ChannelsHandler {
         channel: id,
       });
       await session.commitTransaction();
+
+      socket.leave(id);
       callback({ status: "success" });
+      socket.broadcast.to(id).emit("user-left-channel", { channel: id, userId: socket.data.userId })
     } catch (error) {
       session.abortTransaction();
       console.error(error);
@@ -211,7 +217,7 @@ class ChannelsHandler {
         userSocket.join(data.channelId);
       }
 
-      const channelName = await Channel.findById(data.channelId).select("name").exec();
+      const channel = await Channel.findById(data.channelId).select("name owner").exec();
       const channelUsers = await ChannelUser.find({
         channel: data.channelId,
       }).populate("user", "name id");
@@ -219,8 +225,9 @@ class ChannelsHandler {
       socket.broadcast.to(data.channelId).emit("user-joined-channel", {
         channel: {
           id: data.channelId,
-          name: channelName?.name,
-          users: channelUsers.map((cu) => cu.user.id),
+          name: channel?.name,
+          users: channelUsers.map((cu) => cu.user),
+          owner: channel?.owner
         },
         userId: data.id,
       });

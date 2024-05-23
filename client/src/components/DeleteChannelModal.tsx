@@ -16,14 +16,14 @@ import {
 import { useState } from 'react';
 import useMessengerStore from '../store/messenger';
 import { DeleteIcon } from '@chakra-ui/icons';
-import useUserStore from '../store/user';
+import useAuthStore from '../store/auth';
 
 const DeleteChannelModal = (): any => {
   const [formError, setformError] = useState<string>('');
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { deleteChannel, leaveChannel, currentChannel, channels } =
     useMessengerStore(state => state);
-  const { userData } = useUserStore(state => state);
+  const { userData } = useAuthStore(state => state);
 
   const handleOpen = async (): Promise<void> => {
     setformError('');
@@ -34,6 +34,7 @@ const DeleteChannelModal = (): any => {
     const channelWithOwner = channels.find(
       channel => currentChannel?.id === channel.id
     );
+
     if (
       channelWithOwner?.ownerId === userData?.userId ||
       userData?.userRole?.includes('administration')

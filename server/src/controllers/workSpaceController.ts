@@ -151,7 +151,7 @@ class WorkSpacerController {
       await session.abortTransaction();
 
       if ((error as any).code === 11000) {
-        console.log((error as any).keyValue);
+        console.error((error as any).keyValue);
         return res.status(409).json({
           message: `This email template exists ${(error as any).keyValue?.emailTemplates}`,
         });
