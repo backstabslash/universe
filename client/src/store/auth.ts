@@ -12,7 +12,7 @@ interface UserData {
   password?: string | null;
   verifyCode?: string | null;
   name?: string | null;
-  userRole?: string | null;
+  userRole?: string[] | null;
 }
 
 interface AuthState {
