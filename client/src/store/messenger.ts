@@ -2,8 +2,10 @@ import io, { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 import { api } from '../config/config';
 import { Descendant } from 'slate';
+import lodash from 'lodash';
 
 export interface ChannelGroup {
+  id: string;
   name: string;
   items: Array<Omit<Channel, 'messages'>>;
 }
@@ -76,6 +78,7 @@ interface MessengerState {
     messages: UserMessage[];
     users: any;
   }) => void;
+  updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -264,6 +267,47 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         user: { _id: userId },
       },
     });
+  },
+
+  updateChannelGroupsOrder: (updChannelGroups: ChannelGroup[]) => {
+    const { socket, channelGroups } = get();
+
+    const hasEmptyGroup = updChannelGroups.find(
+      group => group.items.length === 0 && group.name !== 'General'
+    );
+    if (!socket || hasEmptyGroup) {
+      return;
+    }
+
+    const hasGroupsChanged = !lodash.isEqual(
+      channelGroups.map(group => ({
+        id: group.id,
+        name: group.name,
+        items: group.items.map(item => item.id),
+      })),
+      updChannelGroups.map(group => ({
+        id: group.id,
+        name: group.name,
+        items: group.items.map(item => item.id),
+      }))
+    );
+
+    if (!hasGroupsChanged) {
+      return;
+    }
+
+    socket.emit(
+      'update-channel-groups-order',
+      {
+        channelGroups,
+        updChannelGroups,
+      },
+      (response: SocketResponse) => {
+        if (response.status === 'success') {
+          set({ channelGroups: [...updChannelGroups] });
+        }
+      }
+    );
   },
 
   loadChannelMessages: (): void => {

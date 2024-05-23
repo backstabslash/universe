@@ -3,6 +3,7 @@ import { extendTheme } from '@chakra-ui/react';
 const theme = extendTheme({
   colors: {
     zinc950: '#09090b',
+    zinc925: '#111113',
     zinc900: '#18181b',
     zinc800: '#27272a',
     zinc700: '#3f3f46',

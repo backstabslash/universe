@@ -29,6 +29,10 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
     messagesHandler.sendMessage(socket, data, callback);
   });
 
+  socket.on("update-channel-groups-order", (data, callback) => {
+    channelsHandler.updateChannelGroupsOrder(socket, data, callback);
+  });
+
   socket.on("disconnect", () => {
     console.info("User disconnected");
   });
