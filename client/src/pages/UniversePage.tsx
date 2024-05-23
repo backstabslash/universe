@@ -114,7 +114,7 @@ const MainContent = (): JSX.Element => {
     useUserStore(state => state);
 
   const handleOpenModal = (): void => {
-    if (userData?.userRole === 'administration') {
+    if (userData?.userRole?.includes('administration')) {
       setError('');
       if (workSpaceData) {
         setFormData({

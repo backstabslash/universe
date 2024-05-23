@@ -36,7 +36,7 @@ const DeleteChannelModal = (): any => {
     );
     if (
       channelWithOwner?.ownerId === userData?.userId ||
-      userData?.userRole === 'administration'
+      userData?.userRole?.includes('administration')
     ) {
       return true;
     }

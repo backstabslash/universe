@@ -33,8 +33,9 @@ class UserController {
           message: "User not found",
         });
       }
-      const userRole = await UserRole.findOne({ user: user.id }).populate('role')
+      const userRoles = await UserRole.find({ user: user.id }).populate('role')
 
+      const roles = userRoles.map(userRole => userRole.role.name)
       return res.status(200).json({
         tag: user.tag,
         name: user.name,
@@ -42,7 +43,7 @@ class UserController {
         phone: user.phone,
         email: user.email,
         userId: user.id,
-        userRole: userRole?.role.name
+        userRole: roles
       });
     } catch (error) {
       res.status(500).json({
