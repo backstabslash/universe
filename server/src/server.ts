@@ -28,14 +28,16 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
   socket.on("send-message", (data, callback) => {
     messagesHandler.sendMessage(socket, data, callback);
   });
+
+  socket.on("add-user-to-channel", (data, callback) => {
+    channelsHandler.addUserToChannel(io, socket, data, callback);
+  });
   socket.on("create-channel", (data, callback) => {
     channelsHandler.createChannel(socket, data, callback);
   });
-
   socket.on("delete-channel", (data, callback) => {
-    channelsHandler.deleteChannel(data, callback, io);
+    channelsHandler.deleteChannel(data, callback, io, socket);
   });
-
   socket.on("leave-channel", (data, callback) => {
     channelsHandler.leaveChannel(socket, data, callback);
   });

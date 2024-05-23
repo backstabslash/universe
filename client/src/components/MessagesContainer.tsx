@@ -152,7 +152,7 @@ const MessagesContainer = (): JSX.Element => {
       background="rgba(0, 0, 0, 0.5)"
       h="calc(100vh - 252px)"
       overflowY="auto"
-      bgImage="../../public/chat-bg-pattern-dark.png"
+      bgImage="../../chat-bg-pattern-dark.png"
       bgSize="cover"
       bgRepeat="no-repeat"
       bgPosition="center"
@@ -184,8 +184,8 @@ const MessagesContainer = (): JSX.Element => {
                 boxShadow="md"
                 color="zinc300"
                 mt="18px"
-                ml="18px"
-                mr="18px"
+                ml={`${message.user._id === userData?.userId ? '100px' : '18px'}`}
+                mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
                 width="fit-content"
               >
                 <VStack mb={'8px'} spacing={0}>

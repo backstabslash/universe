@@ -36,7 +36,7 @@ class ConnectionHandler {
         items: group?.channels.map((channel) => ({
           id: channel.id,
           name: channel.name,
-          ownerId: channel.owner
+          ownerId: channel.owner,
         })),
       }));
       const allChannelIds = orderedUserGroups.reduce<string[]>((acc, group) => {
@@ -46,7 +46,7 @@ class ConnectionHandler {
 
       const userChannels = await ChannelUser.find({ user: socket.data.userId }).populate("channel");
       const dms = userChannels.map((userChannel) => {
-        if (userChannel.channel.type === ChannelType.DM) {
+        if (userChannel.channel?.type === ChannelType.DM) {
           return userChannel.channel.id;
         }
       });

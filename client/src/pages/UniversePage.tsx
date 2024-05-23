@@ -1,7 +1,7 @@
 import useMessengerStore from '../store/messenger';
 import CottageIcon from '@mui/icons-material/Cottage';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import InboxIcon from '@mui/icons-material/Inbox';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import AddMuiIcon from '@mui/icons-material/Add';
 import TextEditor from '../components/TextEditor';
 import Sidebar from '../components/Sidebar';
@@ -58,6 +58,9 @@ const MainContent = (): JSX.Element => {
     sendMessage,
     setCurrentChannel,
     recieveMessage,
+    onUserJoinedChannel,
+    onUserLeftChannel,
+    onDeletedChannel,
   } = useMessengerStore(state => state);
 
   const { logout, userData, setUserData } = useAuthStore(state => state);
@@ -85,6 +88,11 @@ const MainContent = (): JSX.Element => {
     getChannelGroups();
     recieveMessage();
     getUserData();
+    if (userData?.userId) {
+      onUserJoinedChannel(userData.userId);
+      onUserLeftChannel();
+      onDeletedChannel();
+    }
 
     return () => {
       socket?.disconnect();
@@ -94,10 +102,16 @@ const MainContent = (): JSX.Element => {
   useEffect(() => {
     getWorkspaceData();
   }, [formData]);
+  useEffect(() => {
+    if (workspaceUserData) setUserData(workspaceUserData);
+  }, [workspaceUserData]);
 
   const getUserData = async (): Promise<void> => {
-    await fetchUserByEmail();
-    if (workspaceUserData) setUserData(workspaceUserData);
+    try {
+      await fetchUserByEmail();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const { isOpen, onOpen, onClose } = useDisclosure({
@@ -225,7 +239,7 @@ const MainContent = (): JSX.Element => {
                 _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 onClick={openNotes}
               >
-                <InboxIcon fontSize="medium" />
+                <EditNoteIcon fontSize="medium" />
               </Button>
               <Text fontSize={'xs'}>Notes</Text>
             </Flex>
