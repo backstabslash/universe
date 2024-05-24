@@ -12,6 +12,7 @@ import {
   MenuList,
   Input,
   Box,
+  Text,
 } from '@chakra-ui/react';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
@@ -169,7 +170,7 @@ const Sidebar = (): JSX.Element => {
             onClick={() => setAddingAGroup(true)}
           >
             <AddIcon fontSize="10px" mt={'2px'} />
-            &nbsp;Add group
+            &nbsp;<Text color="zinc400">Add group</Text>
           </Button>
         </HStack>
         {addingAGroup && (

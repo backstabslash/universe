@@ -213,16 +213,6 @@ const UserProfile = (): JSX.Element => {
               <Text color="#1d9bd1">
                 {userData?.tag ? `@${userData.tag}` : '@username'}
               </Text>
-              <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-                <Button
-                  size="md"
-                  bg="zinc800"
-                  _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                  color="zinc300"
-                >
-                  <AddIcon fontSize="13px" /> &nbsp; Add name pronunciation
-                </Button>
-              </Link>
             </VStack>
             <VStack align="start" spacing={1}>
               <Text>Active</Text>
@@ -513,8 +503,17 @@ const UserProfile = (): JSX.Element => {
               <Text color="#1d9bd1">
                 {userData?.tag ? `@${userData.tag}` : '@username'}
               </Text>
-              <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}></Link>
             </VStack>
+            <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
+              <Button
+                size="md"
+                bg="zinc800"
+                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                color="zinc300"
+              >
+                Message
+              </Button>
+            </Link>
             <VStack align="start" spacing={1}>
               <Text>Active</Text>
               <Text>{currentTime} local time</Text>
@@ -531,7 +530,7 @@ const UserProfile = (): JSX.Element => {
             pb="14px"
           >
             <HStack width="100%" justifyContent="space-between">
-              <Text fontWeight="bold">Contact information</Text>
+              <Text fontWeight="bold">Contact in formation</Text>
             </HStack>
             <VStack align="start" spacing={1}>
               <Text fontSize="small" color="#9e9fa1">
@@ -555,6 +554,7 @@ const UserProfile = (): JSX.Element => {
               <Text>{"Phone number isn't specified yet"}</Text>
             )}
           </VStack>
+
           <VStack
             width="100%"
             align="start"

@@ -1,16 +1,17 @@
-import { Server, Socket } from "socket.io";
-import Message from "../models/message/messageModel";
-import ChannelUser from "../models/channel/channelUserModel";
-import Channel, { ChannelType } from "../models/channel/channelModel";
-import mongoose from "mongoose";
-import User from "../models/user/userModel";
-import UserGroup from "../models/user/userGroupModel";
-import { string } from "joi";
+import { Server, Socket } from 'socket.io';
+import Message from '../models/message/messageModel';
+import ChannelUser from '../models/channel/channelUserModel';
+import Channel, { ChannelType } from '../models/channel/channelModel';
+import mongoose from 'mongoose';
+import User from '../models/user/userModel';
+import UserGroup from '../models/user/userGroupModel';
+import WorkspaceUser from '../models/workspace/workspaceUserModel';
+import WorkspaceChannel from '../models/workspace/workspaceChannelModel';
 
 interface ChannelGroup {
   id?: string;
   name: string;
-  items: Array<Omit<Channel, "messages">>;
+  items: Array<Omit<Channel, 'messages'>>;
 }
 
 interface Channel {
@@ -20,7 +21,10 @@ interface Channel {
 }
 
 class ChannelsHandler {
-  async getMessages(socket: Socket, data: { channelId: string; limit: number; page: number }) {
+  async getMessages(
+    socket: Socket,
+    data: { channelId: string; limit: number; page: number }
+  ) {
     try {
       if (!socket.data.userId) {
         return;
@@ -33,7 +37,7 @@ class ChannelsHandler {
 
       const skip = data.page * data.limit;
       const messages = await Message.find({ channel: data.channelId })
-        .populate({ path: "user", select: "name id" })
+        .populate({ path: 'user', select: 'name id' })
         .sort({ sendAt: -1 })
         .skip(skip)
         .limit(data.limit);
@@ -49,9 +53,9 @@ class ChannelsHandler {
 
       const channelUsers = await ChannelUser.find({
         channel: data.channelId,
-      }).populate("user", "name id");
+      }).populate('user', 'name id');
 
-      socket.emit("recieve-channel-messages", {
+      socket.emit('recieve-channel-messages', {
         messages: formattedMessages,
         hasMoreMessages,
         users: channelUsers.map((cu) => cu.user),
@@ -84,17 +88,19 @@ class ChannelsHandler {
       await newChannelUser.save({ session });
 
       const user = await User.findById(socket.data.userId).populate({
-        path: "groupsOrder",
-        select: "name _id",
+        path: 'groupsOrder',
+        select: 'name _id',
       });
       if (!user) {
         await session.abortTransaction();
-        return;
+        return callback({ status: 'error', message: 'User not found' });
       }
-      const userGroup = user.groupsOrder.find((group) => group.name === "General");
+      const userGroup = user.groupsOrder.find(
+        (group) => group.name === 'General'
+      );
       if (!userGroup) {
         await session.abortTransaction();
-        return;
+        return callback({ status: 'error', message: 'User group not found' });
       }
 
       await UserGroup.findOneAndUpdate(
@@ -103,18 +109,44 @@ class ChannelsHandler {
         { session }
       );
 
+      const workspaceUser = await WorkspaceUser.findOne({
+        user: socket.data.userId,
+      });
+      if (!workspaceUser) {
+        await session.abortTransaction();
+        return callback({
+          status: 'error',
+          message: 'Workspace user not found',
+        });
+      }
+
+      await WorkspaceChannel.create(
+        [
+          {
+            workspace: workspaceUser.workspace,
+            channel: savedChannel._id,
+          },
+        ],
+        { session }
+      );
+
       await session.commitTransaction();
       socket.join(savedChannel.id);
-      callback({ status: "success", data: savedChannel });
+      callback({ status: 'success', data: savedChannel });
     } catch (error) {
       await session.abortTransaction();
       console.error(error);
-      callback({ status: "error" });
+      callback({ status: 'error' });
     } finally {
       session.endSession();
     }
   }
-  async deleteChannel(id: string, callback: Function, io: Server, socket: Socket) {
+  async deleteChannel(
+    id: string,
+    callback: Function,
+    io: Server,
+    socket: Socket
+  ) {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -122,16 +154,18 @@ class ChannelsHandler {
       await Message.deleteMany({ channel: id });
 
       await Channel.deleteOne({ _id: id });
+      await WorkspaceChannel.deleteOne({ channel: id });
+
       await session.commitTransaction();
 
-      socket.broadcast.to(id).emit("channel-deleted", { channel: id });
+      socket.broadcast.to(id).emit('channel-deleted', { channel: id });
 
       io.sockets.socketsLeave(id);
-      callback({ status: "success" });
+      callback({ status: 'success' });
     } catch (error) {
       session.abortTransaction();
       console.error(error);
-      callback({ status: "error" });
+      callback({ status: 'error' });
     } finally {
       session.endSession();
     }
@@ -140,14 +174,18 @@ class ChannelsHandler {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const user = await User.findById(socket.data.userId).populate("groupsOrder").exec();
+      const user = await User.findById(socket.data.userId)
+        .populate('groupsOrder')
+        .exec();
       if (!user) {
-        console.error("User not found");
+        console.error('User not found');
         return;
       }
 
       for (const group of user.groupsOrder) {
-        group.channels = group.channels.filter((channel) => String(channel._id) !== id);
+        group.channels = group.channels.filter(
+          (channel) => String(channel._id) !== id
+        );
         await group.save();
       }
       await ChannelUser.findOneAndDelete({
@@ -157,14 +195,14 @@ class ChannelsHandler {
       await session.commitTransaction();
 
       socket.leave(id);
-      callback({ status: "success" });
+      callback({ status: 'success' });
       socket.broadcast
         .to(id)
-        .emit("user-left-channel", { channel: id, userId: socket.data.userId });
+        .emit('user-left-channel', { channel: id, userId: socket.data.userId });
     } catch (error) {
       session.abortTransaction();
       console.error(error);
-      callback({ status: "error" });
+      callback({ status: 'error' });
     } finally {
       session.endSession();
     }
@@ -188,15 +226,17 @@ class ChannelsHandler {
       });
       await channelUser.save({ session });
 
-      const user = await User.findById(data.id).populate("groupsOrder").exec();
+      const user = await User.findById(data.id).populate('groupsOrder').exec();
       if (!user) {
-        console.error("User not found");
+        console.error('User not found');
         return;
       }
 
-      const userGroup = user.groupsOrder.find((group) => group.name === "General");
+      const userGroup = user.groupsOrder.find(
+        (group) => group.name === 'General'
+      );
       if (!userGroup) {
-        console.error("Group not found");
+        console.error('Group not found');
         return;
       }
 
@@ -207,10 +247,10 @@ class ChannelsHandler {
       );
 
       await session.commitTransaction();
-      callback({ status: "success" });
+      callback({ status: 'success' });
 
       let userSocket;
-      for (let [id, socket] of io.of("/").sockets) {
+      for (let [id, socket] of io.of('/').sockets) {
         if (socket.data.userId === data.id) {
           userSocket = socket;
         }
@@ -219,12 +259,14 @@ class ChannelsHandler {
         userSocket.join(data.channelId);
       }
 
-      const channel = await Channel.findById(data.channelId).select("name owner").exec();
+      const channel = await Channel.findById(data.channelId)
+        .select('name owner')
+        .exec();
       const channelUsers = await ChannelUser.find({
         channel: data.channelId,
-      }).populate("user", "name id");
+      }).populate('user', 'name id');
 
-      socket.broadcast.to(data.channelId).emit("user-joined-channel", {
+      socket.broadcast.to(data.channelId).emit('user-joined-channel', {
         channel: {
           id: data.channelId,
           name: channel?.name,
@@ -236,7 +278,7 @@ class ChannelsHandler {
     } catch (error) {
       session.abortTransaction();
       console.error(error);
-      callback({ status: "error" });
+      callback({ status: 'error' });
     } finally {
       session.endSession();
     }
@@ -255,7 +297,8 @@ class ChannelsHandler {
 
     try {
       const channelGroupsToDelete = data.channelGroups.filter(
-        (group) => !data.updChannelGroups.some((updGroup) => updGroup.id === group.id)
+        (group) =>
+          !data.updChannelGroups.some((updGroup) => updGroup.id === group.id)
       );
       if (channelGroupsToDelete.length > 0) {
         await UserGroup.deleteMany({
@@ -286,7 +329,10 @@ class ChannelsHandler {
           updateOne: {
             filter: { _id: group.id },
             update: {
-              $set: { name: group.name, channels: group.items.map((channel) => channel.id) },
+              $set: {
+                name: group.name,
+                channels: group.items.map((channel) => channel.id),
+              },
             },
           },
         }));

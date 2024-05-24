@@ -14,6 +14,15 @@ router.get(
   rateLimiter(),
   workSpaceController.getWorkspaceData
 );
-router.post('/update-workspace-avatar', rateLimiter(), workSpaceController.updateWorkspaceAvatar);
+router.post(
+  '/update-workspace-avatar',
+  rateLimiter(),
+  workSpaceController.updateWorkspaceAvatar
+);
+router.get(
+  '/get-workspace-channels',
+  rateLimiter(),
+  workSpaceController.getWorkspaceChannels
+);
 
 export default router;
