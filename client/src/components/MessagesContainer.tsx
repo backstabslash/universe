@@ -147,10 +147,11 @@ const MessagesContainer = (): JSX.Element => {
   }, [messages]);
 
   return (
-    <Box
+    <Flex
       ref={containerRef}
       background="rgba(0, 0, 0, 0.5)"
-      h="calc(100vh - 252px)"
+      maxH="calc(100vh - 270px)"
+      height={'100%'}
       overflowY="auto"
       bgImage="../../chat-bg-pattern-dark.png"
       bgSize="cover"
@@ -158,7 +159,6 @@ const MessagesContainer = (): JSX.Element => {
       bgPosition="center"
       pt={'15px'}
       pb={'10px'}
-      display="flex"
       flexDirection="column-reverse"
     >
       {messagesLoading && messages.length === 0 ? (
@@ -244,7 +244,7 @@ const MessagesContainer = (): JSX.Element => {
           <Spinner size="lg" thickness="4px" speed="0.5s" />
         </Flex>
       )}
-    </Box>
+    </Flex>
   );
 };
 

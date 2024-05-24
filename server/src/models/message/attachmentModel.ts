@@ -2,6 +2,7 @@ import { Schema, Document, model } from "mongoose";
 
 export interface IAttachment extends Document {
   type: AttachmentType;
+  url: string;
 }
 
 export enum AttachmentType {
@@ -15,6 +16,10 @@ const AttachmentSchema = new Schema<IAttachment>({
   type: {
     type: String,
     enum: Object.values(AttachmentType),
+    required: true,
+  },
+  url: {
+    type: String,
     required: true,
   },
 });
