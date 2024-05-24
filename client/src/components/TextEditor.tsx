@@ -35,7 +35,7 @@ import {
   InsertDriveFile,
   Image,
 } from '@mui/icons-material/';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import isHotkey from 'is-hotkey';
 import {
   Editable,
@@ -131,6 +131,8 @@ interface TextEditorProps {
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const { userData } = useAuthStore(state => state);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
 
   const renderElement = useCallback(
@@ -149,6 +151,30 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
 
   const handleContentChange = (newContent: Descendant[]): void => {
     setContent(newContent);
+  };
+
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    if (event.target.files) {
+      const newFiles = Array.from(event.target.files);
+      setFiles(prevFiles => {
+        const updatedFiles = new Set([...prevFiles, ...newFiles]);
+        return Array.from(updatedFiles);
+      });
+    }
+  };
+
+  const handleFileRemove = (index: number): void => {
+    setFiles(prevFiles => {
+      const updatedFiles = new Set(prevFiles);
+      updatedFiles.delete(prevFiles[index]);
+      const result = Array.from(updatedFiles);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return result;
+    });
   };
 
   const [content, setContent] = useState<Descendant[]>(initialValue);
@@ -277,10 +303,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
                 p="0"
                 m="0"
                 onClick={() => {
-                  setFiles(prevFiles => {
-                    if (!prevFiles) return [];
-                    return prevFiles.filter((_, i) => i !== index);
-                  });
+                  handleFileRemove(index);
                 }}
               />
             </HStack>
@@ -416,15 +439,9 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
                   type="file"
                   display="none"
                   isDisabled={files.length >= 5}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    if (event.target.files) {
-                      const newFiles = Array.from(event.target.files);
-                      setFiles(prevFiles => [
-                        ...(prevFiles || []),
-                        ...newFiles,
-                      ]);
-                    }
-                  }}
+                  multiple
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
                 />
               </Button>
               <IconButton
