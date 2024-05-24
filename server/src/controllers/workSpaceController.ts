@@ -26,6 +26,7 @@ interface PopulatedWorkspaceChannel {
     name: string;
     private: boolean;
     readonly: boolean;
+    owner: string;
   };
 }
 
@@ -242,23 +243,56 @@ class WorkSpacerController {
       );
 
       const filteredChannels = workspaceChannels.filter((workspaceChannel) => {
-        const channel = (workspaceChannel as PopulatedWorkspaceChannel).channel;
+        const channel = (
+          workspaceChannel as unknown as PopulatedWorkspaceChannel
+        ).channel;
         return (
           !userChannelIds.includes(channel._id.toString()) && !channel.private
         );
       });
 
       const channelsToReturn = filteredChannels.map((workspaceChannel) => {
-        const channel = (workspaceChannel as PopulatedWorkspaceChannel).channel;
+        const channel = (
+          workspaceChannel as unknown as PopulatedWorkspaceChannel
+        ).channel;
         return {
           id: channel._id,
           name: channel.name,
           private: channel.private,
           readonly: channel.readonly,
+          owner: channel.owner,
         };
       });
 
-      return res.status(200).json(channelsToReturn);
+      const channelIds = channelsToReturn.map((channel) => channel.id);
+
+      const channelUsers = await ChannelUser.find({
+        channel: { $in: channelIds },
+      }).populate('user');
+
+      const userDetails = channelUsers.map((channelUser) => {
+        return {
+          channelId: channelUser.channel,
+          user: {
+            _id: channelUser.user._id,
+            name: channelUser.user.name,
+          },
+        };
+      });
+
+      const channelsWithUsers = channelsToReturn.map((channel: any) => {
+        return {
+          ...channel,
+          users: userDetails
+            .filter(
+              (userDetail) =>
+                userDetail.channelId.toString() === channel.id.toString()
+            )
+            .map((detail) => detail.user),
+        };
+      });
+
+      return res.status(200).json(channelsWithUsers);
     } catch (error) {
       return res.status(500).json({
         message: 'Internal server error',

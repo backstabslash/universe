@@ -80,7 +80,7 @@ interface MessengerState {
     users: any;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
-  addUserToChannel: (id: string) => void;
+  addUserToChannel: (id: string, channelId?: string) => void;
   onUserJoinedChannel: (currentUserId: string) => void;
   createChannel: (data: {
     name: string;
@@ -359,21 +359,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     set({ channels: updatedChannels });
   },
 
-  addUserToChannel: (id: string) => {
-    const { socket, channels, currentChannel } = get();
+  addUserToChannel: (id: string, channel?: any) => {
+    const { socket, channels, currentChannel, channelGroups } = get();
 
     if (!socket) return;
+
+    let itsMe = false;
+    let chlId = currentChannel?.id;
+
+    if (channel) {
+      itsMe = true;
+      chlId = channel.id;
+    }
 
     socket.emit(
       'add-user-to-channel',
       {
-        channelId: currentChannel?.id,
+        channelId: chlId,
         id,
       },
       (response: any) => {
         if (response.status === 'success') {
           const updatedChannels = channels.map(channel => {
-            if (channel.id === currentChannel?.id) {
+            if (channel.id === chlId) {
               return {
                 ...channel,
                 users: [...channel.users, { _id: id }],
@@ -382,6 +390,26 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             return channel;
           });
           set({ channels: updatedChannels });
+          if (itsMe) {
+            const newChannel = {
+              id: channel.id,
+              messages: [],
+              page: 0,
+              users: channel.users,
+              name: channel.name,
+              ownerId: channel.owner,
+            };
+            const updatedChannelGroups = channelGroups.map(channelGroup => {
+              if (channelGroup.name === 'General') {
+                channelGroup.items.push(channel);
+              }
+              return channelGroup;
+            });
+            set({
+              channels: [newChannel, ...channels],
+              channelGroups: updatedChannelGroups,
+            });
+          }
         }
       }
     );
@@ -397,7 +425,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         channel: {
           id: string;
           name: string;
-          users: { _id: string; name: string }
+          users: { _id: string; name: string };
           owner: string;
         };
         userId: string;
@@ -427,10 +455,10 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           };
           const updatedChannelGroups = channelGroups.map(channelGroup => {
             if (channelGroup.name === 'General') {
-              channelGroup.items.push(data.channel)
+              channelGroup.items.push(data.channel);
             }
             return channelGroup;
-          })
+          });
           set({
             channels: [newChannel, ...channels],
             channelGroups: updatedChannelGroups,
@@ -444,22 +472,22 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     if (!socket) return;
     socket.on(
       'user-left-channel',
-      (data: {
-        channel: string;
-        userId: string;
-      }) => {
+      (data: { channel: string; userId: string }) => {
         const { channels } = get();
         const updatedChannels = channels.map(channel => {
           if (channel.id === data.channel) {
             return {
               ...channel,
-              users: channel.users.filter((user: { _id: string; }) => user._id !== data.userId),
+              users: channel.users.filter(
+                (user: { _id: string }) => user._id !== data.userId
+              ),
             };
           }
           return channel;
         });
-        set({ channels: [...updatedChannels] })
-      })
+        set({ channels: [...updatedChannels] });
+      }
+    );
   },
 
   createChannel: (data: {
@@ -504,31 +532,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     const { socket } = get();
 
     if (!socket) return;
-    socket.on(
-      'channel-deleted',
-      (data: {
-        channel: string;
-      }) => {
-        const { channels, channelGroups, notesChannel, currentChannel } = get();
-        const updatedChannels = channels.filter(channel => channel.id === data.channel);
+    socket.on('channel-deleted', (data: { channel: string }) => {
+      const { channels, channelGroups, notesChannel, currentChannel } = get();
+      const updatedChannels = channels.filter(
+        channel => channel.id === data.channel
+      );
 
-        const updatedChannelGroups = channelGroups.map(channelGroup => ({
-          ...channelGroup,
-          items: channelGroup.items.filter(item => item.id !== data.channel),
-        }));
-        if (currentChannel?.id === data.channel) {
-          set({
-            currentChannel: {
-              id: notesChannel.id,
-              name: notesChannel.name,
-            }
-          })
-        }
+      const updatedChannelGroups = channelGroups.map(channelGroup => ({
+        ...channelGroup,
+        items: channelGroup.items.filter(item => item.id !== data.channel),
+      }));
+      if (currentChannel?.id === data.channel) {
         set({
-          channels: [...updatedChannels],
-          channelGroups: updatedChannelGroups
-        })
-      })
+          currentChannel: {
+            id: notesChannel.id,
+            name: notesChannel.name,
+          },
+        });
+      }
+      set({
+        channels: [...updatedChannels],
+        channelGroups: updatedChannelGroups,
+      });
+    });
   },
 
   deleteChannel: (id: string): void => {

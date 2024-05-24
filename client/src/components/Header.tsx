@@ -10,6 +10,7 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
+  ModalCloseButton,
   ModalBody,
   ModalFooter,
   Divider,
@@ -24,6 +25,7 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import TagIcon from '@mui/icons-material/Tag';
 import useAuthStore from '../store/auth';
 import useUserStore from '../store/user';
+import useMessengerStore from '../store/messenger';
 
 const Header = (): JSX.Element => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -48,6 +50,13 @@ const Header = (): JSX.Element => {
   }));
   const userData = useAuthStore(state => state.userData);
   const { fetchUserById, setIsUserProfileVisible } = useUserStore();
+  const { addUserToChannel } = useMessengerStore();
+  const [selectedChannel, setSelectedChannel] = useState<any>(null);
+  const {
+    isOpen: isConfirmOpen,
+    onOpen: onConfirmOpen,
+    onClose: onConfirmClose,
+  } = useDisclosure();
 
   useEffect(() => {
     const initialize = async (): Promise<void> => {
@@ -77,6 +86,22 @@ const Header = (): JSX.Element => {
     );
 
     setSearchResults({ users: filteredUsers, channels: filteredChannels });
+  };
+
+  const handleChannelClick = (channel: any): void => {
+    setSelectedChannel(channel);
+    onConfirmOpen();
+  };
+
+  const confirmChannelClick = async (): Promise<void> => {
+    if (userData?.userId && selectedChannel) {
+      addUserToChannel(userData?.userId, selectedChannel);
+      handleClear();
+      onClose();
+      onConfirmClose();
+      await getWorkspacePublicChannels();
+      await getWorkspaceUsers();
+    }
   };
 
   const handleClear = (): void => {
@@ -163,8 +188,8 @@ const Header = (): JSX.Element => {
             </Flex>
           </ModalHeader>
           <ModalBody>
-            {searchResults.users.length > 0 ||
-            searchResults.channels.length > 0 ? (
+            {searchResults?.users?.length > 0 ||
+            searchResults?.channels?.length > 0 ? (
               <List spacing={3}>
                 {searchResults.users.length > 0 && (
                   <Text fontWeight="bold" mb="2">
@@ -201,7 +226,13 @@ const Header = (): JSX.Element => {
                 )}
                 {searchResults.channels.map((channel: any) => (
                   <ListItem key={channel._id}>
-                    <Flex align="center" alignItems={'center'} color="gray.500">
+                    <Flex
+                      align="center"
+                      alignItems={'center'}
+                      color="gray.500"
+                      cursor="pointer"
+                      onClick={() => handleChannelClick(channel)}
+                    >
                       <TagIcon fontSize="small" />
                       <Text>{channel.name}</Text>
                     </Flex>
@@ -213,6 +244,26 @@ const Header = (): JSX.Element => {
             )}
           </ModalBody>
           <ModalFooter fontSize="sm"></ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal isOpen={isConfirmOpen} onClose={onConfirmClose}>
+        <ModalOverlay />
+        <ModalContent bg="zinc900" color="zinc200">
+          <ModalHeader>Confirm Action</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to join this channel?</ModalBody>
+          <ModalFooter>
+            <Button onClick={onConfirmClose}>No</Button>
+            <Button
+              colorScheme="blue"
+              ml={3}
+              onClick={() => {
+                confirmChannelClick();
+              }}
+            >
+              Yes
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
     </Flex>
