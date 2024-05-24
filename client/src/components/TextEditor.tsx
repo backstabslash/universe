@@ -14,8 +14,10 @@ import {
   ModalFooter,
   Input,
   Text,
-  Image,
+  HStack,
+  Icon,
 } from '@chakra-ui/react';
+import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
   FormatBold,
   FormatItalic,
@@ -30,6 +32,8 @@ import {
   InsertLink,
   LinkOff,
   DataArray,
+  InsertDriveFile,
+  Image,
 } from '@mui/icons-material/';
 import React, { useCallback, useMemo, useState } from 'react';
 import isHotkey from 'is-hotkey';
@@ -127,7 +131,7 @@ interface TextEditorProps {
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const { userData } = useAuthStore(state => state);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
@@ -216,10 +220,10 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
       }
     });
 
-    if (filteredContent.length > 0) {
-      setFile(null);
+    if (filteredContent.length > 0 || files.length !== 0) {
+      setFiles([]);
       sendMessage({
-        attachments: file,
+        attachments: files,
         textContent: filteredContent,
         user: { _id: userData?.userId, name: userData?.name },
       });
@@ -227,25 +231,62 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     resetEditor();
   };
 
-  const previewFile = (): JSX.Element => {
-    if (!file) return <></>;
-    console.log(file);
-    switch (file.type.split('/')[0]) {
-      case 'image':
-        return;
-      default:
-        return <></>;
-    }
-  };
-
   return (
     <Flex
       flexDirection={'column'}
-      flex={1}
+      w="100%"
       justifyItems={'flex-end'}
       p={'5px 10px 5px 10px'}
     >
-      sadsd
+      {files && (
+        <HStack
+          borderRadius="md"
+          whiteSpace="nowrap"
+          width="calc(100vw - 765px)"
+          mb="5px"
+        >
+          {files.map((file, index) => (
+            <HStack
+              key={index}
+              bg="zinc700"
+              borderRadius="md"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+              spacing="0"
+              maxH="30px"
+            >
+              {file.type.startsWith('image/') ? (
+                <Icon as={Image} ml="5px" />
+              ) : (
+                <Icon as={InsertDriveFile} ml="5px" />
+              )}
+              <Text
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+                ml="5px"
+              >
+                {file.name}
+              </Text>
+              <IconButton
+                label={<SmallCloseIcon color="zinc300" />}
+                bg="transparent"
+                _active={{ background: 'none' }}
+                _hover={{ background: 'none' }}
+                p="0"
+                m="0"
+                onClick={() => {
+                  setFiles(prevFiles => {
+                    if (!prevFiles) return [];
+                    return prevFiles.filter((_, i) => i !== index);
+                  });
+                }}
+              />
+            </HStack>
+          ))}
+        </HStack>
+      )}
       <Flex
         background="rgba(0, 0, 0, 0.2)"
         border="1px"
@@ -255,11 +296,10 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         _focusVisible={{ borderColor: 'zinc600' }}
         width="100%"
         height={'100%'}
-        maxH={'138px'}
+        maxH={files.length !== 0 ? '138px' : '100%'}
         alignItems="center"
         justifyContent="center"
         flexDirection={'column'}
-        mt={'auto'}
       >
         <Slate
           editor={editor as ReactEditor}
@@ -370,13 +410,19 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
                 _active={{ background: 'none' }}
                 _hover={{ background: 'none' }}
                 bg={'none'}
+                isDisabled={files.length >= 5}
               >
                 <Input
                   type="file"
                   display="none"
+                  isDisabled={files.length >= 5}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     if (event.target.files) {
-                      setFile(event.target.files[0]);
+                      const newFiles = Array.from(event.target.files);
+                      setFiles(prevFiles => [
+                        ...(prevFiles || []),
+                        ...newFiles,
+                      ]);
                     }
                   }}
                 />

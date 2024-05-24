@@ -181,9 +181,12 @@ const MainContent = (): JSX.Element => {
   };
 
   const handleSendMessage = async (message: any): Promise<void> => {
-    const fileId = await proccessAttachments(axiosPrivate, message.attachments);
-    console.log('fileId', fileId);
-    sendMessage(fileId, message);
+    const filesData = await proccessAttachments(
+      axiosPrivate,
+      message.attachments
+    );
+    console.log('fileId', filesData);
+    sendMessage(filesData, message);
   };
 
   return (

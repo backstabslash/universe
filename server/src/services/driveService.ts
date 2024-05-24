@@ -36,6 +36,8 @@ class DriveService {
       if (!uploadedFile.data.webViewLink || !uploadedFile.data.id) {
         throw new Error("Error uploading file");
       }
+
+      await fs.promises.unlink(filePath);
       return { fileId: uploadedFile.data.id, webViewLink: uploadedFile.data.webViewLink };
     } catch (error) {
       console.error("Error uploading file:", error);

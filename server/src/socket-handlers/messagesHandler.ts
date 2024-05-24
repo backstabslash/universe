@@ -16,27 +16,32 @@ class MessagesHandler {
     data: { channelId: string; message: Message },
     callback: Function
   ) {
-    let file;
-    if (data.message.attachments.length > 0) {
-      const driveService = new DriveService();
-      const fileData = await driveService.uploadFile(data.message.attachments[0]);
-      if (fileData) {
-        file = await driveService.makeFilePublic(fileData.fileId);
-      }
-    }
     try {
-      const attachment = await Attachment.create({
-        type: "FILE",
-        url: file,
-      });
-
+      let attachments;
+      if (data.message.attachments) {
+        const driveService = new DriveService();
+        const uploadAttachments = async (attachments: string[]) => {
+          const fileDataArray = await Promise.all(attachments.map(attachment => driveService.uploadFile(attachment)));
+          return fileDataArray;
+        };
+        const fileDataArray = await uploadAttachments(data.message.attachments.map((attachment: { path: string; }) => attachment.path));
+        const uploadedFiles = []
+        for (let i = 0; i < data.message.attachments.length; i++) {
+          uploadedFiles.push({
+            name: data.message.attachments[i].name,
+            type: data.message.attachments[i].type,
+            url: fileDataArray[i]?.webViewLink,
+          })
+        }
+        attachments = await Attachment.insertMany(uploadedFiles);
+      }
       const message = await Message.create({
         _id: data.message.id,
         user: socket.data.userId,
         textContent: data.message.textContent,
         channel: data.channelId,
         sendAt: data.message.sendAt,
-        attachments: [attachment],
+        attachments: attachments?.map(attachment => attachment._id) || [],
       });
 
       callback({ status: "success", message: "Message sent" });
@@ -46,7 +51,7 @@ class MessagesHandler {
           id: message.id,
           textContent: message.textContent,
           sendAt: message.sendAt,
-          attachments: message.attachments,
+          attachments: attachments,
           user: data.message.user,
         },
         channelId: data.channelId,

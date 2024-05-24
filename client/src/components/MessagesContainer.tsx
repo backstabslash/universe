@@ -3,6 +3,7 @@ import {
   Flex,
   HStack,
   Icon,
+  IconButton,
   Spinner,
   Text,
   VStack,
@@ -19,7 +20,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import ClearIcon from '@mui/icons-material/Clear';
+import { Clear, InsertDriveFile, Image } from '@mui/icons-material/';
 import {
   Element as EditorElement,
   Leaf as EditorLeaf,
@@ -194,24 +195,52 @@ const MessagesContainer = (): JSX.Element => {
                       <Text color="zinc400">{message.user.name}</Text>
                     )}
                   </HStack>
-                  <HStack alignSelf={'start'}>
-                    <Slate
-                      editor={editorsMap.get(message.id)}
-                      initialValue={message.textContent}
-                    >
-                      <Editable
-                        style={{
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          wordBreak: 'break-all',
-                          whiteSpace: 'normal',
-                        }}
-                        renderElement={renderElement}
-                        renderLeaf={renderLeaf}
-                        readOnly
-                      />
-                    </Slate>
-                  </HStack>
+                  <VStack alignSelf={'start'}>
+                    <VStack>
+                      {message.attachments.map(attachment => (
+                        <>
+                          <HStack alignSelf={'start'}>
+                            <IconButton
+                              aria-label="IconButtonLabel"
+                              icon={
+                                attachment.type === 'image' ? (
+                                  <Image />
+                                ) : (
+                                  <InsertDriveFile />
+                                )
+                              }
+                            ></IconButton>
+                            <Text
+                              overflow="hidden"
+                              textOverflow="ellipsis"
+                              whiteSpace="nowrap"
+                              key={attachment.url}
+                            >
+                              {attachment.name}
+                            </Text>
+                          </HStack>
+                        </>
+                      ))}
+                    </VStack>
+                    <HStack alignSelf={'start'}>
+                      <Slate
+                        editor={editorsMap.get(message.id)}
+                        initialValue={message.textContent}
+                      >
+                        <Editable
+                          style={{
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            wordBreak: 'break-all',
+                            whiteSpace: 'normal',
+                          }}
+                          renderElement={renderElement}
+                          renderLeaf={renderLeaf}
+                          readOnly
+                        />
+                      </Slate>
+                    </HStack>
+                  </VStack>
                 </VStack>
                 <VStack alignSelf={'end'}>
                   <HStack spacing={'5px'}>
@@ -224,7 +253,7 @@ const MessagesContainer = (): JSX.Element => {
                     {message.status === MessageStatus.FAILED ? (
                       <Icon
                         fontSize={'20px'}
-                        as={ClearIcon}
+                        as={Clear}
                         color="red.500"
                         cursor="pointer"
                         onClick={() => {}}

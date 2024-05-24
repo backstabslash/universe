@@ -224,6 +224,9 @@ const Sidebar = (): JSX.Element => {
                 width="92%"
                 pr="15px"
                 pl="15px"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
                 alignItems={'center'}
                 justifyContent={'flex-start'}
                 gap="5px"

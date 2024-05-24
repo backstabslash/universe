@@ -77,7 +77,7 @@ interface MessengerState {
   loadChannelMessages: () => void;
   proccessAttachments: (
     axios: Axios,
-    attachment: any
+    attachments: File[]
   ) => Promise<string | null>;
   sendMessage: (fileId: string | null, message: any) => void;
   recieveMessage: () => void;
@@ -158,36 +158,63 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  proccessAttachments: async (axios: Axios, attachment: any) => {
+  proccessAttachments: async (axios: Axios, attachments: File[]) => {
     try {
-      if (!attachment) {
+      if (!attachments || attachments.length === 0) {
         return null;
       }
       const formData = new FormData();
-      formData.append('file', attachment);
+      attachments.forEach((file, index) => {
+        formData.append('files', file);
+      });
+
       const response = await axios.post('/message/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      return response.data.fileId;
+      return response.data.filesData;
     } catch (error) {
       console.error(error);
+      return error;
     }
   },
 
-  sendMessage: (fileId: string | null, message: UserMessage) => {
+  sendMessage: (filesData: any, message: UserMessage) => {
     const { socket, currentChannel, channels, dmsWithUsers } = get();
 
     if (!socket || !currentChannel) return;
+
+    if (filesData instanceof Error) {
+      const errorMessage = {
+        ...message,
+        id: generateObjectId(),
+        status: MessageStatus.FAILED,
+        sendAt: Date.now(),
+        attachments: [],
+      };
+      for (const channel of channels) {
+        if (channel.id === currentChannel.id) {
+          if (!channel.messages) {
+            channel.messages = [];
+          }
+          channel.messages.unshift(errorMessage);
+        }
+      }
+      set({
+        channels: [...channels],
+      });
+      return;
+    }
+    console.log(filesData);
 
     const newMessage = {
       ...message,
       id: generateObjectId(),
       status: MessageStatus.SENDING,
       sendAt: Date.now(),
-      attachments: fileId ? [fileId] : [],
+      attachments: filesData,
     };
 
     let messageCopy: UserMessage | undefined;
