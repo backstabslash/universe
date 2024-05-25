@@ -1,12 +1,13 @@
-import { Request, Response } from "express";
-import Joi from "joi";
-import mongoose from "mongoose";
-import { channelNameRules } from "../validation/channelDataRules";
-import { emailRules, tagRules } from "../validation/userDataRules";
-import { uuidRules } from "../validation/commonDataRules";
-import ChannelUser from "../models/channel/channelUserModel";
-import Channel, { ChannelType } from "../models/channel/channelModel";
-import UserGroup from "../models/user/userGroupModel";
+import { Request, Response } from 'express';
+import Joi from 'joi';
+import mongoose from 'mongoose';
+import { channelNameRules } from '../validation/channelDataRules';
+import { emailRules, tagRules } from '../validation/userDataRules';
+import { uuidRules } from '../validation/commonDataRules';
+import ChannelUser from '../models/channel/channelUserModel';
+import Channel, { ChannelType } from '../models/channel/channelModel';
+import UserGroup from '../models/user/userGroupModel';
+import Message from '../models/message/messageModel';
 
 class ChannelController {
   async getByUserId(req: Request, res: Response) {
@@ -22,10 +23,12 @@ class ChannelController {
 
     try {
       const { userId } = req.params;
-      const channels = await ChannelUser.find({ user: userId }).populate("channel");
+      const channels = await ChannelUser.find({ user: userId }).populate(
+        'channel'
+      );
 
       if (!channels || channels.length === 0) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       const userChannels = channels.map((channel: any) => {
@@ -37,7 +40,29 @@ class ChannelController {
 
       return res.status(200).json(userChannels);
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+
+  async getMessagesByChannelId(req: Request, res: Response) {
+    const getMessagesByChannelIdSchema = Joi.object({
+      channelId: uuidRules,
+    });
+
+    const { error } = getMessagesByChannelIdSchema.validate(req.params);
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
+    try {
+      const { channelId } = req.params;
+      const messages = await Message.find({ channel: channelId });
+
+      return res.status(200).json(messages);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 
@@ -71,10 +96,12 @@ class ChannelController {
 
       await session.commitTransaction();
 
-      return res.status(201).json({ id: channel._id.toString(), name: channel.name });
+      return res
+        .status(201)
+        .json({ id: channel._id.toString(), name: channel.name });
     } catch (error) {
       await session.abortTransaction();
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     } finally {
       session.endSession();
     }
@@ -107,7 +134,7 @@ class ChannelController {
 
       return res.status(200).json({});
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 
@@ -128,7 +155,7 @@ class ChannelController {
 
       const channel = await Channel.findById(channelId);
       if (!channel) {
-        return res.status(404).json({ message: "Channel not found" });
+        return res.status(404).json({ message: 'Channel not found' });
       }
 
       const user = await ChannelUser.findOne({
@@ -136,7 +163,7 @@ class ChannelController {
         user: { tag },
       });
       if (user) {
-        return res.status(400).json({ message: "User already in channel" });
+        return res.status(400).json({ message: 'User already in channel' });
       }
 
       const newUser = new ChannelUser({ user: { tag }, channel: channelId });
@@ -144,7 +171,7 @@ class ChannelController {
 
       return res.status(200).json({});
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 
@@ -165,7 +192,7 @@ class ChannelController {
 
       const channel = await Channel.findById(channelId);
       if (!channel) {
-        return res.status(404).json({ message: "Channel not found" });
+        return res.status(404).json({ message: 'Channel not found' });
       }
 
       const user = await ChannelUser.findOne({
@@ -173,14 +200,14 @@ class ChannelController {
         user: { tag },
       });
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: 'User not found' });
       }
 
       await ChannelUser.deleteOne({ channel: channelId, user: user._id });
 
       return res.status(200).json({});
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 
@@ -203,7 +230,7 @@ class ChannelController {
 
       const channel = await Channel.findById(channelId);
       if (!channel) {
-        return res.status(404).json({ message: "Channel not found" });
+        return res.status(404).json({ message: 'Channel not found' });
       }
       const userExists = await ChannelUser.findOne({
         channel: channelId,
@@ -211,7 +238,7 @@ class ChannelController {
       });
 
       if (userExists) {
-        return res.status(400).json({ message: "User already in channel" });
+        return res.status(400).json({ message: 'User already in channel' });
       }
 
       const newChannelUser = new ChannelUser({
@@ -221,13 +248,13 @@ class ChannelController {
       await newChannelUser.save();
 
       await UserGroup.updateOne(
-        { user: id, name: "General" },
+        { user: id, name: 'General' },
         { $push: { channels: channelId } },
         { upsert: true }
       );
-      return res.status(201).json({ message: "User added to channel" });
+      return res.status(201).json({ message: 'User added to channel' });
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }

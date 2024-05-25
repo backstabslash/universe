@@ -141,6 +141,46 @@ class ChannelsHandler {
       session.endSession();
     }
   }
+  async createDMChannel(
+    socket: Socket,
+    data: { user1Id: string; user2Id: string },
+    callback: Function
+  ) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const newDMChannel = new Channel({
+        name: `DM-${data.user1Id}-${data.user2Id}`,
+        owner: socket.data.userId,
+        type: ChannelType.DM,
+        private: true,
+        readonly: false,
+      });
+      const savedDMChannel = await newDMChannel.save({ session });
+
+      const newChannelUser1 = new ChannelUser({
+        user: data.user1Id,
+        channel: savedDMChannel._id,
+      });
+      const newChannelUser2 = new ChannelUser({
+        user: data.user2Id,
+        channel: savedDMChannel._id,
+      });
+
+      await newChannelUser1.save({ session });
+      await newChannelUser2.save({ session });
+
+      await session.commitTransaction();
+      socket.join(savedDMChannel.id);
+      callback({ status: 'success', data: savedDMChannel });
+    } catch (error) {
+      await session.abortTransaction();
+      console.error(error);
+      callback({ status: 'error' });
+    } finally {
+      session.endSession();
+    }
+  }
   async deleteChannel(
     id: string,
     callback: Function,

@@ -91,6 +91,7 @@ interface MessengerState {
   leaveChannel: (id: string) => void;
   onUserLeftChannel: () => void;
   onDeletedChannel: () => void;
+  createDM: (data: any) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -322,7 +323,6 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   loadChannelMessages: (): void => {
     try {
       const { socket, channels, currentChannel } = get();
-
       if (!socket || !currentChannel) return;
 
       const currentPage =
@@ -527,6 +527,43 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         });
       }
     });
+  },
+  createDM: (data: {
+    user1Id: string;
+    user2Id: string;
+    userName: string;
+  }): void => {
+    const { socket, setCurrentChannel, dmsWithUsers, channels } = get();
+
+    if (!socket) return;
+    socket.emit(
+      'create-dm-channel',
+      { user1Id: data.user1Id, user2Id: data.user2Id },
+      (response: any) => {
+        if (response.status === 'success') {
+          setCurrentChannel(response.data._id, data.userName, data.user2Id);
+          set({
+            dmsWithUsers: [
+              {
+                channel: response.data._id,
+                user: { _id: data.user2Id, name: data.userName, pfp_url: '' },
+              },
+              ...dmsWithUsers,
+            ],
+            channels: [
+              {
+                id: response.data._id,
+                messages: [],
+                page: 0,
+                users: [],
+                name: data.userName,
+              },
+              ...channels,
+            ],
+          });
+        }
+      }
+    );
   },
   onDeletedChannel: (): void => {
     const { socket } = get();

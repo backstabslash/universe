@@ -30,6 +30,7 @@ import { useEffect, useState } from 'react';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
 import useAuthStore from '../store/auth';
+import useMessengerStore from '../store/messenger';
 
 const UserProfile = (): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
@@ -50,6 +51,9 @@ const UserProfile = (): JSX.Element => {
     isUserProfileVisible: state.isUserProfileVisible,
     setIsUserProfileVisible: state.setIsUserProfileVisible,
   }));
+  const { dmsWithUsers, setCurrentChannel, createDM } = useMessengerStore(
+    state => state
+  );
 
   const { userId: authUserId } = useAuthStore(state => ({
     userId: state?.userData?.userId,
@@ -130,6 +134,19 @@ const UserProfile = (): JSX.Element => {
     } catch (error: any) {
       console.error(error);
       setError(error?.response?.data?.message || 'Failed to update user info');
+    }
+  };
+
+  const handleUserClick = async (userName: any, userId: any): Promise<void> => {
+    if (!authUserId) return;
+    const existingDM = dmsWithUsers.find(
+      dm => dm.user._id === userId || dm.user._id === authUserId
+    );
+
+    if (existingDM) {
+      setCurrentChannel(existingDM.channel, userName, userId);
+    } else {
+      createDM({ user1Id: authUserId, user2Id: userId, userName });
     }
   };
 
@@ -510,6 +527,9 @@ const UserProfile = (): JSX.Element => {
                 bg="zinc800"
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 color="zinc300"
+                onClick={() => {
+                  handleUserClick(userData?.name, userData?.userId);
+                }}
               >
                 Message
               </Button>

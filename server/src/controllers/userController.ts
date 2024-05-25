@@ -65,6 +65,7 @@ class UserController {
       const roles = userRoles.map((userRole) => userRole.role.name);
 
       return res.status(200).json({
+        userId: user.id,
         tag: user.tag,
         name: user.name,
         email: user.email,
