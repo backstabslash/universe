@@ -1,21 +1,24 @@
 import { Schema, Document, model } from "mongoose";
 
 export interface IAttachment extends Document {
-  type: AttachmentType;
-}
-
-export enum AttachmentType {
-  IMAGE = "IMAGE",
-  VIDEO = "VIDEO",
-  AUDIO = "AUDIO",
-  FILE = "FILE",
+  type: string;
+  url: string;
+  name: string;
 }
 
 const AttachmentSchema = new Schema<IAttachment>({
   type: {
     type: String,
-    enum: Object.values(AttachmentType),
     required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+    unique: true
   },
 });
 

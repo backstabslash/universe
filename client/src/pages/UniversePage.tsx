@@ -55,6 +55,7 @@ const MainContent = (): JSX.Element => {
     channelGroups,
     connectSocket,
     getChannelGroups,
+    proccessUploadingAttachments,
     sendMessage,
     setCurrentChannel,
     recieveMessage,
@@ -97,6 +98,18 @@ const MainContent = (): JSX.Element => {
   useEffect(() => {
     getWorkspaceData();
   }, [formData]);
+  
+  useEffect(() => {
+    if (workspaceUserData) setUserData(workspaceUserData);
+  }, []);
+
+  const getUserData = async (): Promise<void> => {
+    try {
+      await fetchUserByEmail();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
@@ -161,6 +174,15 @@ const MainContent = (): JSX.Element => {
 
   const openNotes = (): void => {
     setCurrentChannel(notesChannel.id, notesChannel.name);
+  };
+
+  const handleSendMessage = async (message: any): Promise<void> => {
+    const filesData = await proccessUploadingAttachments(
+      axiosPrivate,
+      message.attachments
+    );
+    console.log('fileId', filesData);
+    sendMessage(filesData, message);
   };
 
   return (
@@ -291,12 +313,7 @@ const MainContent = (): JSX.Element => {
         >
           <Flex>
             <Sidebar />
-            <Box
-              w="calc(100vw - 8px)"
-              h="calc(100vh - 42px)"
-              color="zinc300"
-              flex="6"
-            >
+            <Box color="zinc300" flex="6">
               <Flex
                 fontSize="lg"
                 width="100%"
@@ -354,8 +371,8 @@ const MainContent = (): JSX.Element => {
                 )}
               </Flex>
               <MessagesContainer />
-              <Flex background="rgba(0, 0, 0, 0.5)" pr="4" pl="4" pb="4">
-                <TextEditor sendMessage={sendMessage} />
+              <Flex maxH={'168px'} h={'100%'} background="rgba(0, 0, 0, 0.5)">
+                <TextEditor sendMessage={handleSendMessage} />
               </Flex>
             </Box>
             {isUserProfileVisible && <UserProfile />}

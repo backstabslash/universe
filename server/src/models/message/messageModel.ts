@@ -21,7 +21,6 @@ const MessageSchema = new Schema<IMessage>({
   },
   textContent: {
     type: Schema.Types.Mixed,
-    required: true,
   },
   attachments: {
     type: [

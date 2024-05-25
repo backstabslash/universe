@@ -23,6 +23,7 @@ import UserGroup from '../models/user/userGroupModel';
 import ChannelUser from '../models/channel/channelUserModel';
 import Channel, { ChannelType } from '../models/channel/channelModel';
 
+
 class AuthController {
   private readonly accessTokenSecret: string;
   private readonly refreshTokenSecret: string;

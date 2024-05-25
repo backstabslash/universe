@@ -37,7 +37,11 @@ class ChannelsHandler {
 
       const skip = data.page * data.limit;
       const messages = await Message.find({ channel: data.channelId })
-        .populate({ path: 'user', select: 'name id' })
+        .populate({ path: "user", select: "name id" })
+        .populate({
+          path: "attachments",
+          select: "name type url",
+        })
         .sort({ sendAt: -1 })
         .skip(skip)
         .limit(data.limit);

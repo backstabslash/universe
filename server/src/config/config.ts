@@ -25,3 +25,8 @@ export const emailService = {
   login: process.env.EMAIL_SERVICE_LOGIN!,
   pass: process.env.EMAIL_SERVICE_PASS!,
 };
+
+export const driveService = {
+  email: process.env.DRIVE_SERVICE_ACCOUNT_EMAIL!,
+  privateKey: process.env.DRIVE_SERVICE_PRIVATE_KEY!,
+};
