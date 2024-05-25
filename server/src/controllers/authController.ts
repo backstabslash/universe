@@ -11,7 +11,7 @@ import {
 } from "../validation/userDataRules";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import EmailService from "../email-service/emailService";
+import EmailService from "../services/emailService";
 import UserVerifyCode from "../models/user/userVerifyCodeModel";
 import Joi from "joi";
 import WorkSpace from "../models/workspace/workspaceModel";

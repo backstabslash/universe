@@ -1,6 +1,6 @@
 import rateLimit from "express-rate-limit";
 
-function rateLimiter(windowMs = 15 * 60 * 1000, max = 100) {
+function rateLimiter(windowMs = 15 * 60 * 1000, max = 1000) {
   return rateLimit({
     windowMs,
     max,

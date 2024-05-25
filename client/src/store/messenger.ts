@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { api } from '../config/config';
 import { Descendant } from 'slate';
 import lodash from 'lodash';
+import { Axios } from 'axios';
+import FileSaver from 'file-saver';
 
 export interface ChannelGroup {
   id: string;
@@ -39,6 +41,7 @@ export interface MessageInfo {
 export interface Message {
   textContent: MessageTextContent[];
   status: MessageStatus;
+  attachments: any[];
 }
 
 export enum MessageStatus {
@@ -52,9 +55,10 @@ export type MessageTextContent = Descendant & {
   type: string;
 };
 
-interface SocketResponse {
+interface MessageResponse {
   status: string;
   message: string;
+  attachments: any[];
 }
 
 interface MessengerState {
@@ -73,7 +77,16 @@ interface MessengerState {
   getChannelGroups: () => void;
   setCurrentChannel: (id: string, name: string, userId?: string) => void;
   loadChannelMessages: () => void;
-  sendMessage: (message: any) => void;
+  proccessUploadingAttachments: (
+    axios: Axios,
+    attachments: File[]
+  ) => Promise<string | null>;
+  processDownloadingAttachment: (
+    axios: Axios,
+    fileId: string,
+    fileName: string
+  ) => Promise<void>;
+  sendMessage: (fileId: string | null, message: any) => void;
   recieveMessage: () => void;
   onRecieveChannelMessages: (data: {
     messages: UserMessage[];
@@ -152,42 +165,120 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  sendMessage: (message: UserMessage) => {
+  proccessUploadingAttachments: async (axios: Axios, attachments: File[]) => {
+    try {
+      if (!attachments || attachments.length === 0) {
+        return null;
+      }
+      const formData = new FormData();
+      attachments.forEach(file => {
+        formData.append('files', file);
+      });
+
+      const response = await axios.post('/file/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      return response.data.filesData;
+    } catch (error) {
+      return error;
+    }
+  },
+
+  processDownloadingAttachment: async (
+    axios: Axios,
+    fileId: string,
+    fileName: string
+  ): Promise<void> => {
+    try {
+      if (!fileId) return;
+      console.log(fileId);
+      const response = await axios.get(`/file/download/${fileId}`, {
+        responseType: 'blob',
+      });
+      console.log(response);
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'],
+      });
+
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = fileName;
+      if (
+        contentDisposition &&
+        contentDisposition.indexOf('attachment') !== -1
+      ) {
+        const match = contentDisposition.match(/filename="?(.+)"?/);
+        if (match?.[1]) {
+          filename = match[1];
+        }
+      }
+
+      FileSaver.saveAs(blob, filename);
+    } catch (error) {}
+  },
+
+  sendMessage: (filesData: any, message: UserMessage) => {
     const { socket, currentChannel, channels, dmsWithUsers } = get();
 
     if (!socket || !currentChannel) return;
+
+    if (filesData instanceof Error) {
+      const errorMessage = {
+        ...message,
+        id: generateObjectId(),
+        status: MessageStatus.FAILED,
+        sendAt: Date.now(),
+        attachments: [],
+      };
+      for (const channel of channels) {
+        if (channel.id === currentChannel.id) {
+          if (!channel.messages) {
+            channel.messages = [];
+          }
+          channel.messages.unshift(errorMessage);
+        }
+      }
+      set({
+        channels: [...channels],
+      });
+      return;
+    }
 
     const newMessage = {
       ...message,
       id: generateObjectId(),
       status: MessageStatus.SENDING,
       sendAt: Date.now(),
+      attachments: filesData,
     };
 
-    let messageLink: UserMessage | undefined;
+    let messageCopy: UserMessage | undefined;
     for (const channel of channels) {
       if (channel.id === currentChannel.id) {
         if (!channel.messages) {
           channel.messages = [];
         }
         channel.messages.unshift(newMessage);
-        messageLink = channel.messages[0];
+        messageCopy = channel.messages[0];
       }
     }
 
-    if (!messageLink) {
+    if (!messageCopy) {
       return;
     }
+
     set({
       channels: [...channels],
       lastSentMessage: {
-        message: messageLink,
+        message: messageCopy,
         channelId: currentChannel.id,
       },
     });
 
     const timeout = setTimeout(() => {
-      messageLink.status = MessageStatus.FAILED;
+      messageCopy.status = MessageStatus.FAILED;
       set({ channels: [...channels] });
     }, 10000);
 
@@ -197,7 +288,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         message: newMessage,
         channelId: currentChannel.id,
       },
-      (response: SocketResponse) => {
+      (response: MessageResponse) => {
         clearTimeout(timeout);
         const updatedDm = dmsWithUsers.find(
           dm => dm.channel === currentChannel.id
@@ -210,13 +301,14 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           set({ dmsWithUsers: [updatedDm, ...dmsWithUsers] });
         }
         if (response.status === 'error') {
-          messageLink.status = MessageStatus.FAILED;
+          messageCopy.status = MessageStatus.FAILED;
           set({
             channels: [...channels],
           });
         }
         if (response.status === 'success') {
-          messageLink.status = MessageStatus.SUCCESS;
+          messageCopy.status = MessageStatus.SUCCESS;
+          messageCopy.attachments = response.attachments;
           set({ channels: [...channels] });
         }
       }
@@ -311,7 +403,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         channelGroups,
         updChannelGroups,
       },
-      (response: SocketResponse) => {
+      (response: MessageResponse) => {
         if (response.status === 'success') {
           set({ channelGroups: [...updChannelGroups] });
         }
@@ -397,7 +489,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         channel: {
           id: string;
           name: string;
-          users: { _id: string; name: string }
+          users: { _id: string; name: string };
           owner: string;
         };
         userId: string;
@@ -427,10 +519,10 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           };
           const updatedChannelGroups = channelGroups.map(channelGroup => {
             if (channelGroup.name === 'General') {
-              channelGroup.items.push(data.channel)
+              channelGroup.items.push(data.channel);
             }
             return channelGroup;
-          })
+          });
           set({
             channels: [newChannel, ...channels],
             channelGroups: updatedChannelGroups,
@@ -444,22 +536,22 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     if (!socket) return;
     socket.on(
       'user-left-channel',
-      (data: {
-        channel: string;
-        userId: string;
-      }) => {
+      (data: { channel: string; userId: string }) => {
         const { channels } = get();
         const updatedChannels = channels.map(channel => {
           if (channel.id === data.channel) {
             return {
               ...channel,
-              users: channel.users.filter((user: { _id: string; }) => user._id !== data.userId),
+              users: channel.users.filter(
+                (user: { _id: string }) => user._id !== data.userId
+              ),
             };
           }
           return channel;
         });
-        set({ channels: [...updatedChannels] })
-      })
+        set({ channels: [...updatedChannels] });
+      }
+    );
   },
 
   createChannel: (data: {
@@ -504,31 +596,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     const { socket } = get();
 
     if (!socket) return;
-    socket.on(
-      'channel-deleted',
-      (data: {
-        channel: string;
-      }) => {
-        const { channels, channelGroups, notesChannel, currentChannel } = get();
-        const updatedChannels = channels.filter(channel => channel.id === data.channel);
+    socket.on('channel-deleted', (data: { channel: string }) => {
+      const { channels, channelGroups, notesChannel, currentChannel } = get();
+      const updatedChannels = channels.filter(
+        channel => channel.id === data.channel
+      );
 
-        const updatedChannelGroups = channelGroups.map(channelGroup => ({
-          ...channelGroup,
-          items: channelGroup.items.filter(item => item.id !== data.channel),
-        }));
-        if (currentChannel?.id === data.channel) {
-          set({
-            currentChannel: {
-              id: notesChannel.id,
-              name: notesChannel.name,
-            }
-          })
-        }
+      const updatedChannelGroups = channelGroups.map(channelGroup => ({
+        ...channelGroup,
+        items: channelGroup.items.filter(item => item.id !== data.channel),
+      }));
+      if (currentChannel?.id === data.channel) {
         set({
-          channels: [...updatedChannels],
-          channelGroups: updatedChannelGroups
-        })
-      })
+          currentChannel: {
+            id: notesChannel.id,
+            name: notesChannel.name,
+          },
+        });
+      }
+      set({
+        channels: [...updatedChannels],
+        channelGroups: updatedChannelGroups,
+      });
+    });
   },
 
   deleteChannel: (id: string): void => {

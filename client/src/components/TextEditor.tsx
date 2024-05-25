@@ -13,7 +13,11 @@ import {
   ModalBody,
   ModalFooter,
   Input,
+  Text,
+  HStack,
+  Icon,
 } from '@chakra-ui/react';
+import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
   FormatBold,
   FormatItalic,
@@ -21,7 +25,6 @@ import {
   FormatListBulleted,
   Code,
   FormatListNumberedRounded,
-  Add,
   Send,
   AlternateEmail,
   EmojiEmotions,
@@ -29,8 +32,10 @@ import {
   InsertLink,
   LinkOff,
   DataArray,
+  InsertDriveFile,
+  Image,
 } from '@mui/icons-material/';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import isHotkey from 'is-hotkey';
 import {
   Editable,
@@ -52,6 +57,7 @@ import { withHistory } from 'slate-history';
 import styled from 'styled-components';
 import useAuthStore from '../store/auth';
 import { MessageTextContent } from '../store/messenger';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 interface IconButtonProps extends ButtonProps {
   label: string | JSX.Element;
@@ -120,11 +126,14 @@ const StyledEditable = styled(Editable)`
 `;
 
 interface TextEditorProps {
-  sendMessage: (message: any) => void;
+  sendMessage: (message: any) => Promise<void>;
 }
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const { userData } = useAuthStore(state => state);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const renderElement = useCallback(
     (props: ElementProps) => <Element {...props} />,
@@ -142,6 +151,30 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
 
   const handleContentChange = (newContent: Descendant[]): void => {
     setContent(newContent);
+  };
+
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    if (event.target.files) {
+      const newFiles = Array.from(event.target.files);
+      setFiles(prevFiles => {
+        const updatedFiles = new Set([...prevFiles, ...newFiles]);
+        return Array.from(updatedFiles);
+      });
+    }
+  };
+
+  const handleFileRemove = (index: number): void => {
+    setFiles(prevFiles => {
+      const updatedFiles = new Set(prevFiles);
+      updatedFiles.delete(prevFiles[index]);
+      const result = Array.from(updatedFiles);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return result;
+    });
   };
 
   const [content, setContent] = useState<Descendant[]>(initialValue);
@@ -213,8 +246,10 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
       }
     });
 
-    if (filteredContent.length > 0) {
+    if (filteredContent.length > 0 || files.length !== 0) {
+      setFiles([]);
       sendMessage({
+        attachments: files,
         textContent: filteredContent,
         user: { _id: userData?.userId, name: userData?.name },
       });
@@ -223,11 +258,58 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   };
 
   return (
-    <Slate
-      editor={editor as ReactEditor}
-      initialValue={initialValue}
-      onChange={handleContentChange}
+    <Flex
+      flexDirection={'column'}
+      w="100%"
+      justifyItems={'flex-end'}
+      p={'5px 10px 5px 10px'}
     >
+      {files && (
+        <HStack
+          borderRadius="md"
+          whiteSpace="nowrap"
+          width="calc(100vw - 765px)"
+          mb="5px"
+        >
+          {files.map((file, index) => (
+            <HStack
+              key={index}
+              bg="zinc700"
+              borderRadius="md"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+              spacing="0"
+              maxH="30px"
+            >
+              {file.type.startsWith('image/') ? (
+                <Icon as={Image} ml="5px" />
+              ) : (
+                <Icon as={InsertDriveFile} ml="5px" />
+              )}
+              <Text
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+                ml="5px"
+              >
+                {file.name}
+              </Text>
+              <IconButton
+                label={<SmallCloseIcon color="zinc300" />}
+                bg="transparent"
+                _active={{ background: 'none' }}
+                _hover={{ background: 'none' }}
+                p="0"
+                m="0"
+                onClick={() => {
+                  handleFileRemove(index);
+                }}
+              />
+            </HStack>
+          ))}
+        </HStack>
+      )}
       <Flex
         background="rgba(0, 0, 0, 0.2)"
         border="1px"
@@ -236,135 +318,163 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         _hover={{ borderColor: 'zinc600' }}
         _focusVisible={{ borderColor: 'zinc600' }}
         width="100%"
-        maxH="134px"
-        h={'140px'}
+        height={'100%'}
+        maxH={files.length !== 0 ? '138px' : '100%'}
         alignItems="center"
         justifyContent="center"
         flexDirection={'column'}
       >
-        <Flex
-          mt="5px"
-          ml="20px"
-          mb="5px"
-          alignItems="center"
-          justifyContent="left"
-          width="100%"
+        <Slate
+          editor={editor as ReactEditor}
+          initialValue={initialValue}
+          onChange={handleContentChange}
         >
-          <MarkButton format="bold" label={<FormatBold fontSize="small" />} />
-          <MarkButton
-            format="italic"
-            label={<FormatItalic fontSize="small" />}
-          />
-          <MarkButton
-            format="strikethrough"
-            label={<StrikethroughS fontSize="small" />}
-          />
-          <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
-          <AddLinkButton />
-          <RemoveLinkButton />
-          <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
-          <BlockButton
-            label={<FormatListNumberedRounded fontSize="small" />}
-            format="numbered-list"
-          />
-          <BlockButton
-            format="bulleted-list"
-            label={<FormatListBulleted fontSize="small" />}
-          />
-          <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
-          <MarkButton format="code" label={<Code fontSize="small" />} />
-          <BlockButton
-            format="code-block"
-            label={<DataArray fontSize="small" />}
-          />
-        </Flex>
-        <StyledEditable
-          style={{
-            width: '97%',
-            // maxWidth: '95%',
-            overflow: 'auto',
-            height: '100%',
-            margin: 'auto',
-            marginLeft: '18px',
-            fontFamily: 'Libre Fraklin',
-            fontSize: '18px',
-            fontWeight: 500,
-            color: '#d4d4d8',
-          }}
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          placeholder="Type a message..."
-          spellCheck
-          onKeyDown={(event: React.KeyboardEvent) => {
-            for (const hotkey in HOTKEYS) {
-              if (isHotkey(hotkey, event)) {
-                event.preventDefault();
-                const mark = HOTKEYS[hotkey];
-                toggleMark(editor, mark);
+          <Flex
+            mt="5px"
+            ml="20px"
+            mb="5px"
+            alignItems="center"
+            justifyContent="left"
+            width="100%"
+          >
+            <MarkButton format="bold" label={<FormatBold fontSize="small" />} />
+            <MarkButton
+              format="italic"
+              label={<FormatItalic fontSize="small" />}
+            />
+            <MarkButton
+              format="strikethrough"
+              label={<StrikethroughS fontSize="small" />}
+            />
+            <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
+            <AddLinkButton />
+            <RemoveLinkButton />
+            <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
+            <BlockButton
+              label={<FormatListNumberedRounded fontSize="small" />}
+              format="numbered-list"
+            />
+            <BlockButton
+              format="bulleted-list"
+              label={<FormatListBulleted fontSize="small" />}
+            />
+            <Divider orientation="vertical" h="20px" m="0" p="0" mr="8px" />
+            <MarkButton format="code" label={<Code fontSize="small" />} />
+            <BlockButton
+              format="code-block"
+              label={<DataArray fontSize="small" />}
+            />
+          </Flex>
+          <StyledEditable
+            style={{
+              width: '97%',
+              // maxWidth: '95%',
+              overflow: 'auto',
+              height: '100%',
+              margin: 'auto',
+              marginLeft: '18px',
+              fontFamily: 'Libre Fraklin',
+              fontSize: '18px',
+              fontWeight: 500,
+              color: '#d4d4d8',
+            }}
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            placeholder="Type a message..."
+            spellCheck
+            onKeyDown={(event: React.KeyboardEvent) => {
+              for (const hotkey in HOTKEYS) {
+                if (isHotkey(hotkey, event)) {
+                  event.preventDefault();
+                  const mark = HOTKEYS[hotkey];
+                  toggleMark(editor, mark);
+                }
               }
-            }
 
-            const { selection } = editor;
-            if (selection && Range.isCollapsed(selection)) {
-              const match = Editor.above(editor, {
-                match: n => (n as MyElement).type === 'link',
-              });
-              if (match) {
-                const [, path] = match;
-                if (Editor.isEnd(editor, selection.focus, path)) {
-                  const pointAfterLink = Editor.after(editor, path);
-                  if (pointAfterLink) {
-                    Transforms.select(editor, pointAfterLink);
-                    event.preventDefault();
+              const { selection } = editor;
+              if (selection && Range.isCollapsed(selection)) {
+                const match = Editor.above(editor, {
+                  match: n => (n as MyElement).type === 'link',
+                });
+                if (match) {
+                  const [, path] = match;
+                  if (Editor.isEnd(editor, selection.focus, path)) {
+                    const pointAfterLink = Editor.after(editor, path);
+                    if (pointAfterLink) {
+                      Transforms.select(editor, pointAfterLink);
+                      event.preventDefault();
+                    }
                   }
                 }
               }
-            }
 
-            if (event.shiftKey && event.key === 'Enter') {
-              event.preventDefault();
-              handleSendMessage();
-            }
-          }}
-        />
-        <Flex
-          alignItems="center"
-          justifyContent="space-between"
-          width="100%"
-          ml="20px"
-        >
-          <Box>
-            <IconButton label={<Add />} mb="5px" mt="5px" />
-            <IconButton
-              label={<FormatColorText fontSize="small" />}
-              mb="5px"
-              mt="5px"
-            />
-            <IconButton
-              label={<EmojiEmotions fontSize="small" />}
-              mb="5px"
-              mt="5px"
-            />
-            <IconButton
-              label={<AlternateEmail fontSize="small" />}
-              mb="5px"
-              mt="5px"
-            />
-          </Box>
-          <Box>
-            <IconButton
-              label={<Send fontSize="small" />}
-              mb="5px"
-              mr="30px"
-              mt="5px"
-              onClick={() => {
+              if (event.shiftKey && event.key === 'Enter') {
+                event.preventDefault();
                 handleSendMessage();
-              }}
-            />
-          </Box>
-        </Flex>
+              }
+            }}
+          />
+          <Flex
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+            ml="20px"
+          >
+            <Box>
+              <Button
+                leftIcon={<AttachFileIcon fontSize="small" />}
+                as="label"
+                cursor="pointer"
+                m={0}
+                p={0}
+                mb="5px"
+                mt="5px"
+                color={'zinc300'}
+                _active={{ background: 'none' }}
+                _hover={{ background: 'none' }}
+                bg={'none'}
+                isDisabled={files.length >= 5}
+              >
+                <Input
+                  type="file"
+                  display="none"
+                  isDisabled={files.length >= 5}
+                  multiple
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                />
+              </Button>
+              <IconButton
+                label={<FormatColorText fontSize="small" />}
+                mb="5px"
+                mt="5px"
+              />
+              <IconButton
+                label={<EmojiEmotions fontSize="small" />}
+                mb="5px"
+                mt="5px"
+              />
+              <IconButton
+                label={<AlternateEmail fontSize="small" />}
+                mb="5px"
+                mt="5px"
+              />
+            </Box>
+            <Box>
+              <IconButton
+                label={<Send fontSize="small" />}
+                mb="5px"
+                mr="30px"
+                mt="5px"
+                onClick={() => {
+                  handleSendMessage();
+                }}
+              />
+            </Box>
+          </Flex>
+        </Slate>
       </Flex>
-    </Slate>
+    </Flex>
   );
 };
 

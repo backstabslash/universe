@@ -21,6 +21,7 @@
     "@mui/material": "^5.15.10",
     "@tanstack/react-query": "^5.0.0",
     "axios": "^1.6.8",
+    "file-saver": "^2.0.5",
     "framer-motion": "^11.0.3",
     "is-url": "^1.2.4",
     "joi": "^17.13.1",
@@ -40,6 +41,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/is-url": "^1.2.32",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^18.2.55",

@@ -3,6 +3,7 @@ import {
   Flex,
   HStack,
   Icon,
+  IconButton,
   Spinner,
   Text,
   VStack,
@@ -19,7 +20,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import ClearIcon from '@mui/icons-material/Clear';
+import { Clear, InsertDriveFile, Image } from '@mui/icons-material/';
 import {
   Element as EditorElement,
   Leaf as EditorLeaf,
@@ -29,6 +30,7 @@ import {
 } from './TextEditor';
 import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
+import useUserStore from '../store/user';
 
 const MessagesContainer = (): JSX.Element => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,8 +48,10 @@ const MessagesContainer = (): JSX.Element => {
     lastSentMessage,
     loadChannelMessages,
     onRecieveChannelMessages,
+    processDownloadingAttachment,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
+  const { axios } = useUserStore(state => state);
 
   useEffect(() => {
     if (!currentChannel) return;
@@ -146,11 +150,27 @@ const MessagesContainer = (): JSX.Element => {
     return map;
   }, [messages]);
 
+  const handleDownloadFile = async (
+    fileId: string,
+    fileName: string
+  ): Promise<void> => {
+    try {
+      if (!axios) {
+        return;
+      }
+
+      await processDownloadingAttachment(axios, fileId, fileName);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
   return (
-    <Box
+    <Flex
       ref={containerRef}
       background="rgba(0, 0, 0, 0.5)"
-      h="calc(100vh - 252px)"
+      maxH="calc(100vh - 270px)"
+      height={'100%'}
       overflowY="auto"
       bgImage="../../chat-bg-pattern-dark.png"
       bgSize="cover"
@@ -158,7 +178,6 @@ const MessagesContainer = (): JSX.Element => {
       bgPosition="center"
       pt={'15px'}
       pb={'10px'}
-      display="flex"
       flexDirection="column-reverse"
     >
       {messagesLoading && messages.length === 0 ? (
@@ -194,24 +213,58 @@ const MessagesContainer = (): JSX.Element => {
                       <Text color="zinc400">{message.user.name}</Text>
                     )}
                   </HStack>
-                  <HStack alignSelf={'start'}>
-                    <Slate
-                      editor={editorsMap.get(message.id)}
-                      initialValue={message.textContent}
-                    >
-                      <Editable
-                        style={{
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          wordBreak: 'break-all',
-                          whiteSpace: 'normal',
-                        }}
-                        renderElement={renderElement}
-                        renderLeaf={renderLeaf}
-                        readOnly
-                      />
-                    </Slate>
-                  </HStack>
+                  <VStack alignSelf={'start'}>
+                    {message.attachments?.map((attachment, index) => (
+                      <VStack
+                        key={`${attachment.url}-${index}`}
+                        alignSelf={'start'}
+                      >
+                        <HStack alignSelf={'start'}>
+                          <IconButton
+                            aria-label="IconButtonLabel"
+                            icon={
+                              attachment.type === 'image' ? (
+                                <Image />
+                              ) : (
+                                <InsertDriveFile />
+                              )
+                            }
+                            onClick={() => {
+                              handleDownloadFile(
+                                attachment.url,
+                                attachment.name
+                              );
+                            }}
+                          />
+                          <Text
+                            overflow="hidden"
+                            textOverflow="ellipsis"
+                            whiteSpace="nowrap"
+                          >
+                            {attachment.name}
+                          </Text>
+                        </HStack>
+                      </VStack>
+                    ))}
+                    <HStack alignSelf={'start'}>
+                      <Slate
+                        editor={editorsMap.get(message.id)}
+                        initialValue={message.textContent}
+                      >
+                        <Editable
+                          style={{
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            wordBreak: 'break-all',
+                            whiteSpace: 'normal',
+                          }}
+                          renderElement={renderElement}
+                          renderLeaf={renderLeaf}
+                          readOnly
+                        />
+                      </Slate>
+                    </HStack>
+                  </VStack>
                 </VStack>
                 <VStack alignSelf={'end'}>
                   <HStack spacing={'5px'}>
@@ -224,7 +277,7 @@ const MessagesContainer = (): JSX.Element => {
                     {message.status === MessageStatus.FAILED ? (
                       <Icon
                         fontSize={'20px'}
-                        as={ClearIcon}
+                        as={Clear}
                         color="red.500"
                         cursor="pointer"
                         onClick={() => {}}
@@ -244,7 +297,7 @@ const MessagesContainer = (): JSX.Element => {
           <Spinner size="lg" thickness="4px" speed="0.5s" />
         </Flex>
       )}
-    </Box>
+    </Flex>
   );
 };
 
