@@ -122,7 +122,7 @@ const DeleteChannelModal = (): any => {
               <Button
                 background="red.600"
                 _hover={{ background: 'red.800' }}
-                color="zinc800"
+                color="zinc100"
                 mr={3}
                 onClick={() => {
                   handleDelete();
@@ -134,7 +134,7 @@ const DeleteChannelModal = (): any => {
               <Button
                 background="red.600"
                 _hover={{ background: 'red.800' }}
-                color="zinc800"
+                color="zinc100"
                 mr={3}
                 onClick={() => {
                   handleLeave();

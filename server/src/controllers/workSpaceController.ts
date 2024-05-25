@@ -1,23 +1,34 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   emailRules,
   emailTemplatesRule,
   nameRules,
   passwordRules,
   verifyCodeRules,
-} from "../validation/userDataRules";
-import Joi from "joi";
-import WorkSpace, { IWorkSpace } from "../models/workspace/workspaceModel";
-import WorkspaceUser from "../models/workspace/workspaceUserModel";
-import User from "../models/user/userModel";
-import mongoose from "mongoose";
-import Role from "../models/user/roleModel";
-import UserRole from "../models/user/userRoleModel";
-import UserGroup from "../models/user/userGroupModel";
-import UserVerifyCode from "../models/user/userVerifyCodeModel";
-import bcrypt from "bcrypt";
-import Channel, { ChannelType } from "../models/channel/channelModel";
-import ChannelUser from "../models/channel/channelUserModel";
+} from '../validation/userDataRules';
+import Joi from 'joi';
+import WorkSpace, { IWorkSpace } from '../models/workspace/workspaceModel';
+import WorkspaceUser from '../models/workspace/workspaceUserModel';
+import User from '../models/user/userModel';
+import mongoose from 'mongoose';
+import Role from '../models/user/roleModel';
+import UserRole from '../models/user/userRoleModel';
+import UserGroup from '../models/user/userGroupModel';
+import UserVerifyCode from '../models/user/userVerifyCodeModel';
+import bcrypt from 'bcrypt';
+import Channel, { ChannelType } from '../models/channel/channelModel';
+import ChannelUser from '../models/channel/channelUserModel';
+import WorkspaceChannel from '../models/workspace/workspaceChannelModel';
+
+interface PopulatedWorkspaceChannel {
+  channel: {
+    _id: string;
+    name: string;
+    private: boolean;
+    readonly: boolean;
+    owner: string;
+  };
+}
 
 class WorkSpacerController {
   async checkName(req: Request, res: Response) {
@@ -37,15 +48,15 @@ class WorkSpacerController {
       });
       if (workSpace) {
         return res.status(401).json({
-          message: "Workspace with this name already exists",
+          message: 'Workspace with this name already exists',
         });
       }
       return res.status(200).json({
-        message: "Workspace name is available",
+        message: 'Workspace name is available',
       });
     } catch (error) {
       res.status(400).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }
@@ -67,7 +78,8 @@ class WorkSpacerController {
       });
     }
 
-    const { name, email, password, verifyCode, workSpaceName, emailTemplates } = req.body;
+    const { name, email, password, verifyCode, workSpaceName, emailTemplates } =
+      req.body;
     const session = await mongoose.startSession();
 
     try {
@@ -77,37 +89,41 @@ class WorkSpacerController {
       if (user) {
         await session.abortTransaction();
         return res.status(400).json({
-          message: "User already exists",
+          message: 'User already exists',
         });
       }
 
-      const existingUserVerifyCode = await UserVerifyCode.findOne({ email }).session(session);
+      const existingUserVerifyCode = await UserVerifyCode.findOne({
+        email,
+      }).session(session);
 
       if (existingUserVerifyCode?.verifyCode !== verifyCode) {
         await session.abortTransaction();
         return res.status(400).json({
-          message: "Invalid verification code",
+          message: 'Invalid verification code',
         });
       }
 
       const userGroup = new UserGroup({
-        name: "General",
+        name: 'General',
       });
       const newUserGroup = await userGroup.save({ session });
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({
         name,
-        tag: email.replace("@", "_"),
+        tag: email.replace('@', '_'),
         email,
-        pfp_url: "",
-        phone: "",
+        pfp_url: '',
+        phone: '',
         password: hashedPassword,
         groupsOrder: [newUserGroup._id],
       });
       const savedUser = await newUser.save({ session });
 
-      const userRole = await Role.findOne({ name: "administration" }).session(session);
+      const userRole = await Role.findOne({ name: 'administration' }).session(
+        session
+      );
 
       const newUserRole = new UserRole({
         user: savedUser?._id,
@@ -116,7 +132,7 @@ class WorkSpacerController {
       await newUserRole.save({ session });
 
       const newChannel = new Channel({
-        name: "Notes",
+        name: 'Notes',
         owner: savedUser?._id,
         type: ChannelType.DM,
         private: true,
@@ -153,12 +169,14 @@ class WorkSpacerController {
       if ((error as any).code === 11000) {
         console.error((error as any).keyValue);
         return res.status(409).json({
-          message: `This email template exists ${(error as any).keyValue?.emailTemplates}`,
+          message: `This email template exists ${
+            (error as any).keyValue?.emailTemplates
+          }`,
         });
       }
 
       return res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     } finally {
       session.endSession();
@@ -171,43 +189,138 @@ class WorkSpacerController {
 
       const workspaceUser = await WorkspaceUser.findOne({ user: userId });
       if (!workspaceUser) {
-        return res.status(404).json({ message: "User does not belong to any workspace." });
+        return res
+          .status(404)
+          .json({ message: 'User does not belong to any workspace.' });
       }
-
       const workspaceUsers = await WorkspaceUser.find({
         workspace: workspaceUser.workspace,
       });
 
       const userIds = workspaceUsers.map((wsUser) => wsUser.user);
-
       const users = await User.find({ _id: { $in: userIds } }, { password: 0 });
+      const userRolesPromises = users.map(async (user) => {
+        const roles = await UserRole.find({ user: user._id }).populate('role');
+        return {
+          ...user.toObject(),
+          userRole: roles.map((userRole) => userRole.role.name),
+        };
+      });
+      const usersWithRoles = await Promise.all(userRolesPromises);
 
-      return res.status(200).json(users);
+      return res.status(200).json(usersWithRoles);
     } catch (error) {
-      res.status(500).json({
-        message: "Internal server error",
+      return res.status(500).json({
+        message: 'Internal server error',
       });
     }
   }
+
+  async getWorkspaceChannels(req: Request, res: Response) {
+    try {
+      const { userId } = req.body;
+
+      const workspaceUser = await WorkspaceUser.findOne({ user: userId });
+      if (!workspaceUser) {
+        return res
+          .status(404)
+          .json({ message: 'User does not belong to any workspace.' });
+      }
+
+      const workspace = await WorkSpace.findById(workspaceUser.workspace);
+      if (!workspace) {
+        return res.status(404).json({ message: 'Workspace not found.' });
+      }
+
+      const workspaceChannels = await WorkspaceChannel.find({
+        workspace: workspaceUser.workspace,
+      }).populate('channel');
+
+      const userChannels = await ChannelUser.find({ user: userId });
+
+      const userChannelIds = userChannels.map((channelUser) =>
+        channelUser.channel.toString()
+      );
+
+      const filteredChannels = workspaceChannels.filter((workspaceChannel) => {
+        const channel = (
+          workspaceChannel as unknown as PopulatedWorkspaceChannel
+        ).channel;
+        return (
+          !userChannelIds.includes(channel._id.toString()) && !channel.private
+        );
+      });
+
+      const channelsToReturn = filteredChannels.map((workspaceChannel) => {
+        const channel = (
+          workspaceChannel as unknown as PopulatedWorkspaceChannel
+        ).channel;
+        return {
+          id: channel._id,
+          name: channel.name,
+          private: channel.private,
+          readonly: channel.readonly,
+          owner: channel.owner,
+        };
+      });
+
+      const channelIds = channelsToReturn.map((channel) => channel.id);
+
+      const channelUsers = await ChannelUser.find({
+        channel: { $in: channelIds },
+      }).populate('user');
+
+      const userDetails = channelUsers.map((channelUser) => {
+        return {
+          channelId: channelUser.channel,
+          user: {
+            _id: channelUser.user._id,
+            name: channelUser.user.name,
+          },
+        };
+      });
+
+      const channelsWithUsers = channelsToReturn.map((channel: any) => {
+        return {
+          ...channel,
+          users: userDetails
+            .filter(
+              (userDetail) =>
+                userDetail.channelId.toString() === channel.id.toString()
+            )
+            .map((detail) => detail.user),
+        };
+      });
+
+      return res.status(200).json(channelsWithUsers);
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
   async getWorkspaceData(req: Request, res: Response) {
     try {
       const { userId } = req.body;
 
       const workspaceUser = await WorkspaceUser.findOne({ user: userId });
       if (!workspaceUser) {
-        return res.status(404).json({ message: "User does not belong to any workspace." });
+        return res
+          .status(404)
+          .json({ message: 'User does not belong to any workspace.' });
       }
 
       const workspace = await WorkSpace.findById(workspaceUser.workspace);
       if (!workspace) {
-        return res.status(404).json({ message: "Workspace not found." });
+        return res.status(404).json({ message: 'Workspace not found.' });
       }
 
       const { owner, workSpaceName, pfp_url } = workspace;
       return res.status(200).json({ ownerId: owner, workSpaceName, pfp_url });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }
@@ -216,29 +329,32 @@ class WorkSpacerController {
     try {
       const { userId, workSpaceName, pfp_url } = req.body;
 
-      const userRole = await UserRole.findOne({ user: userId }).populate("role");
+      const userRole = await UserRole.findOne({ user: userId }).populate(
+        'role'
+      );
 
-      if (userRole?.role.name !== "administration") {
+      if (userRole?.role.name !== 'administration') {
         return res.status(403).json({
-          message: "Forbidden: You are not authorized to perform this action.",
+          message: 'Forbidden: You are not authorized to perform this action.',
         });
       }
 
-      const updatedWorkspace: IWorkSpace | null = await WorkSpace.findOneAndUpdate(
-        { workSpaceName },
-        { $set: { pfp_url } },
-        { new: true }
-      );
+      const updatedWorkspace: IWorkSpace | null =
+        await WorkSpace.findOneAndUpdate(
+          { workSpaceName },
+          { $set: { pfp_url } },
+          { new: true }
+        );
 
       if (!updatedWorkspace) {
         return res.status(404).json({
-          message: "Workspace not found.",
+          message: 'Workspace not found.',
         });
       }
       return res.status(200).json();
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }

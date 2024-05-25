@@ -18,5 +18,6 @@ router.delete(
   channelController.excludeUserByTag
 );
 router.post('/add-user', rateLimiter(), channelController.addUserToChannel);
+router.get('/:channelId/messages', channelController.getMessagesByChannelId);
 
 export default router;

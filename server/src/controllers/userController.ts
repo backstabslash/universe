@@ -1,15 +1,15 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   emailRules,
   phoneRules,
   pfpUrlSchema,
   tagRules,
   nameRules,
-} from "../validation/userDataRules";
-import { uuidRules } from "../validation/commonDataRules";
-import User from "../models/user/userModel";
-import Joi from "joi";
-import UserRole from "../models/user/userRoleModel";
+} from '../validation/userDataRules';
+import { uuidRules } from '../validation/commonDataRules';
+import User from '../models/user/userModel';
+import Joi from 'joi';
+import UserRole from '../models/user/userRoleModel';
 
 class UserController {
   async getByEmail(req: Request, res: Response) {
@@ -30,12 +30,12 @@ class UserController {
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({
-          message: "User not found",
+          message: 'User not found',
         });
       }
-      const userRoles = await UserRole.find({ user: user.id }).populate('role')
+      const userRoles = await UserRole.find({ user: user.id }).populate('role');
 
-      const roles = userRoles.map(userRole => userRole.role.name)
+      const roles = userRoles.map((userRole) => userRole.role.name);
       return res.status(200).json({
         tag: user.tag,
         name: user.name,
@@ -43,11 +43,11 @@ class UserController {
         phone: user.phone,
         email: user.email,
         userId: user.id,
-        userRole: roles
+        userRole: roles,
       });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }
@@ -58,20 +58,24 @@ class UserController {
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
-          message: "User not found",
+          message: 'User not found',
         });
       }
+      const userRoles = await UserRole.find({ user: user.id }).populate('role');
+      const roles = userRoles.map((userRole) => userRole.role.name);
+
       return res.status(200).json({
+        userId: user.id,
         tag: user.tag,
         name: user.name,
         email: user.email,
         pfp_url: user.pfp_url,
         phone: user.phone,
-        userId,
+        userRole: roles,
       });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }
@@ -105,7 +109,7 @@ class UserController {
 
       if (!updatedUser) {
         return res.status(404).json({
-          message: "User not found",
+          message: 'User not found',
         });
       }
 
@@ -118,7 +122,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }

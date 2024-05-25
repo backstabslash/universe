@@ -13,6 +13,7 @@ import {
   ModalFooter,
   Checkbox,
   Text,
+  Flex,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import useMessengerStore from '../store/messenger';
@@ -87,33 +88,35 @@ const CreateChannelModal = (): any => {
                 onChange={handleInputChange}
               />
             </FormControl>
-            <FormControl mt={4}>
-              <Checkbox
-                name="private"
-                isChecked={formData.private}
-                onChange={handleInputChange}
-                colorScheme="gray"
-              >
-                Private
-              </Checkbox>
-            </FormControl>
-            <FormControl mt={4}>
-              <Checkbox
-                name="readonly"
-                isChecked={formData.readonly}
-                onChange={handleInputChange}
-                colorScheme="gray"
-              >
-                Read-only
-              </Checkbox>
-            </FormControl>
+            <Flex width="60%">
+              <FormControl mt={4}>
+                <Checkbox
+                  name="private"
+                  isChecked={formData.private}
+                  onChange={handleInputChange}
+                  colorScheme="gray"
+                >
+                  Private
+                </Checkbox>
+              </FormControl>
+              <FormControl mt={4}>
+                <Checkbox
+                  name="readonly"
+                  isChecked={formData.readonly}
+                  onChange={handleInputChange}
+                  colorScheme="gray"
+                >
+                  Read-only
+                </Checkbox>
+              </FormControl>
+            </Flex>
           </ModalBody>
           {formError && (
             <Text ml="7" color="red.500">
               {formError}
             </Text>
           )}
-          <ModalFooter>
+          <ModalFooter justifyContent={'flex-start'} pt="0">
             <Button
               background="zinc700"
               _hover={{ background: 'zinc800' }}
