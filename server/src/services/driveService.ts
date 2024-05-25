@@ -84,6 +84,19 @@ class DriveService {
     }
   }
 
+  async deleteFile(fileId: string): Promise<void> {
+    try {
+      const drive = google.drive({ version: "v3", auth: this.jwtClient });
+
+      await drive.files.delete({ fileId });
+
+      console.log("File deleted from Google Drive");
+    } catch (error) {
+      console.error("Error deleting file from Google Drive:", error);
+      throw error;
+    }
+  }
+
   async makeFilePublic(fileId: string): Promise<string | undefined> {
     try {
       const drive = google.drive({ version: "v3", auth: this.jwtClient });

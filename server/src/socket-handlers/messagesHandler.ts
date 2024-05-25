@@ -11,6 +11,11 @@ type Message = {
   user: { _id: string; name: string };
 };
 class MessagesHandler {
+  private driveService: DriveService;
+
+  constructor() {
+    this.driveService = new DriveService();
+  }
   async sendMessage(
     socket: Socket,
     data: { channelId: string; message: Message },
@@ -19,10 +24,9 @@ class MessagesHandler {
     try {
       let attachments;
       if (data.message.attachments) {
-        const driveService = new DriveService();
         const uploadAttachments = async (attachments: string[]) => {
           const fileDataArray = await Promise.all(
-            attachments.map((attachment) => driveService.uploadFile(attachment))
+            attachments.map((attachment) => this.driveService.uploadFile(attachment))
           );
           return fileDataArray;
         };
@@ -59,6 +63,36 @@ class MessagesHandler {
         },
         channelId: data.channelId,
       });
+    } catch (error) {
+      callback({ status: "error", message: "Error sending message" });
+      console.error(error);
+    }
+  }
+
+  async deleteMessage(
+    socket: Socket,
+    data: { messageId: string; channelId: string },
+    callback: Function
+  ) {
+    try {
+      const message = await Message.findById(data.messageId);
+      if (!message) {
+        throw new Error("Message not found");
+      }
+
+      const attachmentIds = message.attachments.map(attachment => attachment.toString());
+
+      const attachments = await Attachment.find({ _id: { $in: attachmentIds } });
+      for (const attachment of attachments) {
+        await this.driveService.deleteFile(attachment.url);
+      }
+
+      await Attachment.deleteMany({ _id: { $in: attachmentIds } });
+
+      await Message.deleteOne({ _id: data.messageId });
+
+      callback({ status: "success" });
+      socket.broadcast.to(data.channelId).emit("on-deleted-message", data.messageId);
     } catch (error) {
       callback({ status: "error", message: "Error sending message" });
       console.error(error);

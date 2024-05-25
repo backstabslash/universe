@@ -44,6 +44,9 @@ io.use(verifySocketJwt).on("connection", (socket: Socket) => {
   socket.on("update-channel-groups-order", (data, callback) => {
     channelsHandler.updateChannelGroupsOrder(socket, data, callback);
   });
+  socket.on("delete-message", (data, callback) => {
+    messagesHandler.deleteMessage(socket, data, callback);
+  });
 
   socket.on("disconnect", () => {
     console.info("User disconnected");

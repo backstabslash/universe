@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Flex,
   HStack,
   Icon,
@@ -8,6 +9,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import useMessengerStore, {
   MessageStatus,
   UserMessage,
@@ -49,9 +51,39 @@ const MessagesContainer = (): JSX.Element => {
     loadChannelMessages,
     onRecieveChannelMessages,
     processDownloadingAttachment,
+    deleteMessage,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const { axios } = useUserStore(state => state);
+
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    messageId: string | null;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    messageId: null,
+  });
+
+  const closeContextMenu = (): void => {
+    setContextMenu({ visible: false, x: 0, y: 0, messageId: null });
+  };
+
+  const handleContextMenu = (
+    event: React.MouseEvent,
+    messageId: string
+  ): void => {
+    event.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      messageId,
+    });
+  };
 
   useEffect(() => {
     if (!currentChannel) return;
@@ -164,7 +196,19 @@ const MessagesContainer = (): JSX.Element => {
       console.error('Error downloading file:', error);
     }
   };
-
+  const handleDeleteMessage = (): void => {
+    try {
+      if (contextMenu.messageId && currentChannel?.id) {
+        deleteMessage(contextMenu.messageId, currentChannel.id);
+        const filteredMessages = messages.filter(
+          message => message.id === contextMenu.messageId
+        );
+        setMessages(filteredMessages);
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
   return (
     <Flex
       ref={containerRef}
@@ -179,6 +223,7 @@ const MessagesContainer = (): JSX.Element => {
       pt={'15px'}
       pb={'10px'}
       flexDirection="column-reverse"
+      onClick={closeContextMenu}
     >
       {messagesLoading && messages.length === 0 ? (
         <Flex w="100%" h="100%" justifyContent="center" alignItems="center">
@@ -206,6 +251,7 @@ const MessagesContainer = (): JSX.Element => {
                 ml={`${message.user._id === userData?.userId ? '100px' : '18px'}`}
                 mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
                 width="fit-content"
+                onContextMenu={event => handleContextMenu(event, message.id)}
               >
                 <VStack mb={'8px'} spacing={0}>
                   <HStack alignSelf={'start'}>
@@ -296,6 +342,49 @@ const MessagesContainer = (): JSX.Element => {
         <Flex justifyContent="center" alignItems="center" w="100%" h="auto">
           <Spinner size="lg" thickness="4px" speed="0.5s" />
         </Flex>
+      )}
+      {contextMenu.visible && (
+        <Box
+          position="fixed"
+          top={`${contextMenu.y}px`}
+          left={`${contextMenu.x}px`}
+          zIndex="tooltip"
+        >
+          <VStack bg="zinc900" borderRadius="md" boxShadow="md" p="2">
+            <HStack
+              bg="zinc900"
+              _hover={{ background: 'zinc800' }}
+              w={'100%'}
+              borderRadius={'md'}
+            >
+              <Button
+                leftIcon={<EditIcon />}
+                // onClick={() => }
+                color="white"
+                bg="none"
+                _hover={{ background: 'none' }}
+                _active={{ background: 'none' }}
+                alignSelf={'start'}
+              >
+                Edit
+              </Button>
+            </HStack>
+            <Button
+              leftIcon={<DeleteIcon color="red.500" />}
+              onClick={() => {
+                handleDeleteMessage();
+              }}
+              color="red.500"
+              bg="zinc900"
+              _hover={{ background: 'zinc800' }}
+              _active={{ background: 'zinc800' }}
+              borderRadius={'md'}
+              alignSelf={'start'}
+            >
+              Delete
+            </Button>
+          </VStack>
+        </Box>
       )}
     </Flex>
   );

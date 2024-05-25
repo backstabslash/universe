@@ -104,6 +104,7 @@ interface MessengerState {
   leaveChannel: (id: string) => void;
   onUserLeftChannel: () => void;
   onDeletedChannel: () => void;
+  deleteMessage: (messageId: string, channelId: string) => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -216,7 +217,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
 
       FileSaver.saveAs(blob, filename);
-    } catch (error) {}
+    } catch (error) { }
   },
 
   sendMessage: (filesData: any, message: UserMessage) => {
@@ -449,6 +450,59 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
 
     set({ channels: updatedChannels });
+  },
+
+  onDeletedMessage: (id: string) => {
+    try {
+      const { socket } = get();
+
+      if (!socket) return;
+      socket.on(
+        'on-deleted-message',
+        (messageId: string): void => {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (!channel.messages) return channel;
+            return {
+              ...channel,
+              messages: channel.messages.filter(message => message.id !== messageId),
+            };
+          });
+
+          set({ channels: [...updatedChannels] })
+        })
+    } catch (error: any) {
+      set({ error });
+    }
+  },
+  deleteMessage: (messageId: string, channelId: string) => {
+    const { socket } = get();
+
+    if (!socket) return;
+
+    socket.emit(
+      'delete-message',
+      {
+        messageId,
+        channelId
+      },
+      (response: MessageResponse) => {
+        if (response.status === 'success') {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (!channel.messages) return channel;
+            return {
+              ...channel,
+              messages: channel.messages.filter(message => message.id !== messageId),
+            };
+          })
+
+          set({ channels: [...updatedChannels] })
+        }
+      }
+    );
   },
 
   addUserToChannel: (id: string) => {
