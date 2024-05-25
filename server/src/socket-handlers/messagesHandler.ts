@@ -92,7 +92,7 @@ class MessagesHandler {
       await Message.deleteOne({ _id: data.messageId });
 
       callback({ status: "success" });
-      socket.broadcast.to(data.channelId).emit("on-deleted-message", data.messageId);
+      socket.broadcast.to(data.channelId).emit("on-deleted-message", data);
     } catch (error) {
       callback({ status: "error", message: "Error sending message" });
       console.error(error);

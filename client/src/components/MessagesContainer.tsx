@@ -52,6 +52,7 @@ const MessagesContainer = (): JSX.Element => {
     onRecieveChannelMessages,
     processDownloadingAttachment,
     deleteMessage,
+    lastDeletedMessage,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const { axios } = useUserStore(state => state);
@@ -61,20 +62,29 @@ const MessagesContainer = (): JSX.Element => {
     x: number;
     y: number;
     messageId: string | null;
+    ownerId: string | null;
   }>({
     visible: false,
     x: 0,
     y: 0,
     messageId: null,
+    ownerId: null,
   });
 
   const closeContextMenu = (): void => {
-    setContextMenu({ visible: false, x: 0, y: 0, messageId: null });
+    setContextMenu({
+      visible: false,
+      x: 0,
+      y: 0,
+      messageId: null,
+      ownerId: null,
+    });
   };
 
   const handleContextMenu = (
     event: React.MouseEvent,
-    messageId: string
+    messageId: string,
+    ownerId: string
   ): void => {
     event.preventDefault();
     setContextMenu({
@@ -82,6 +92,7 @@ const MessagesContainer = (): JSX.Element => {
       x: event.clientX,
       y: event.clientY,
       messageId,
+      ownerId,
     });
   };
 
@@ -163,6 +174,18 @@ const MessagesContainer = (): JSX.Element => {
     }
   }, [lastSentMessage]);
 
+  useEffect(() => {
+    if (
+      lastDeletedMessage.messageId &&
+      lastDeletedMessage.channelId === currentChannel?.id
+    ) {
+      const filteredMessages = messages.filter(
+        message => message.id !== lastDeletedMessage.messageId
+      );
+      setMessages(filteredMessages);
+    }
+  }, [lastDeletedMessage]);
+
   const renderElement = useCallback(
     (props: ElementProps) => <EditorElement {...props} />,
     []
@@ -199,11 +222,12 @@ const MessagesContainer = (): JSX.Element => {
   const handleDeleteMessage = (): void => {
     try {
       if (contextMenu.messageId && currentChannel?.id) {
-        deleteMessage(contextMenu.messageId, currentChannel.id);
         const filteredMessages = messages.filter(
-          message => message.id === contextMenu.messageId
+          message => message.id !== contextMenu.messageId
         );
         setMessages(filteredMessages);
+
+        deleteMessage(contextMenu.messageId, currentChannel.id);
       }
     } catch (error) {
       console.error('Error downloading file:', error);
@@ -251,7 +275,9 @@ const MessagesContainer = (): JSX.Element => {
                 ml={`${message.user._id === userData?.userId ? '100px' : '18px'}`}
                 mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
                 width="fit-content"
-                onContextMenu={event => handleContextMenu(event, message.id)}
+                onContextMenu={event =>
+                  handleContextMenu(event, message.id, message.user._id)
+                }
               >
                 <VStack mb={'8px'} spacing={0}>
                   <HStack alignSelf={'start'}>
@@ -343,7 +369,7 @@ const MessagesContainer = (): JSX.Element => {
           <Spinner size="lg" thickness="4px" speed="0.5s" />
         </Flex>
       )}
-      {contextMenu.visible && (
+      {contextMenu.visible && contextMenu.ownerId === userData?.userId && (
         <Box
           position="fixed"
           top={`${contextMenu.y}px`}

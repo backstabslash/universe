@@ -71,6 +71,14 @@ interface MessengerState {
     message: UserMessage | null;
     channelId: string;
   };
+  lastDeletedMessage: {
+    messageId: string;
+    channelId: string;
+  };
+  lastEditedMessage: {
+    message: UserMessage | null;
+    channelId: string;
+  };
   currentChannel: Omit<Channel, 'messages'> | null;
   error: Error | null;
   connectSocket: () => void;
@@ -106,6 +114,7 @@ interface MessengerState {
   onDeletedChannel: () => void;
   deleteMessage: (messageId: string, channelId: string) => void;
   createDM: (data: any) => void;
+  onDeletedMessage: () => void;
 
 }
 
@@ -121,7 +130,14 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     message: null,
     channelId: '',
   },
-
+  lastDeletedMessage: {
+    messageId: '',
+    channelId: '',
+  },
+  lastEditedMessage: {
+    message: null,
+    channelId: '',
+  },
   connectSocket: () => {
     try {
       const socket = io(api.url, {
@@ -197,11 +213,9 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   ): Promise<void> => {
     try {
       if (!fileId) return;
-      console.log(fileId);
       const response = await axios.get(`/file/download/${fileId}`, {
         responseType: 'blob',
       });
-      console.log(response);
       const blob = new Blob([response.data], {
         type: response.headers['content-type'],
       });
@@ -453,25 +467,28 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     set({ channels: updatedChannels });
   },
 
-  onDeletedMessage: (id: string) => {
+  onDeletedMessage: () => {
     try {
       const { socket } = get();
 
       if (!socket) return;
+
       socket.on(
         'on-deleted-message',
-        (messageId: string): void => {
+        (data: { messageId: string, channelId: string }): void => {
           const { channels } = get();
 
           const updatedChannels = channels.map(channel => {
-            if (!channel.messages) return channel;
-            return {
-              ...channel,
-              messages: channel.messages.filter(message => message.id !== messageId),
-            };
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.filter(message => message.id !== data.messageId)
+              };
+            }
+            return channel;
           });
 
-          set({ channels: [...updatedChannels] })
+          set({ channels: [...updatedChannels], lastDeletedMessage: data })
         })
     } catch (error: any) {
       set({ error });
@@ -493,13 +510,14 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           const { channels } = get();
 
           const updatedChannels = channels.map(channel => {
-            if (!channel.messages) return channel;
-            return {
-              ...channel,
-              messages: channel.messages.filter(message => message.id !== messageId),
-            };
-          })
-
+            if (channel.id === channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.filter(message => message.id !== messageId)
+              };
+            }
+            return channel;
+          });
           set({ channels: [...updatedChannels] })
         }
       }

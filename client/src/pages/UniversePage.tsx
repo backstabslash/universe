@@ -62,6 +62,7 @@ const MainContent = (): JSX.Element => {
     onUserJoinedChannel,
     onUserLeftChannel,
     onDeletedChannel,
+    onDeletedMessage,
   } = useMessengerStore(state => state);
 
   const { logout, userData } = useAuthStore(state => state);
@@ -88,6 +89,7 @@ const MainContent = (): JSX.Element => {
       onUserJoinedChannel(userData.userId);
       onUserLeftChannel();
       onDeletedChannel();
+      onDeletedMessage();
     }
 
     return () => {
