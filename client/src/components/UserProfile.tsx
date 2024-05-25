@@ -137,7 +137,11 @@ const UserProfile = (): JSX.Element => {
     }
   };
 
-  const handleUserClick = async (userName: any, userId: any): Promise<void> => {
+  const handleUserClick = async (
+    userName: any,
+    userId: any,
+    pfpUrl: any
+  ): Promise<void> => {
     if (!authUserId) return;
     const existingDM = dmsWithUsers.find(
       dm => dm.user._id === userId || dm.user._id === authUserId
@@ -146,7 +150,12 @@ const UserProfile = (): JSX.Element => {
     if (existingDM) {
       setCurrentChannel(existingDM.channel, userName, userId);
     } else {
-      createDM({ user1Id: authUserId, user2Id: userId, userName });
+      createDM({
+        user1Id: authUserId,
+        user2Id: userId,
+        userName,
+        pfp_url: pfpUrl,
+      });
     }
   };
 
@@ -528,7 +537,11 @@ const UserProfile = (): JSX.Element => {
                 _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 color="zinc300"
                 onClick={() => {
-                  handleUserClick(userData?.name, userData?.userId);
+                  handleUserClick(
+                    userData?.name,
+                    userData?.userId,
+                    userData?.pfp_url
+                  );
                 }}
               >
                 Message

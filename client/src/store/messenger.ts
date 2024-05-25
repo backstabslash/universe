@@ -532,6 +532,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     user1Id: string;
     user2Id: string;
     userName: string;
+    pfp_url: string;
   }): void => {
     const { socket, setCurrentChannel, dmsWithUsers, channels } = get();
 
@@ -546,7 +547,11 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             dmsWithUsers: [
               {
                 channel: response.data._id,
-                user: { _id: data.user2Id, name: data.userName, pfp_url: '' },
+                user: {
+                  _id: data.user2Id,
+                  name: data.userName,
+                  pfp_url: data.pfp_url,
+                },
               },
               ...dmsWithUsers,
             ],
