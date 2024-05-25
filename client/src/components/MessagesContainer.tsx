@@ -2,12 +2,22 @@ import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormLabel,
   HStack,
   Icon,
   IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spinner,
   Text,
   VStack,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import useMessengerStore, {
@@ -56,6 +66,7 @@ const MessagesContainer = (): JSX.Element => {
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const { axios } = useUserStore(state => state);
+  const { isOpen, onOpen, onClose } = useDisclosure({});
 
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
@@ -221,6 +232,8 @@ const MessagesContainer = (): JSX.Element => {
   };
   const handleDeleteMessage = (): void => {
     try {
+      console.log(contextMenu);
+
       if (contextMenu.messageId && currentChannel?.id) {
         const filteredMessages = messages.filter(
           message => message.id !== contextMenu.messageId
@@ -398,7 +411,7 @@ const MessagesContainer = (): JSX.Element => {
             <Button
               leftIcon={<DeleteIcon color="red.500" />}
               onClick={() => {
-                handleDeleteMessage();
+                onOpen();
               }}
               color="red.500"
               bg="zinc900"
@@ -412,6 +425,36 @@ const MessagesContainer = (): JSX.Element => {
           </VStack>
         </Box>
       )}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent bg="zinc900" color="zinc200">
+          <ModalHeader>Delete message</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <FormControl>
+              <FormLabel>
+                Are you sure you want to delete message? This action is
+                IRREVERSIBLE and the channel will be PERMANENTLY removed.
+              </FormLabel>
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              background="red.600"
+              _hover={{ background: 'red.800' }}
+              color="zinc100"
+              mr={3}
+              onClick={() => {
+                handleDeleteMessage();
+                onClose();
+              }}
+            >
+              Delete
+            </Button>
+            <Button onClick={onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };
