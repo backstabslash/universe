@@ -30,6 +30,7 @@ import { useEffect, useState } from 'react';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
 import useAuthStore from '../store/auth';
+import useMessengerStore from '../store/messenger';
 
 const UserProfile = (): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
@@ -50,6 +51,9 @@ const UserProfile = (): JSX.Element => {
     isUserProfileVisible: state.isUserProfileVisible,
     setIsUserProfileVisible: state.setIsUserProfileVisible,
   }));
+  const { dmsWithUsers, setCurrentChannel, createDM } = useMessengerStore(
+    state => state
+  );
 
   const { userId: authUserId } = useAuthStore(state => ({
     userId: state?.userData?.userId,
@@ -133,6 +137,28 @@ const UserProfile = (): JSX.Element => {
     }
   };
 
+  const handleUserClick = async (
+    userName: any,
+    userId: any,
+    pfpUrl: any
+  ): Promise<void> => {
+    if (!authUserId) return;
+    const existingDM = dmsWithUsers.find(
+      dm => dm.user._id === userId || dm.user._id === authUserId
+    );
+
+    if (existingDM) {
+      setCurrentChannel(existingDM.channel, userName, userId);
+    } else {
+      createDM({
+        user1Id: authUserId,
+        user2Id: userId,
+        userName,
+        pfp_url: pfpUrl,
+      });
+    }
+  };
+
   const currentTime = new Date().toLocaleTimeString('en-US', {
     hour12: false,
     hour: 'numeric',
@@ -213,16 +239,6 @@ const UserProfile = (): JSX.Element => {
               <Text color="#1d9bd1">
                 {userData?.tag ? `@${userData.tag}` : '@username'}
               </Text>
-              <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-                <Button
-                  size="md"
-                  bg="zinc800"
-                  _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                  color="zinc300"
-                >
-                  <AddIcon fontSize="13px" /> &nbsp; Add name pronunciation
-                </Button>
-              </Link>
             </VStack>
             <VStack align="start" spacing={1}>
               <Text>Active</Text>
@@ -513,8 +529,24 @@ const UserProfile = (): JSX.Element => {
               <Text color="#1d9bd1">
                 {userData?.tag ? `@${userData.tag}` : '@username'}
               </Text>
-              <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}></Link>
             </VStack>
+            <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
+              <Button
+                size="md"
+                bg="zinc800"
+                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                color="zinc300"
+                onClick={() => {
+                  handleUserClick(
+                    userData?.name,
+                    userData?.userId,
+                    userData?.pfp_url
+                  );
+                }}
+              >
+                Message
+              </Button>
+            </Link>
             <VStack align="start" spacing={1}>
               <Text>Active</Text>
               <Text>{currentTime} local time</Text>
@@ -531,7 +563,7 @@ const UserProfile = (): JSX.Element => {
             pb="14px"
           >
             <HStack width="100%" justifyContent="space-between">
-              <Text fontWeight="bold">Contact information</Text>
+              <Text fontWeight="bold">Contact in formation</Text>
             </HStack>
             <VStack align="start" spacing={1}>
               <Text fontSize="small" color="#9e9fa1">
@@ -555,6 +587,7 @@ const UserProfile = (): JSX.Element => {
               <Text>{"Phone number isn't specified yet"}</Text>
             )}
           </VStack>
+
           <VStack
             width="100%"
             align="start"

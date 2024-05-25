@@ -22,6 +22,7 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
 import useWorkSpaceStore from '../store/workSpace';
 import useMessengerStore from '../store/messenger';
+import useAuthStore from '../store/auth';
 
 const ChannelMembersModal = (): any => {
   const axiosPrivate = useAxiosPrivate();
@@ -31,11 +32,14 @@ const ChannelMembersModal = (): any => {
   const { fetchUserById, setIsUserProfileVisible } = useUserStore();
   const { currentChannel, notesChannel, channels, addUserToChannel } =
     useMessengerStore();
+  const { userData } = useAuthStore(state => state);
   const [userDetails, setUserDetails] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
   const [currentChannelUsers, setCurrentChannelUsers] = useState<any>([]);
   const [dataFetched, setDataFetched] = useState(false);
+
+  const isStudent = userData?.userRole?.includes('student');
 
   const {
     setAxiosPrivate: setAxiosPrivateWorkspace,
@@ -46,7 +50,13 @@ const ChannelMembersModal = (): any => {
   const fetchAllUsers = async (): Promise<void> => {
     if (currentChannelUsers.length) {
       const details: any = await Promise.all(
-        currentChannelUsers.map((user: any) => fetchUserDetails(user._id))
+        currentChannelUsers.map(async (user: any) => {
+          const userDetails = await fetchUserDetails(user._id);
+          if (userDetails) {
+            return { ...userDetails, _id: user._id };
+          }
+          return null;
+        })
       );
       setUserDetails(details.filter(Boolean));
     }
@@ -61,6 +71,11 @@ const ChannelMembersModal = (): any => {
       setCurrentChannelUsers(channelUsers);
     }
   }, [channels, currentChannel]);
+
+  useEffect(() => {
+    setAxiosPrivateUser(axiosPrivate);
+    setAxiosPrivateWorkspace(axiosPrivate);
+  }, [axiosPrivate]);
 
   useEffect(() => {
     setAxiosPrivateUser(axiosPrivate);
@@ -84,16 +99,22 @@ const ChannelMembersModal = (): any => {
   };
 
   const isUserInDetails = (userId: string): boolean => {
-    return userDetails.some((user: any) => user.userId === userId);
+    return userDetails.some((user: any) => user._id === userId);
   };
 
   const filteredUsers = searchQuery
-    ? workspaceUsers?.filter(
-        (user: any) =>
-          (user?.name?.toLowerCase().includes(searchQuery) ||
-            user?.tag?.toLowerCase()?.includes(searchQuery)) &&
-          !isUserInDetails(user._id)
-      )
+    ? workspaceUsers
+        ?.filter((user: any) => {
+          const matchesSearch =
+            user?.name?.toLowerCase().includes(searchQuery) ||
+            user?.tag?.toLowerCase()?.includes(searchQuery);
+          const notInDetails = !isUserInDetails(user._id);
+          return matchesSearch && notInDetails;
+        })
+        .map((user: any) => ({
+          ...user,
+          isAdmin: user.userRole.includes('administration'),
+        }))
     : [];
 
   const handleUserSelect = (user: any): void => {
@@ -197,10 +218,15 @@ const ChannelMembersModal = (): any => {
                 <ListItem key={user.userId}>
                   <Flex
                     align="center"
-                    cursor="pointer"
+                    cursor={
+                      isStudent && user.isAdmin ? 'not-allowed' : 'pointer'
+                    }
                     onClick={() => {
-                      handleUserSelect(user);
+                      if (!(isStudent && user.isAdmin)) {
+                        handleUserSelect(user);
+                      }
                     }}
+                    opacity={isStudent && user.isAdmin ? 0.5 : 1}
                   >
                     <Image
                       borderRadius="full"
@@ -269,7 +295,7 @@ const ChannelMembersModal = (): any => {
                       align="center"
                       cursor="pointer"
                       onClick={() => {
-                        openProfileOnClick(user.userId);
+                        openProfileOnClick(user._id);
                       }}
                     >
                       <Image

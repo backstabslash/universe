@@ -12,6 +12,7 @@ import {
   MenuList,
   Input,
   Box,
+  Text,
 } from '@chakra-ui/react';
 import DragAndDropList from './custom-elements/DragAndDropList';
 import useMessengerStore, { ChannelGroup } from '../store/messenger';
@@ -19,6 +20,8 @@ import useWorkSpaceStore from '../store/workSpace';
 import CreateChannelModal from './CreateChannelModal';
 import { AddIcon } from '@chakra-ui/icons';
 import { css } from '@emotion/react';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { api } from '../config/config';
 
 const Sidebar = (): JSX.Element => {
   const {
@@ -32,7 +35,10 @@ const Sidebar = (): JSX.Element => {
   const [groupsChanged, setGroupsChanged] = useState<boolean>(false);
   const [addingAGroup, setAddingAGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
+  const [filteredDMs, setFilteredDMs] = useState<any[]>([]);
+  const [activeChannel, setActiveChannel] = useState<string | null>(null);
   const { workSpaceData } = useWorkSpaceStore(state => state);
+  const axiosPrivate = useAxiosPrivate();
 
   const changeGroupstimeoutRef = useRef<any>(null);
 
@@ -59,7 +65,34 @@ const Sidebar = (): JSX.Element => {
 
   const onChannelClick = (id: string, name: string, userId: string): void => {
     setCurrentChannel(id, name, userId);
+    setActiveChannel(id);
   };
+
+  const fetchMessages = async (channelId: string): Promise<boolean> => {
+    try {
+      const response = await axiosPrivate?.get(
+        `${api.url}/channel/${channelId}/messages`
+      );
+      return response.data.length > 0;
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      return false;
+    }
+  };
+
+  const filterDMs = async (): Promise<void> => {
+    const dmsWithMessages = await Promise.all(
+      dmsWithUsers?.map(async dm => {
+        const hasMessages = await fetchMessages(dm.channel);
+        return hasMessages ? dm : null;
+      })
+    );
+    setFilteredDMs(dmsWithMessages.filter(dm => dm !== null));
+  };
+
+  useEffect(() => {
+    filterDMs();
+  }, [dmsWithUsers]);
 
   useEffect(() => {
     setNewGroupName('New Group');
@@ -169,7 +202,7 @@ const Sidebar = (): JSX.Element => {
             onClick={() => setAddingAGroup(true)}
           >
             <AddIcon fontSize="10px" mt={'2px'} />
-            &nbsp;Add group
+            &nbsp;<Text color="zinc400">Add group</Text>
           </Button>
         </HStack>
         {addingAGroup && (
@@ -207,18 +240,23 @@ const Sidebar = (): JSX.Element => {
               onItemClick={onChannelClick}
               setGroupsChanged={setGroupsChanged}
               onDeleteList={onDeleteGroup}
+              activeChannel={activeChannel}
             />
 
             <Heading mb="2" mt="2" fontSize="lg" width="100%" ml={'30px'}>
               Direct Messages
             </Heading>
-            {dmsWithUsers?.map(dm => (
+            {filteredDMs?.map(dm => (
               <Button
                 key={dm.channel}
                 p="2"
                 borderRadius="md"
-                background="rgba(0, 0, 0, 0.1)"
-                color="zinc400"
+                background={
+                  activeChannel === dm.channel
+                    ? 'rgba(0, 0, 0, 0.3)'
+                    : 'rgba(0, 0, 0, 0.1)'
+                }
+                color={activeChannel === dm.channel ? 'white' : 'zinc400'}
                 _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 width="92%"

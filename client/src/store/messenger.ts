@@ -93,7 +93,7 @@ interface MessengerState {
     users: any;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
-  addUserToChannel: (id: string) => void;
+  addUserToChannel: (id: string, channelId?: string) => void;
   onUserJoinedChannel: (currentUserId: string) => void;
   createChannel: (data: {
     name: string;
@@ -105,6 +105,8 @@ interface MessengerState {
   onUserLeftChannel: () => void;
   onDeletedChannel: () => void;
   deleteMessage: (messageId: string, channelId: string) => void;
+  createDM: (data: any) => void;
+
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -415,7 +417,6 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   loadChannelMessages: (): void => {
     try {
       const { socket, channels, currentChannel } = get();
-
       if (!socket || !currentChannel) return;
 
       const currentPage =
@@ -505,21 +506,29 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     );
   },
 
-  addUserToChannel: (id: string) => {
-    const { socket, channels, currentChannel } = get();
+  addUserToChannel: (id: string, channel?: any) => {
+    const { socket, channels, currentChannel, channelGroups } = get();
 
     if (!socket) return;
+
+    let itsMe = false;
+    let chlId = currentChannel?.id;
+
+    if (channel) {
+      itsMe = true;
+      chlId = channel.id;
+    }
 
     socket.emit(
       'add-user-to-channel',
       {
-        channelId: currentChannel?.id,
+        channelId: chlId,
         id,
       },
       (response: any) => {
         if (response.status === 'success') {
           const updatedChannels = channels.map(channel => {
-            if (channel.id === currentChannel?.id) {
+            if (channel.id === chlId) {
               return {
                 ...channel,
                 users: [...channel.users, { _id: id }],
@@ -528,6 +537,26 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             return channel;
           });
           set({ channels: updatedChannels });
+          if (itsMe) {
+            const newChannel = {
+              id: channel.id,
+              messages: [],
+              page: 0,
+              users: channel.users,
+              name: channel.name,
+              ownerId: channel.owner,
+            };
+            const updatedChannelGroups = channelGroups.map(channelGroup => {
+              if (channelGroup.name === 'General') {
+                channelGroup.items.push(channel);
+              }
+              return channelGroup;
+            });
+            set({
+              channels: [newChannel, ...channels],
+              channelGroups: updatedChannelGroups,
+            });
+          }
         }
       }
     );
@@ -645,6 +674,48 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         });
       }
     });
+  },
+  createDM: (data: {
+    user1Id: string;
+    user2Id: string;
+    userName: string;
+    pfp_url: string;
+  }): void => {
+    const { socket, setCurrentChannel, dmsWithUsers, channels } = get();
+
+    if (!socket) return;
+    socket.emit(
+      'create-dm-channel',
+      { user1Id: data.user1Id, user2Id: data.user2Id },
+      (response: any) => {
+        if (response.status === 'success') {
+          setCurrentChannel(response.data._id, data.userName, data.user2Id);
+          set({
+            dmsWithUsers: [
+              {
+                channel: response.data._id,
+                user: {
+                  _id: data.user2Id,
+                  name: data.userName,
+                  pfp_url: data.pfp_url,
+                },
+              },
+              ...dmsWithUsers,
+            ],
+            channels: [
+              {
+                id: response.data._id,
+                messages: [],
+                page: 0,
+                users: [],
+                name: data.userName,
+              },
+              ...channels,
+            ],
+          });
+        }
+      }
+    );
   },
   onDeletedChannel: (): void => {
     const { socket } = get();

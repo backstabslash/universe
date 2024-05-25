@@ -14,7 +14,9 @@ interface DragAndDropListProps {
   onItemClick: (id: string, name: string, userId: string) => void;
   setGroupsChanged: (groupsChanged: boolean) => void;
   onDeleteList: (id: string) => void;
+  activeChannel: string | null; // Ensure activeChannel is a string or null
 }
+
 interface List {
   id: string;
   name: string;
@@ -27,6 +29,7 @@ interface Item {
 }
 
 const DragAndDropList = ({
+  activeChannel,
   itemLists,
   setItemLists,
   onItemClick,
@@ -162,14 +165,20 @@ const DragAndDropList = ({
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                       bg={
-                                        snapshot.isDragging
-                                          ? 'rgba(0, 0, 0, 0.4)'
-                                          : 'rgba(0, 0, 0, 0.1)'
+                                        activeChannel === item.id
+                                          ? 'rgba(0, 0, 0, 0.6)'
+                                          : snapshot.isDragging
+                                            ? 'rgba(0, 0, 0, 0.4)'
+                                            : 'rgba(0, 0, 0, 0.1)'
                                       }
                                       p={'10px'}
                                       borderRadius="md"
                                       mb="2"
-                                      color="zinc400"
+                                      color={
+                                        activeChannel === item.id
+                                          ? 'white'
+                                          : 'zinc400'
+                                      }
                                       _hover={{
                                         background: 'rgba(0, 0, 0, 1)',
                                       }}

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserJwtPayload } from '../utils/utils';
-import { auth } from "../config/config";
+import { auth } from '../config/config';
 
 const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -10,10 +10,7 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     const token = Array.isArray(authHeader)
       ? authHeader[0].split(' ')[1]
       : authHeader.split(' ')[1];
-    const decoded = jwt.verify(
-      token,
-      auth.accessSecret
-    ) as UserJwtPayload;
+    const decoded = jwt.verify(token, auth.accessSecret) as UserJwtPayload;
     if (!decoded) {
       return res.status(403).send();
     }

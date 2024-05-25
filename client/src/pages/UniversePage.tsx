@@ -64,16 +64,12 @@ const MainContent = (): JSX.Element => {
     onDeletedChannel,
   } = useMessengerStore(state => state);
 
-  const { logout, userData, setUserData } = useAuthStore(state => state);
+  const { logout, userData } = useAuthStore(state => state);
   const { getWorkspaceData, workSpaceData, updateAvatar } = useWorkSpaceStore(
     state => state
   );
   const axiosPrivate = useAxiosPrivate();
-  const {
-    setAxiosPrivate,
-    fetchUserByEmail,
-    userData: workspaceUserData,
-  } = useUserStore(state => state);
+  const { setAxiosPrivate } = useUserStore(state => state);
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -88,7 +84,6 @@ const MainContent = (): JSX.Element => {
     connectSocket();
     getChannelGroups();
     recieveMessage();
-    getUserData();
     if (userData?.userId) {
       onUserJoinedChannel(userData.userId);
       onUserLeftChannel();
@@ -103,17 +98,6 @@ const MainContent = (): JSX.Element => {
   useEffect(() => {
     getWorkspaceData();
   }, [formData]);
-  useEffect(() => {
-    if (workspaceUserData) setUserData(workspaceUserData);
-  }, []);
-
-  const getUserData = async (): Promise<void> => {
-    try {
-      await fetchUserByEmail();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
