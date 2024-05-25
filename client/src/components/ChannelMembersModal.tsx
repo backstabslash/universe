@@ -17,6 +17,7 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import UserRoleFilter from './UserRoleFilter';
 import useChannelUsersStore from '../store/channelusers';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
@@ -38,6 +39,8 @@ const ChannelMembersModal = (): any => {
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
   const [currentChannelUsers, setCurrentChannelUsers] = useState<any>([]);
   const [dataFetched, setDataFetched] = useState(false);
+  const [roleFilters, setRoleFilters] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState<any>([]);
 
   const isStudent = userData?.userRole?.includes('student');
 
@@ -77,11 +80,6 @@ const ChannelMembersModal = (): any => {
     setAxiosPrivateWorkspace(axiosPrivate);
   }, [axiosPrivate]);
 
-  useEffect(() => {
-    setAxiosPrivateUser(axiosPrivate);
-    setAxiosPrivateWorkspace(axiosPrivate);
-  }, [axiosPrivate]);
-
   const handleOpen = async (): Promise<void> => {
     onOpen();
     await fetchAllUsers();
@@ -102,33 +100,67 @@ const ChannelMembersModal = (): any => {
     return userDetails.some((user: any) => user._id === userId);
   };
 
-  const filteredUsers = searchQuery
+  const handleRoleFilterChange = (filters: any): void => {
+    setRoleFilters(filters);
+    if (filters.length > 0 && !searchQuery) {
+      const usersMatchingRoles: any = workspaceUsers?.filter((user: any) =>
+        filters.every((role: string) => user.userRole.includes(role))
+      );
+      setFilteredUsers(usersMatchingRoles);
+    }
+  };
+
+  const selectAllUsers = (): void => {
+    setSelectedUsers(filteredUsersList);
+  };
+
+  const deselectAllUsers = (): void => {
+    setSelectedUsers([]);
+  };
+
+  const filteredUsersList = searchQuery
     ? workspaceUsers
         ?.filter((user: any) => {
           const matchesSearch =
             user?.name?.toLowerCase().includes(searchQuery) ||
             user?.tag?.toLowerCase()?.includes(searchQuery);
           const notInDetails = !isUserInDetails(user._id);
-          return matchesSearch && notInDetails;
+          const matchesRoleFilter =
+            roleFilters.length === 0 ||
+            roleFilters.every(role => user.userRole.includes(role));
+          return matchesSearch && notInDetails && matchesRoleFilter;
         })
         .map((user: any) => ({
           ...user,
           isAdmin: user.userRole.includes('administration'),
         }))
-    : [];
+    : roleFilters.length > 0
+      ? workspaceUsers?.filter(
+          (user: any) =>
+            roleFilters.every(role => user.userRole.includes(role)) &&
+            !currentChannelUsers.some(
+              (channelUser: any) => channelUser._id === user._id
+            )
+        )
+      : [];
 
   const handleUserSelect = (user: any): void => {
+    if (isStudent && user.userRole.includes('administration')) {
+      return;
+    }
     const isAlreadySelected = selectedUsers.some(
-      (selectedUser: any) => selectedUser.userId === user.userId
+      (selectedUser: any) => selectedUser._id === user._id
     );
     if (!isAlreadySelected) {
       setSelectedUsers([...selectedUsers, user]);
+      setFilteredUsers(filteredUsers.filter((u: any) => u._id !== user._id));
     } else {
       setSelectedUsers(
         selectedUsers.filter(
-          (selectedUser: any) => selectedUser.userId !== user.userId
+          (selectedUser: any) => selectedUser._id !== user._id
         )
       );
+      setFilteredUsers([...filteredUsers, user]);
     }
   };
 
@@ -136,9 +168,11 @@ const ChannelMembersModal = (): any => {
     try {
       if (!currentChannel) return;
 
-      await Promise.all(
-        selectedUsers.map((user: any) => addUserToChannel(user._id))
-      );
+      selectedUsers.map(async (user: any) => {
+        addUserToChannel(user._id);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      });
+
       await fetchAllUsers();
       setUserDetails([...userDetails, ...selectedUsers]);
       setSelectedUsers([]);
@@ -200,7 +234,7 @@ const ChannelMembersModal = (): any => {
                 CLEAR
               </Button>
               <Button
-                color="#2EB67D"
+                color="#23bdff"
                 fontWeight="bold"
                 variant="ghost"
                 _hover={{ background: 'transparent' }}
@@ -213,9 +247,10 @@ const ChannelMembersModal = (): any => {
                 ADD
               </Button>
             </Flex>
-            <List spacing={3}>
-              {filteredUsers?.map((user: any) => (
-                <ListItem key={user.userId}>
+            <UserRoleFilter onFilterChange={handleRoleFilterChange} />
+            <List spacing={3} mt="10px">
+              {filteredUsersList?.map((user: any) => (
+                <ListItem key={user._id}>
                   <Flex
                     align="center"
                     cursor={
@@ -241,6 +276,31 @@ const ChannelMembersModal = (): any => {
                   </Flex>
                 </ListItem>
               ))}
+              <ListItem>
+                <Button
+                  color="#23bdff"
+                  fontWeight="bold"
+                  variant="ghost"
+                  _hover={{ background: 'transparent' }}
+                  m="0"
+                  p="0"
+                  onClick={selectAllUsers}
+                >
+                  SELECT ALL
+                </Button>
+                <Button
+                  color="zinc300"
+                  fontWeight="bold"
+                  variant="ghost"
+                  _hover={{ background: 'transparent' }}
+                  ml="16px"
+                  mt="0"
+                  p="0"
+                  onClick={deselectAllUsers}
+                >
+                  DESELECT ALL
+                </Button>
+              </ListItem>
             </List>
             <Divider
               orientation="horizontal"
@@ -263,7 +323,7 @@ const ChannelMembersModal = (): any => {
             ) : (
               <List spacing={3}>
                 {selectedUsers.map((user: any) => (
-                  <ListItem key={user.userId}>
+                  <ListItem key={user._id}>
                     <Flex
                       align="center"
                       cursor="pointer"
@@ -282,7 +342,7 @@ const ChannelMembersModal = (): any => {
                         <Text fontWeight="bold">
                           {user.name} {user.tag ? `@${user.tag}` : ''}
                         </Text>
-                        <Text fontWeight="bold" color="#2EB67D">
+                        <Text fontWeight="bold" color="#23bdff">
                           NEW
                         </Text>
                       </Flex>
@@ -290,7 +350,7 @@ const ChannelMembersModal = (): any => {
                   </ListItem>
                 ))}
                 {userDetails.map((user: any) => (
-                  <ListItem key={user.userId}>
+                  <ListItem key={user._id}>
                     <Flex
                       align="center"
                       cursor="pointer"
