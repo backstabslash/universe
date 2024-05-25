@@ -55,7 +55,7 @@ const MainContent = (): JSX.Element => {
     channelGroups,
     connectSocket,
     getChannelGroups,
-    proccessAttachments,
+    proccessUploadingAttachments,
     sendMessage,
     setCurrentChannel,
     recieveMessage,
@@ -181,7 +181,7 @@ const MainContent = (): JSX.Element => {
   };
 
   const handleSendMessage = async (message: any): Promise<void> => {
-    const filesData = await proccessAttachments(
+    const filesData = await proccessUploadingAttachments(
       axiosPrivate,
       message.attachments
     );

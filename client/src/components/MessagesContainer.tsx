@@ -30,6 +30,7 @@ import {
 } from './TextEditor';
 import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
+import useUserStore from '../store/user';
 
 const MessagesContainer = (): JSX.Element => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -47,8 +48,10 @@ const MessagesContainer = (): JSX.Element => {
     lastSentMessage,
     loadChannelMessages,
     onRecieveChannelMessages,
+    processDownloadingAttachment,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
+  const { axios } = useUserStore(state => state);
 
   useEffect(() => {
     if (!currentChannel) return;
@@ -147,6 +150,21 @@ const MessagesContainer = (): JSX.Element => {
     return map;
   }, [messages]);
 
+  const handleDownloadFile = async (
+    fileId: string,
+    fileName: string
+  ): Promise<void> => {
+    try {
+      if (!axios) {
+        return;
+      }
+
+      await processDownloadingAttachment(axios, fileId, fileName);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
   return (
     <Flex
       ref={containerRef}
@@ -196,32 +214,38 @@ const MessagesContainer = (): JSX.Element => {
                     )}
                   </HStack>
                   <VStack alignSelf={'start'}>
-                    <VStack>
-                      {message.attachments.map(attachment => (
-                        <>
-                          <HStack alignSelf={'start'}>
-                            <IconButton
-                              aria-label="IconButtonLabel"
-                              icon={
-                                attachment.type === 'image' ? (
-                                  <Image />
-                                ) : (
-                                  <InsertDriveFile />
-                                )
-                              }
-                            ></IconButton>
-                            <Text
-                              overflow="hidden"
-                              textOverflow="ellipsis"
-                              whiteSpace="nowrap"
-                              key={attachment.url}
-                            >
-                              {attachment.name}
-                            </Text>
-                          </HStack>
-                        </>
-                      ))}
-                    </VStack>
+                    {message.attachments?.map((attachment, index) => (
+                      <VStack
+                        key={`${attachment.url}-${index}`}
+                        alignSelf={'start'}
+                      >
+                        <HStack alignSelf={'start'}>
+                          <IconButton
+                            aria-label="IconButtonLabel"
+                            icon={
+                              attachment.type === 'image' ? (
+                                <Image />
+                              ) : (
+                                <InsertDriveFile />
+                              )
+                            }
+                            onClick={() => {
+                              handleDownloadFile(
+                                attachment.url,
+                                attachment.name
+                              );
+                            }}
+                          />
+                          <Text
+                            overflow="hidden"
+                            textOverflow="ellipsis"
+                            whiteSpace="nowrap"
+                          >
+                            {attachment.name}
+                          </Text>
+                        </HStack>
+                      </VStack>
+                    ))}
                     <HStack alignSelf={'start'}>
                       <Slate
                         editor={editorsMap.get(message.id)}

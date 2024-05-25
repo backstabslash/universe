@@ -10,7 +10,7 @@ import channelRoutes from "./routes/channelRoutes";
 import rateLimiter from "./middleware/rateLimiter";
 import workSpaceRoutes from "./routes/workSpaceRoutes";
 import workspaceUserRoutes from "./routes/workspaceUsersRoutes";
-import messageRoutes from "./routes/messagesRoutes";
+import fileRoutes from "./routes/fileRoutes";
 
 const app = express();
 
@@ -25,6 +25,6 @@ app.use(rateLimiter(), verifyJWT);
 app.use("/wusers", workspaceUserRoutes);
 app.use("/user", userRoutes);
 app.use("/channel", channelRoutes);
-app.use("/message", messageRoutes);
+app.use("/file", fileRoutes);
 
 export default app;

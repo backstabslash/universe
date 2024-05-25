@@ -44,6 +44,46 @@ class DriveService {
     }
   }
 
+  async getFileMetadata(fileId: string): Promise<{ name: string; mimeType: string }> {
+    try {
+      const drive = google.drive({ version: "v3", auth: this.jwtClient });
+      const response = await drive.files.get({ fileId, fields: "name, mimeType" });
+      const { name, mimeType } = response.data;
+
+      if (!name) {
+        throw new Error("File name is undefined");
+      }
+
+      return { name, mimeType: mimeType || "application/octet-stream" };
+    } catch (error) {
+      console.error("Error getting file metadata:", error);
+      throw error;
+    }
+  }
+  async downloadFile(fileId: string, destPath: string): Promise<void> {
+    try {
+      const drive = google.drive({ version: "v3", auth: this.jwtClient });
+      const dest = fs.createWriteStream(destPath);
+
+      const res = await drive.files.get({ fileId, alt: "media" }, { responseType: "stream" });
+
+      await new Promise<void>((resolve, reject) => {
+        res.data
+          .on("end", () => {
+            console.log("Downloaded file from Google Drive");
+            resolve();
+          })
+          .on("error", (err) => {
+            console.error("Error downloading file from Google Drive:", err);
+            reject(err);
+          })
+          .pipe(dest);
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async makeFilePublic(fileId: string): Promise<string | undefined> {
     try {
       const drive = google.drive({ version: "v3", auth: this.jwtClient });

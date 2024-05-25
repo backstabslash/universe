@@ -4,6 +4,7 @@ import { api } from '../config/config';
 import { Descendant } from 'slate';
 import lodash from 'lodash';
 import { Axios } from 'axios';
+import FileSaver from 'file-saver';
 
 export interface ChannelGroup {
   id: string;
@@ -54,9 +55,10 @@ export type MessageTextContent = Descendant & {
   type: string;
 };
 
-interface SocketResponse {
+interface MessageResponse {
   status: string;
   message: string;
+  attachments: any[];
 }
 
 interface MessengerState {
@@ -75,10 +77,15 @@ interface MessengerState {
   getChannelGroups: () => void;
   setCurrentChannel: (id: string, name: string, userId?: string) => void;
   loadChannelMessages: () => void;
-  proccessAttachments: (
+  proccessUploadingAttachments: (
     axios: Axios,
     attachments: File[]
   ) => Promise<string | null>;
+  processDownloadingAttachment: (
+    axios: Axios,
+    fileId: string,
+    fileName: string
+  ) => Promise<void>;
   sendMessage: (fileId: string | null, message: any) => void;
   recieveMessage: () => void;
   onRecieveChannelMessages: (data: {
@@ -158,17 +165,17 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  proccessAttachments: async (axios: Axios, attachments: File[]) => {
+  proccessUploadingAttachments: async (axios: Axios, attachments: File[]) => {
     try {
       if (!attachments || attachments.length === 0) {
         return null;
       }
       const formData = new FormData();
-      attachments.forEach((file, index) => {
+      attachments.forEach(file => {
         formData.append('files', file);
       });
 
-      const response = await axios.post('/message/upload', formData, {
+      const response = await axios.post('/file/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -176,9 +183,40 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
 
       return response.data.filesData;
     } catch (error) {
-      console.error(error);
       return error;
     }
+  },
+
+  processDownloadingAttachment: async (
+    axios: Axios,
+    fileId: string,
+    fileName: string
+  ): Promise<void> => {
+    try {
+      if (!fileId) return;
+      console.log(fileId);
+      const response = await axios.get(`/file/download/${fileId}`, {
+        responseType: 'blob',
+      });
+      console.log(response);
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'],
+      });
+
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = fileName;
+      if (
+        contentDisposition &&
+        contentDisposition.indexOf('attachment') !== -1
+      ) {
+        const match = contentDisposition.match(/filename="?(.+)"?/);
+        if (match?.[1]) {
+          filename = match[1];
+        }
+      }
+
+      FileSaver.saveAs(blob, filename);
+    } catch (error) {}
   },
 
   sendMessage: (filesData: any, message: UserMessage) => {
@@ -207,7 +245,6 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       });
       return;
     }
-    console.log(filesData);
 
     const newMessage = {
       ...message,
@@ -231,6 +268,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     if (!messageCopy) {
       return;
     }
+
     set({
       channels: [...channels],
       lastSentMessage: {
@@ -250,7 +288,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         message: newMessage,
         channelId: currentChannel.id,
       },
-      (response: SocketResponse) => {
+      (response: MessageResponse) => {
         clearTimeout(timeout);
         const updatedDm = dmsWithUsers.find(
           dm => dm.channel === currentChannel.id
@@ -270,6 +308,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         }
         if (response.status === 'success') {
           messageCopy.status = MessageStatus.SUCCESS;
+          messageCopy.attachments = response.attachments;
           set({ channels: [...channels] });
         }
       }
@@ -364,7 +403,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
         channelGroups,
         updChannelGroups,
       },
-      (response: SocketResponse) => {
+      (response: MessageResponse) => {
         if (response.status === 'success') {
           set({ channelGroups: [...updChannelGroups] });
         }
