@@ -98,18 +98,6 @@ const MainContent = (): JSX.Element => {
   useEffect(() => {
     getWorkspaceData();
   }, [formData]);
-  
-  useEffect(() => {
-    if (workspaceUserData) setUserData(workspaceUserData);
-  }, []);
-
-  const getUserData = async (): Promise<void> => {
-    try {
-      await fetchUserByEmail();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {

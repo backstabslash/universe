@@ -17,6 +17,7 @@ import {
   List,
   ListItem,
   Image,
+  Spinner,
 } from '@chakra-ui/react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
@@ -31,6 +32,7 @@ const Header = (): JSX.Element => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const axiosPrivate = useAxiosPrivate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDataFetched, setIsDataFetched] = useState(true);
   const [searchResults, setSearchResults] = useState<any>({
     users: [],
     channels: [],
@@ -66,6 +68,19 @@ const Header = (): JSX.Element => {
     initialize();
   }, [setAxiosPrivateWorkspace]);
 
+  useEffect(() => {
+    const filteredUsers = users?.filter(
+      (user: any) =>
+        (user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user?.tag?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        user?._id !== userData?.userId
+    );
+    const filteredChannels = publicChannels?.filter((channel: any) =>
+      channel.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setSearchResults({ users: filteredUsers, channels: filteredChannels });
+  }, [publicChannels, users]);
+
   const handleSearchChange = (event: any): void => {
     setSearchQuery(event.target.value);
   };
@@ -73,19 +88,7 @@ const Header = (): JSX.Element => {
   const handleSearch = async (): Promise<void> => {
     await getWorkspacePublicChannels();
     await getWorkspaceUsers();
-
-    const filteredUsers = users?.filter(
-      (user: any) =>
-        (user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user?.tag?.toLowerCase().includes(searchQuery.toLowerCase())) &&
-        user?._id !== userData?.userId
-    );
-
-    const filteredChannels = publicChannels.filter((channel: any) =>
-      channel.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    setSearchResults({ users: filteredUsers, channels: filteredChannels });
+    setIsDataFetched(true);
   };
 
   const handleChannelClick = (channel: any): void => {
@@ -126,22 +129,26 @@ const Header = (): JSX.Element => {
       alignItems={'center'}
       justifyContent={'center'}
     >
-      <Button
-        flex="2"
-        fontSize={'sm'}
-        background="rgba(0, 0, 0, 0.5)"
-        borderColor="transparent"
-        height="30px"
-        _placeholder={{ color: 'zinc300' }}
-        _focusVisible={{ borderColor: '' }}
-        _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
-        onClick={onOpen}
-      >
-        <HStack justifyContent="space-between" width="100%" color="zinc300">
-          <Text>Search Universe</Text>
-          <SearchIcon />
-        </HStack>
-      </Button>
+      {!isOpen ? (
+        <Button
+          flex="2"
+          fontSize={'sm'}
+          background="rgba(0, 0, 0, 0.5)"
+          borderColor="transparent"
+          height="30px"
+          _placeholder={{ color: 'zinc300' }}
+          _focusVisible={{ borderColor: '' }}
+          _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
+          onClick={onOpen}
+        >
+          <HStack justifyContent="space-between" width="100%" color="zinc300">
+            <Text>Search Universe</Text>
+            <SearchIcon />
+          </HStack>
+        </Button>
+      ) : (
+        <></>
+      )}
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay bg="transparent" />
         <ModalContent mt={1} bg="#18181b" color="zinc300">
@@ -160,8 +167,11 @@ const Header = (): JSX.Element => {
                 _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
                 value={searchQuery}
                 onChange={handleSearchChange}
-                onKeyPress={e => {
-                  if (e.key === 'Enter') handleSearch();
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    setIsDataFetched(false);
+                    handleSearch();
+                  }
                 }}
               />
               <Button
@@ -187,60 +197,73 @@ const Header = (): JSX.Element => {
               ></CloseIcon>
             </Flex>
           </ModalHeader>
-          <ModalBody>
-            {searchResults?.users?.length > 0 ||
-            searchResults?.channels?.length > 0 ? (
-              <List spacing={3}>
-                {searchResults.users.length > 0 && (
-                  <Text fontWeight="bold" mb="2">
-                    Users
-                  </Text>
-                )}
-                {searchResults.users.map((user: any) => (
-                  <ListItem key={user._id}>
-                    <Flex
-                      align="center"
-                      onClick={() => {
-                        openProfileOnClick(user._id);
-                      }}
-                      cursor="pointer"
-                    >
-                      <Image
-                        borderRadius="full"
-                        boxSize="40px"
-                        src={user.pfp_url || 'https://i.imgur.com/zPKzLoe.gif'}
-                        alt="Profile Image"
-                        mr="12px"
-                      />
-                      <Text fontWeight="bold">{user.name}</Text>
-                      <Text ml="2" color="gray.500">
-                        @{user.tag}
-                      </Text>
-                    </Flex>
-                  </ListItem>
-                ))}
-                {searchResults.channels.length > 0 && (
-                  <Text fontWeight="bold" mt="4" mb="2">
-                    Channels
-                  </Text>
-                )}
-                {searchResults.channels.map((channel: any) => (
-                  <ListItem key={channel._id}>
-                    <Flex
-                      align="center"
-                      alignItems={'center'}
-                      color="gray.500"
-                      cursor="pointer"
-                      onClick={() => handleChannelClick(channel)}
-                    >
-                      <TagIcon fontSize="small" />
-                      <Text>{channel.name}</Text>
-                    </Flex>
-                  </ListItem>
-                ))}
-              </List>
+          <ModalBody maxH={'70vh'}>
+            {isDataFetched ? (
+              searchResults?.users?.length > 0 ||
+              searchResults?.channels?.length > 0 ? (
+                <List spacing={3} maxH={'70vh'} overflowY={'auto'}>
+                  {searchResults.users.length > 0 && (
+                    <Text fontWeight="bold" mb="2">
+                      Users
+                    </Text>
+                  )}
+                  {searchResults.users.map((user: any) => (
+                    <ListItem key={user._id}>
+                      <Flex
+                        align="center"
+                        onClick={() => {
+                          openProfileOnClick(user._id);
+                        }}
+                        cursor="pointer"
+                      >
+                        <Image
+                          borderRadius="full"
+                          boxSize="40px"
+                          src={
+                            user.pfp_url || 'https://i.imgur.com/zPKzLoe.gif'
+                          }
+                          alt="Profile Image"
+                          mr="12px"
+                        />
+                        <Text fontWeight="bold">{user.name}</Text>
+                        <Text ml="2" color="gray.500">
+                          @{user.tag}
+                        </Text>
+                      </Flex>
+                    </ListItem>
+                  ))}
+                  {searchResults.channels.length > 0 && (
+                    <Text fontWeight="bold" mt="4" mb="2">
+                      Channels
+                    </Text>
+                  )}
+                  {searchResults.channels.map((channel: any) => (
+                    <ListItem key={channel._id}>
+                      <Flex
+                        align="center"
+                        alignItems={'center'}
+                        color="gray.500"
+                        cursor="pointer"
+                        onClick={() => handleChannelClick(channel)}
+                      >
+                        <TagIcon fontSize="small" />
+                        <Text>{channel.name}</Text>
+                      </Flex>
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Text>No results found</Text>
+              )
             ) : (
-              <Text>No results found</Text>
+              <Flex
+                justifyContent="center"
+                alignItems="center"
+                w="100%"
+                h="auto"
+              >
+                <Spinner size="lg" thickness="4px" speed="0.5s" />
+              </Flex>
             )}
           </ModalBody>
           <ModalFooter fontSize="sm"></ModalFooter>
