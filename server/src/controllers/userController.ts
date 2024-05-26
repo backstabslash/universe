@@ -10,6 +10,7 @@ import { uuidRules } from '../validation/commonDataRules';
 import User from '../models/user/userModel';
 import Joi from 'joi';
 import UserRole from '../models/user/userRoleModel';
+import Role from '../models/user/roleModel';
 
 class UserController {
   async getByEmail(req: Request, res: Response) {
@@ -73,6 +74,18 @@ class UserController {
         phone: user.phone,
         userRole: roles,
       });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async getRoles(req: Request, res: Response) {
+    try {
+      const userRoles = await Role.find().select('name -_id');
+
+      return res.status(200).json(userRoles);
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',
