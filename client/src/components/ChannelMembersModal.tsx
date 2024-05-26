@@ -176,10 +176,8 @@ const ChannelMembersModal = (): any => {
     try {
       if (!currentChannel) return;
 
-      selectedUsers.map(async (user: any) => {
-        addUserToChannel(user._id);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      });
+      const userIds = selectedUsers.map((user: any) => user._id);
+      addUserToChannel(userIds);
 
       await fetchAllUsers();
       setUserDetails([...userDetails, ...selectedUsers]);

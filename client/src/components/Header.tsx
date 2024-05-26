@@ -98,7 +98,7 @@ const Header = (): JSX.Element => {
 
   const confirmChannelClick = async (): Promise<void> => {
     if (userData?.userId && selectedChannel) {
-      addUserToChannel(userData?.userId, selectedChannel);
+      addUserToChannel([userData?.userId], selectedChannel);
       handleClear();
       onClose();
       onConfirmClose();

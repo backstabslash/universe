@@ -12,7 +12,6 @@ import {
 import { api } from '../config/config';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
-// eslint-disable-next-line react/prop-types
 const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
   const [filters, setFilters] = useState<any>([]);
