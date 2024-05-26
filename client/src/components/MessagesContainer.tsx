@@ -1,25 +1,13 @@
 import {
   Box,
-  Button,
   Flex,
-  FormControl,
-  FormLabel,
   HStack,
   Icon,
   IconButton,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Spinner,
   Text,
   VStack,
-  useDisclosure,
 } from '@chakra-ui/react';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import useMessengerStore, {
   MessageStatus,
   UserMessage,
@@ -43,6 +31,7 @@ import {
 import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
 import useUserStore from '../store/user';
+import MessageContextMenu from './MessageContextMenu';
 
 const MessagesContainer = (): JSX.Element => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -53,59 +42,28 @@ const MessagesContainer = (): JSX.Element => {
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
 
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [contextMenuMessage, setContextMenuMessage] =
+    useState<UserMessage | null>(null);
+
   const {
     channels,
     socket,
     currentChannel,
     lastSentMessage,
+    lastDeletedMessage,
+    setEditingMessage,
     loadChannelMessages,
     onRecieveChannelMessages,
     processDownloadingAttachment,
     deleteMessage,
-    lastDeletedMessage,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const { axios } = useUserStore(state => state);
-  const { isOpen, onOpen, onClose } = useDisclosure({});
-
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    messageId: string | null;
-    ownerId: string | null;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    messageId: null,
-    ownerId: null,
-  });
-
-  const closeContextMenu = (): void => {
-    setContextMenu({
-      visible: false,
-      x: 0,
-      y: 0,
-      messageId: null,
-      ownerId: null,
-    });
-  };
-
-  const handleContextMenu = (
-    event: React.MouseEvent,
-    messageId: string,
-    ownerId: string
-  ): void => {
-    event.preventDefault();
-    setContextMenu({
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      messageId,
-      ownerId,
-    });
-  };
 
   useEffect(() => {
     if (!currentChannel) return;
@@ -230,22 +188,42 @@ const MessagesContainer = (): JSX.Element => {
       console.error('Error downloading file:', error);
     }
   };
+
+  const handleContextMenu = (
+    event: React.MouseEvent<HTMLDivElement>,
+    message: UserMessage
+  ): void => {
+    event.preventDefault();
+    setMousePosition({ x: event.clientX, y: event.clientY });
+    setContextMenuMessage(message);
+    setIsContextMenuOpen(true);
+  };
+
   const handleDeleteMessage = (): void => {
     try {
-      console.log(contextMenu);
+      if (!currentChannel || !contextMenuMessage) return;
 
-      if (contextMenu.messageId && currentChannel?.id) {
-        const filteredMessages = messages.filter(
-          message => message.id !== contextMenu.messageId
-        );
-        setMessages(filteredMessages);
-
-        deleteMessage(contextMenu.messageId, currentChannel.id);
+      try {
+        deleteMessage(contextMenuMessage.id, currentChannel.id);
+      } catch (error) {
+        return;
       }
+
+      const filteredMessages = messages.filter(
+        message => message.id !== contextMenuMessage.id
+      );
+      setMessages(filteredMessages);
     } catch (error) {
       console.error('Error downloading file:', error);
     }
   };
+
+  const handleEditMessage = (): void => {
+    setIsContextMenuOpen(false);
+    if (!contextMenuMessage) return;
+    setEditingMessage(contextMenuMessage);
+  };
+
   return (
     <Flex
       ref={containerRef}
@@ -260,7 +238,7 @@ const MessagesContainer = (): JSX.Element => {
       pt={'15px'}
       pb={'10px'}
       flexDirection="column-reverse"
-      onClick={closeContextMenu}
+      onClick={() => setIsContextMenuOpen(false)}
     >
       {messagesLoading && messages.length === 0 ? (
         <Flex w="100%" h="100%" justifyContent="center" alignItems="center">
@@ -288,10 +266,21 @@ const MessagesContainer = (): JSX.Element => {
                 ml={`${message.user._id === userData?.userId ? '100px' : '18px'}`}
                 mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
                 width="fit-content"
-                onContextMenu={event =>
-                  handleContextMenu(event, message.id, message.user._id)
-                }
+                onContextMenu={event => {
+                  if (message.user._id === userData?.userId) {
+                    handleContextMenu(event, message);
+                  }
+                }}
               >
+                {contextMenuMessage?.id === message.id && (
+                  <MessageContextMenu
+                    mousePosition={mousePosition}
+                    onDeleteMessage={handleDeleteMessage}
+                    onEditMessage={handleEditMessage}
+                    isContextMenuOpen={isContextMenuOpen}
+                    onCloseContextMenu={() => setIsContextMenuOpen(false)}
+                  />
+                )}
                 <VStack mb={'8px'} spacing={0}>
                   <HStack alignSelf={'start'}>
                     {message.user._id === userData?.userId ? null : (
@@ -382,79 +371,6 @@ const MessagesContainer = (): JSX.Element => {
           <Spinner size="lg" thickness="4px" speed="0.5s" />
         </Flex>
       )}
-      {contextMenu.visible && contextMenu.ownerId === userData?.userId && (
-        <Box
-          position="fixed"
-          top={`${contextMenu.y}px`}
-          left={`${contextMenu.x}px`}
-          zIndex="tooltip"
-        >
-          <VStack bg="zinc900" borderRadius="md" boxShadow="md" p="2">
-            <HStack
-              bg="zinc900"
-              _hover={{ background: 'zinc800' }}
-              w={'100%'}
-              borderRadius={'md'}
-            >
-              <Button
-                leftIcon={<EditIcon />}
-                // onClick={() => }
-                color="white"
-                bg="none"
-                _hover={{ background: 'none' }}
-                _active={{ background: 'none' }}
-                alignSelf={'start'}
-              >
-                Edit
-              </Button>
-            </HStack>
-            <Button
-              leftIcon={<DeleteIcon color="red.500" />}
-              onClick={() => {
-                onOpen();
-              }}
-              color="red.500"
-              bg="zinc900"
-              _hover={{ background: 'zinc800' }}
-              _active={{ background: 'zinc800' }}
-              borderRadius={'md'}
-              alignSelf={'start'}
-            >
-              Delete
-            </Button>
-          </VStack>
-        </Box>
-      )}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent bg="zinc900" color="zinc200">
-          <ModalHeader>Delete message</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>
-                Are you sure you want to delete message? This action is
-                IRREVERSIBLE and the channel will be PERMANENTLY removed.
-              </FormLabel>
-            </FormControl>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              background="red.600"
-              _hover={{ background: 'red.800' }}
-              color="zinc100"
-              mr={3}
-              onClick={() => {
-                handleDeleteMessage();
-                onClose();
-              }}
-            >
-              Delete
-            </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </Flex>
   );
 };

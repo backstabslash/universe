@@ -35,7 +35,13 @@ import {
   InsertDriveFile,
   Image,
 } from '@mui/icons-material/';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
 import isHotkey from 'is-hotkey';
 import {
   Editable,
@@ -56,7 +62,7 @@ import type { BaseEditor, BaseElement, Descendant } from 'slate';
 import { withHistory } from 'slate-history';
 import styled from 'styled-components';
 import useAuthStore from '../store/auth';
-import { MessageTextContent } from '../store/messenger';
+import useMessengerStore, { MessageTextContent } from '../store/messenger';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 interface IconButtonProps extends ButtonProps {
@@ -131,7 +137,10 @@ interface TextEditorProps {
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const { userData } = useAuthStore(state => state);
+  const { editingMessage } = useMessengerStore(state => state);
 
+  const [editorKey, setEditorKey] = useState(0);
+  const [content, setContent] = useState<Descendant[]>(initialValue);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
 
@@ -148,6 +157,16 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     };
     return withPlugins(withReact(withHistory(createEditor())));
   }, []);
+
+  useEffect(() => {
+    if (editingMessage) {
+      resetEditor();
+      setContent(editingMessage.textContent);
+      setEditorKey(key => key + 1);
+    } else {
+      setContent(initialValue);
+    }
+  }, [editingMessage]);
 
   const handleContentChange = (newContent: Descendant[]): void => {
     setContent(newContent);
@@ -177,7 +196,6 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     });
   };
 
-  const [content, setContent] = useState<Descendant[]>(initialValue);
   const resetEditor = (): void => {
     const hasText = (node: any): boolean => {
       if (!node.children || node.children.length === 0) {
@@ -325,8 +343,9 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         flexDirection={'column'}
       >
         <Slate
+          key={editorKey}
           editor={editor as ReactEditor}
-          initialValue={initialValue}
+          initialValue={content}
           onChange={handleContentChange}
         >
           <Flex
@@ -734,8 +753,13 @@ export const Leaf = ({
     newChildren = <del>{newChildren}</del>;
   }
 
+  if (leaf['list-item']) {
+    return <li {...attributes}>{newChildren}</li>;
+  }
+
   return <span {...attributes}>{newChildren}</span>;
 };
+
 const LinkComponent = ({ attributes, children, element }: any): JSX.Element => {
   const selected = useSelected();
   return (

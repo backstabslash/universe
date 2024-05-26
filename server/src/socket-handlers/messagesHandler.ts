@@ -80,7 +80,7 @@ class MessagesHandler {
         throw new Error("Message not found");
       }
 
-      const attachmentIds = message.attachments.map(attachment => attachment.toString());
+      const attachmentIds = message.attachments.map((attachment) => attachment.toString());
 
       const attachments = await Attachment.find({ _id: { $in: attachmentIds } });
       for (const attachment of attachments) {
@@ -94,7 +94,7 @@ class MessagesHandler {
       callback({ status: "success" });
       socket.broadcast.to(data.channelId).emit("on-deleted-message", data);
     } catch (error) {
-      callback({ status: "error", message: "Error sending message" });
+      callback({ status: "error", message: "Error deleting message" });
       console.error(error);
     }
   }

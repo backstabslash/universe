@@ -79,11 +79,13 @@ interface MessengerState {
     message: UserMessage | null;
     channelId: string;
   };
+  editingMessage: UserMessage | null;
   currentChannel: Omit<Channel, 'messages'> | null;
   error: Error | null;
   connectSocket: () => void;
-  getChannelGroups: () => void;
   setCurrentChannel: (id: string, name: string, userId?: string) => void;
+  setEditingMessage: (message: UserMessage | null) => void;
+  getChannelGroups: () => void;
   loadChannelMessages: () => void;
   proccessUploadingAttachments: (
     axios: Axios,
@@ -115,7 +117,6 @@ interface MessengerState {
   deleteMessage: (messageId: string, channelId: string) => void;
   createDM: (data: any) => void;
   onDeletedMessage: () => void;
-
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -138,6 +139,8 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     message: null,
     channelId: '',
   },
+  editingMessage: null,
+
   connectSocket: () => {
     try {
       const socket = io(api.url, {
@@ -147,6 +150,20 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     } catch (error: any) {
       set({ error });
     }
+  },
+
+  setCurrentChannel: (id: string, name: string, userId?: string) => {
+    set({
+      currentChannel: {
+        id,
+        name,
+        user: { _id: userId },
+      },
+    });
+  },
+
+  setEditingMessage: (message: UserMessage | null) => {
+    set({ editingMessage: message });
   },
 
   getChannelGroups: () => {
@@ -233,7 +250,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
 
       FileSaver.saveAs(blob, filename);
-    } catch (error) { }
+    } catch (error) {}
   },
 
   sendMessage: (filesData: any, message: UserMessage) => {
@@ -380,16 +397,6 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  setCurrentChannel: (id: string, name: string, userId?: string) => {
-    set({
-      currentChannel: {
-        id,
-        name,
-        user: { _id: userId },
-      },
-    });
-  },
-
   updateChannelGroupsOrder: (updChannelGroups: ChannelGroup[]) => {
     const { socket, channelGroups } = get();
 
@@ -467,33 +474,6 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     set({ channels: updatedChannels });
   },
 
-  onDeletedMessage: () => {
-    try {
-      const { socket } = get();
-
-      if (!socket) return;
-
-      socket.on(
-        'on-deleted-message',
-        (data: { messageId: string, channelId: string }): void => {
-          const { channels } = get();
-
-          const updatedChannels = channels.map(channel => {
-            if (channel.id === data.channelId) {
-              return {
-                ...channel,
-                messages: channel.messages.filter(message => message.id !== data.messageId)
-              };
-            }
-            return channel;
-          });
-
-          set({ channels: [...updatedChannels], lastDeletedMessage: data })
-        })
-    } catch (error: any) {
-      set({ error });
-    }
-  },
   deleteMessage: (messageId: string, channelId: string) => {
     const { socket } = get();
 
@@ -503,7 +483,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       'delete-message',
       {
         messageId,
-        channelId
+        channelId,
       },
       (response: MessageResponse) => {
         if (response.status === 'success') {
@@ -513,15 +493,50 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             if (channel.id === channelId) {
               return {
                 ...channel,
-                messages: channel.messages.filter(message => message.id !== messageId)
+                messages: channel.messages.filter(
+                  message => message.id !== messageId
+                ),
               };
             }
             return channel;
           });
-          set({ channels: [...updatedChannels] })
+          set({ channels: [...updatedChannels] });
+        } else {
+          throw new Error('Error deleting message');
         }
       }
     );
+  },
+
+  onDeletedMessage: () => {
+    try {
+      const { socket } = get();
+
+      if (!socket) return;
+
+      socket.on(
+        'on-deleted-message',
+        (data: { messageId: string; channelId: string }): void => {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.filter(
+                  message => message.id !== data.messageId
+                ),
+              };
+            }
+            return channel;
+          });
+
+          set({ channels: [...updatedChannels], lastDeletedMessage: data });
+        }
+      );
+    } catch (error: any) {
+      set({ error });
+    }
   },
 
   addUserToChannel: (id: string, channel?: any) => {
