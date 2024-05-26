@@ -111,7 +111,15 @@ const ChannelMembersModal = (): any => {
   };
 
   const selectAllUsers = (): void => {
-    setSelectedUsers(filteredUsersList);
+    if (isStudent) {
+      setSelectedUsers(
+        filteredUsersList?.filter(
+          (user: any) => !user.userRole.includes('administration')
+        )
+      );
+    } else {
+      setSelectedUsers(filteredUsersList);
+    }
   };
 
   const deselectAllUsers = (): void => {
@@ -254,14 +262,22 @@ const ChannelMembersModal = (): any => {
                   <Flex
                     align="center"
                     cursor={
-                      isStudent && user.isAdmin ? 'not-allowed' : 'pointer'
+                      isStudent && user.userRole.includes('administration')
+                        ? 'not-allowed'
+                        : 'pointer'
                     }
                     onClick={() => {
-                      if (!(isStudent && user.isAdmin)) {
+                      if (
+                        !(isStudent && user.userRole.includes('administration'))
+                      ) {
                         handleUserSelect(user);
                       }
                     }}
-                    opacity={isStudent && user.isAdmin ? 0.5 : 1}
+                    opacity={
+                      isStudent && user.userRole.includes('administration')
+                        ? 0.5
+                        : 1
+                    }
                   >
                     <Image
                       borderRadius="full"
