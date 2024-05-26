@@ -98,6 +98,7 @@ interface MessengerState {
   ) => Promise<void>;
   sendMessage: (fileId: string | null, message: any) => void;
   recieveMessage: () => void;
+  sendMessageToNotes: (message: UserMessage, userId: string) => void;
   onRecieveChannelMessages: (data: {
     messages: UserMessage[];
     users: any;
@@ -395,6 +396,68 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     } catch (error: any) {
       set({ error });
     }
+  },
+
+  sendMessageToNotes: (message: UserMessage, userId: string) => {
+    const { socket, notesChannel, channels } = get();
+
+    if (!socket) return;
+
+    const newMessage = {
+      ...message,
+      sendAt: Date.now(),
+      id: generateObjectId(),
+      status: MessageStatus.SENDING,
+    };
+    let messageCopy: UserMessage | undefined;
+    for (const channel of channels) {
+      if (channel.id === notesChannel.id) {
+        if (!channel.messages) {
+          channel.messages = [];
+        }
+        channel.messages.unshift(newMessage);
+        messageCopy = channel.messages[0];
+      }
+    }
+
+    if (!messageCopy) {
+      return;
+    }
+
+    set({
+      channels: [...channels],
+      lastSentMessage: {
+        message: messageCopy,
+        channelId: notesChannel.id,
+      },
+    });
+
+    const timeout = setTimeout(() => {
+      messageCopy.status = MessageStatus.FAILED;
+      set({ channels: [...channels] });
+    }, 10000);
+
+    socket.emit(
+      'send-message',
+      {
+        message: newMessage,
+        channelId: notesChannel.id,
+        userId,
+      },
+      (response: MessageResponse) => {
+        clearTimeout(timeout);
+        if (response.status === 'error') {
+          messageCopy.status = MessageStatus.FAILED;
+          set({
+            channels: [...channels],
+          });
+        }
+        if (response.status === 'success') {
+          messageCopy.status = MessageStatus.SUCCESS;
+          set({ channels: [...channels] });
+        }
+      }
+    );
   },
 
   updateChannelGroupsOrder: (updChannelGroups: ChannelGroup[]) => {

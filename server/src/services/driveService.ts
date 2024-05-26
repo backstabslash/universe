@@ -70,11 +70,9 @@ class DriveService {
       await new Promise<void>((resolve, reject) => {
         res.data
           .on("end", () => {
-            console.log("Downloaded file from Google Drive");
             resolve();
           })
           .on("error", (err) => {
-            console.error("Error downloading file from Google Drive:", err);
             reject(err);
           })
           .pipe(dest);
@@ -89,8 +87,6 @@ class DriveService {
       const drive = google.drive({ version: "v3", auth: this.jwtClient });
 
       await drive.files.delete({ fileId });
-
-      console.log("File deleted from Google Drive");
     } catch (error) {
       console.error("Error deleting file from Google Drive:", error);
       throw error;

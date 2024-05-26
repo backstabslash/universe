@@ -1,4 +1,5 @@
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { Bookmark } from '@mui/icons-material';
 import {
   FormControl,
   FormLabel,
@@ -19,7 +20,11 @@ import {
 interface MessageContextMenuProps {
   mousePosition: { x: number; y: number };
   onDeleteMessage: () => void;
+  isDeleteEnabled: boolean;
   onEditMessage: () => void;
+  isEditEnabled: boolean;
+  onSendToNotes: () => void;
+  isSendToNotesEnabled: boolean;
   isContextMenuOpen: boolean;
   onCloseContextMenu: () => void;
 }
@@ -27,7 +32,11 @@ interface MessageContextMenuProps {
 const MessageContextMenu = ({
   mousePosition,
   onDeleteMessage,
+  isDeleteEnabled,
   onEditMessage,
+  isEditEnabled,
+  onSendToNotes,
+  isSendToNotesEnabled,
   isContextMenuOpen,
   onCloseContextMenu,
 }: MessageContextMenuProps): JSX.Element => {
@@ -43,39 +52,72 @@ const MessageContextMenu = ({
           zIndex="tooltip"
         >
           <VStack bg="zinc900" borderRadius="md" boxShadow="md" p="2">
-            <HStack
-              bg="zinc900"
-              _hover={{ background: 'zinc800' }}
-              w={'100%'}
-              borderRadius={'md'}
-            >
-              <Button
-                leftIcon={<EditIcon />}
-                onClick={() => onEditMessage()}
-                color="white"
-                bg="none"
-                _hover={{ background: 'none' }}
-                _active={{ background: 'none' }}
-                alignSelf={'start'}
+            {isSendToNotesEnabled && (
+              <HStack
+                bg="zinc900"
+                _hover={{ background: 'zinc800' }}
+                w={'100%'}
+                borderRadius={'md'}
               >
-                Edit
-              </Button>
-            </HStack>
-            <Button
-              leftIcon={<DeleteIcon color="red.500" />}
-              onClick={() => {
-                onCloseContextMenu();
-                onOpen();
-              }}
-              color="red.500"
-              bg="zinc900"
-              _hover={{ background: 'zinc800' }}
-              _active={{ background: 'zinc800' }}
-              borderRadius={'md'}
-              alignSelf={'start'}
-            >
-              Delete
-            </Button>
+                <Button
+                  leftIcon={<Bookmark />}
+                  onClick={() => onSendToNotes()}
+                  color="white"
+                  bg="none"
+                  pl={'11px'}
+                  _hover={{ background: 'none' }}
+                  _active={{ background: 'none' }}
+                  alignSelf={'start'}
+                >
+                  Save
+                </Button>
+              </HStack>
+            )}
+            {isEditEnabled && (
+              <HStack
+                bg="zinc900"
+                _hover={{ background: 'zinc800' }}
+                _active={{ background: 'zinc800' }}
+                w={'100%'}
+                borderRadius={'md'}
+              >
+                <Button
+                  leftIcon={<EditIcon />}
+                  onClick={() => onEditMessage()}
+                  color="white"
+                  bg="none"
+                  _hover={{ background: 'none' }}
+                  _active={{ background: 'none' }}
+                  alignSelf={'start'}
+                >
+                  Edit
+                </Button>
+              </HStack>
+            )}
+
+            {isDeleteEnabled && (
+              <HStack
+                bg="zinc900"
+                _hover={{ background: 'zinc800' }}
+                w={'100%'}
+                borderRadius={'md'}
+              >
+                <Button
+                  leftIcon={<DeleteIcon color="red.500" />}
+                  onClick={() => {
+                    onCloseContextMenu();
+                    onOpen();
+                  }}
+                  color="red.500"
+                  bg="none"
+                  _hover={{ background: 'none' }}
+                  _active={{ background: 'none' }}
+                  alignSelf={'start'}
+                >
+                  Delete
+                </Button>
+              </HStack>
+            )}
           </VStack>
         </Box>
       )}
@@ -86,10 +128,7 @@ const MessageContextMenu = ({
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl>
-              <FormLabel>
-                Are you sure you want to delete message? This action is
-                IRREVERSIBLE and the channel will be PERMANENTLY removed.
-              </FormLabel>
+              <FormLabel>Are you sure you want to delete message?</FormLabel>
             </FormControl>
           </ModalBody>
           <ModalFooter>
