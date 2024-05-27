@@ -71,11 +71,21 @@ interface MessengerState {
     message: UserMessage | null;
     channelId: string;
   };
+  lastDeletedMessage: {
+    messageId: string;
+    channelId: string;
+  };
+  lastEditedMessage: {
+    message: UserMessage | null;
+    channelId: string;
+  };
+  editingMessage: UserMessage | null;
   currentChannel: Omit<Channel, 'messages'> | null;
   error: Error | null;
   connectSocket: () => void;
-  getChannelGroups: () => void;
   setCurrentChannel: (id: string, name: string, userId?: string) => void;
+  setEditingMessage: (message: UserMessage | null) => void;
+  getChannelGroups: () => void;
   loadChannelMessages: () => void;
   proccessUploadingAttachments: (
     axios: Axios,
@@ -88,6 +98,7 @@ interface MessengerState {
   ) => Promise<void>;
   sendMessage: (fileId: string | null, message: any) => void;
   recieveMessage: () => void;
+  sendMessageToNotes: (message: UserMessage, userId: string) => void;
   onRecieveChannelMessages: (data: {
     messages: UserMessage[];
     users: any;
@@ -104,7 +115,11 @@ interface MessengerState {
   leaveChannel: (id: string) => void;
   onUserLeftChannel: () => void;
   onDeletedChannel: () => void;
+  deleteMessage: (messageId: string, channelId: string) => void;
   createDM: (data: any) => void;
+  onDeletedMessage: () => void;
+  editMessage: (editedMessage: any, channelId: string) => void;
+  onEditedMessage: () => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -119,6 +134,15 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     message: null,
     channelId: '',
   },
+  lastDeletedMessage: {
+    messageId: '',
+    channelId: '',
+  },
+  lastEditedMessage: {
+    message: null,
+    channelId: '',
+  },
+  editingMessage: null,
 
   connectSocket: () => {
     try {
@@ -129,6 +153,20 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     } catch (error: any) {
       set({ error });
     }
+  },
+
+  setCurrentChannel: (id: string, name: string, userId?: string) => {
+    set({
+      currentChannel: {
+        id,
+        name,
+        user: { _id: userId },
+      },
+    });
+  },
+
+  setEditingMessage: (message: UserMessage | null) => {
+    set({ editingMessage: message });
   },
 
   getChannelGroups: () => {
@@ -195,11 +233,9 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   ): Promise<void> => {
     try {
       if (!fileId) return;
-      console.log(fileId);
       const response = await axios.get(`/file/download/${fileId}`, {
         responseType: 'blob',
       });
-      console.log(response);
       const blob = new Blob([response.data], {
         type: response.headers['content-type'],
       });
@@ -217,7 +253,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
 
       FileSaver.saveAs(blob, filename);
-    } catch (error) {}
+    } catch (error) { }
   },
 
   sendMessage: (filesData: any, message: UserMessage) => {
@@ -364,14 +400,66 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  setCurrentChannel: (id: string, name: string, userId?: string) => {
+  sendMessageToNotes: (message: UserMessage, userId: string) => {
+    const { socket, notesChannel, channels } = get();
+
+    if (!socket) return;
+
+    const newMessage = {
+      ...message,
+      sendAt: Date.now(),
+      id: generateObjectId(),
+      status: MessageStatus.SENDING,
+    };
+    let messageCopy: UserMessage | undefined;
+    for (const channel of channels) {
+      if (channel.id === notesChannel.id) {
+        if (!channel.messages) {
+          channel.messages = [];
+        }
+        channel.messages.unshift(newMessage);
+        messageCopy = channel.messages[0];
+      }
+    }
+
+    if (!messageCopy) {
+      return;
+    }
+
     set({
-      currentChannel: {
-        id,
-        name,
-        user: { _id: userId },
+      channels: [...channels],
+      lastSentMessage: {
+        message: messageCopy,
+        channelId: notesChannel.id,
       },
     });
+
+    const timeout = setTimeout(() => {
+      messageCopy.status = MessageStatus.FAILED;
+      set({ channels: [...channels] });
+    }, 10000);
+
+    socket.emit(
+      'send-message',
+      {
+        message: newMessage,
+        channelId: notesChannel.id,
+        userId,
+      },
+      (response: MessageResponse) => {
+        clearTimeout(timeout);
+        if (response.status === 'error') {
+          messageCopy.status = MessageStatus.FAILED;
+          set({
+            channels: [...channels],
+          });
+        }
+        if (response.status === 'success') {
+          messageCopy.status = MessageStatus.SUCCESS;
+          set({ channels: [...channels] });
+        }
+      }
+    );
   },
 
   updateChannelGroupsOrder: (updChannelGroups: ChannelGroup[]) => {
@@ -449,6 +537,146 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     });
 
     set({ channels: updatedChannels });
+  },
+
+  deleteMessage: (messageId: string, channelId: string) => {
+    const { socket } = get();
+
+    if (!socket) return;
+
+    socket.emit(
+      'delete-message',
+      {
+        messageId,
+        channelId,
+      },
+      (response: MessageResponse) => {
+        if (response.status === 'success') {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.filter(
+                  message => message.id !== messageId
+                ),
+              };
+            }
+            return channel;
+          });
+          set({ channels: [...updatedChannels] });
+        } else {
+          throw new Error('Error deleting message');
+        }
+      }
+    );
+  },
+
+  onDeletedMessage: () => {
+    try {
+      const { socket } = get();
+
+      if (!socket) return;
+
+      socket.on(
+        'on-deleted-message',
+        (data: { messageId: string; channelId: string }): void => {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.filter(
+                  message => message.id !== data.messageId
+                ),
+              };
+            }
+            return channel;
+          });
+
+          set({ channels: [...updatedChannels], lastDeletedMessage: data });
+        }
+      );
+    } catch (error: any) {
+      set({ error });
+    }
+  },
+
+  editMessage: (editedMessage: UserMessage, channelId: string) => {
+    const { socket } = get();
+
+    if (!socket) return;
+
+    socket.emit(
+      'edit-message',
+      {
+        editedMessage,
+        channelId,
+      },
+      (response: MessageResponse) => {
+        if (response.status === 'success') {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.map(
+                  message => {
+                    if (message.id === editedMessage.id) {
+                      return editedMessage
+                    }
+                    return message
+                  }
+                ),
+              };
+            }
+            return channel;
+          });
+          set({ channels: [...updatedChannels], editingMessage: null, lastEditedMessage: { message: editedMessage, channelId } });
+        } else {
+          throw new Error('Error editing message');
+        }
+      }
+    );
+  },
+
+  onEditedMessage: () => {
+    try {
+      const { socket } = get();
+
+      if (!socket) return;
+
+      socket.on(
+        'on-edited-message',
+        (data: { editedMessage: UserMessage; channelId: string }): void => {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.map(
+                  message => {
+                    if (message.id === data.editedMessage.id) {
+                      return data.editedMessage
+                    }
+                    return message
+                  }
+                ),
+              };
+            }
+            return channel;
+          });
+
+          set({ channels: [...updatedChannels], lastEditedMessage: { message: data.editedMessage, channelId: data.channelId } });
+        }
+      );
+    } catch (error: any) {
+      set({ error });
+    }
   },
 
   addUserToChannel: (ids: string[], channel?: any) => {

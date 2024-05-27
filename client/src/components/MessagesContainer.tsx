@@ -13,13 +13,7 @@ import useMessengerStore, {
   UserMessage,
 } from '../store/messenger';
 import useAuthStore from '../store/auth';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Clear, InsertDriveFile, Image } from '@mui/icons-material/';
 import {
   Element as EditorElement,
@@ -31,6 +25,7 @@ import {
 import { Editable, Slate, withReact } from 'slate-react';
 import { createEditor } from 'slate';
 import useUserStore from '../store/user';
+import MessageContextMenu from './MessageContextMenu';
 
 const MessagesContainer = (): JSX.Element => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -41,14 +36,28 @@ const MessagesContainer = (): JSX.Element => {
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
 
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [contextMenuMessage, setContextMenuMessage] =
+    useState<UserMessage | null>(null);
+
   const {
     channels,
     socket,
     currentChannel,
     lastSentMessage,
+    lastEditedMessage,
+    lastDeletedMessage,
+    notesChannel,
+    setEditingMessage,
     loadChannelMessages,
     onRecieveChannelMessages,
     processDownloadingAttachment,
+    deleteMessage,
+    sendMessageToNotes,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const { axios } = useUserStore(state => state);
@@ -131,6 +140,57 @@ const MessagesContainer = (): JSX.Element => {
     }
   }, [lastSentMessage]);
 
+  useEffect(() => {
+    if (
+      lastDeletedMessage.messageId &&
+      lastDeletedMessage.channelId === currentChannel?.id
+    ) {
+      const filteredMessages = messages.filter(
+        message => message.id !== lastDeletedMessage.messageId
+      );
+      setMessages(filteredMessages);
+    }
+  }, [lastDeletedMessage]);
+
+  const [editorsMap, setEditorsMap] = useState(new Map());
+
+  useEffect(() => {
+    const updatedEditorsMap = new Map(editorsMap);
+    channels
+      ?.find(channel => channel?.id === currentChannel?.id)
+      ?.messages?.forEach(message => {
+        if (!updatedEditorsMap.has(message.id)) {
+          const editor = withInlines(withReact(createEditor()));
+          editor.children = message.textContent;
+          updatedEditorsMap.set(message.id, editor);
+        }
+      });
+    setEditorsMap(updatedEditorsMap);
+  }, [channels, currentChannel]);
+
+  useEffect(() => {
+    if (
+      lastEditedMessage.message &&
+      lastEditedMessage.channelId === currentChannel?.id
+    ) {
+      const filteredMessages = messages.map(message => {
+        if (message.id === lastEditedMessage?.message?.id) {
+          const editor = editorsMap.get(message.id);
+          if (editor) {
+            editor.children = lastEditedMessage.message.textContent;
+          }
+          return {
+            ...message,
+            textContent: lastEditedMessage.message.textContent,
+          };
+        }
+        return message;
+      });
+
+      setMessages(filteredMessages);
+    }
+  }, [lastEditedMessage]);
+
   const renderElement = useCallback(
     (props: ElementProps) => <EditorElement {...props} />,
     []
@@ -140,15 +200,6 @@ const MessagesContainer = (): JSX.Element => {
     (props: LeafProps) => <EditorLeaf {...props} />,
     []
   );
-
-  const editorsMap = useMemo(() => {
-    const map = new Map();
-    messages.forEach(message => {
-      const editor = withInlines(withReact(createEditor()));
-      map.set(message.id, editor);
-    });
-    return map;
-  }, [messages]);
 
   const handleDownloadFile = async (
     fileId: string,
@@ -165,6 +216,48 @@ const MessagesContainer = (): JSX.Element => {
     }
   };
 
+  const handleContextMenu = (
+    event: React.MouseEvent<HTMLDivElement>,
+    message: UserMessage
+  ): void => {
+    event.preventDefault();
+    setMousePosition({ x: event.clientX, y: event.clientY });
+    setContextMenuMessage(message);
+    setIsContextMenuOpen(true);
+  };
+
+  const handleDeleteMessage = (): void => {
+    try {
+      if (!currentChannel || !contextMenuMessage) return;
+
+      try {
+        deleteMessage(contextMenuMessage.id, currentChannel.id);
+      } catch (error) {
+        return;
+      }
+
+      const filteredMessages = messages.filter(
+        message => message.id !== contextMenuMessage.id
+      );
+      setMessages(filteredMessages);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
+  const handleEditMessage = (): void => {
+    setIsContextMenuOpen(false);
+    if (!contextMenuMessage) return;
+    setEditingMessage(contextMenuMessage);
+  };
+
+  const handleSendToNotes = (): void => {
+    setIsContextMenuOpen(false);
+    if (!contextMenuMessage) return;
+
+    sendMessageToNotes(contextMenuMessage, contextMenuMessage.user._id);
+  };
+
   return (
     <Flex
       ref={containerRef}
@@ -179,12 +272,14 @@ const MessagesContainer = (): JSX.Element => {
       pt={'15px'}
       pb={'10px'}
       flexDirection="column-reverse"
+      onClick={() => setIsContextMenuOpen(false)}
     >
       {messagesLoading && messages.length === 0 ? (
         <Flex w="100%" h="100%" justifyContent="center" alignItems="center">
           <Spinner size={'xl'} thickness="4px" speed="0.5s" />
         </Flex>
       ) : (
+        editorsMap.size > 0 &&
         messages.map((message, index) => {
           return (
             <React.Fragment key={message.id}>
@@ -206,7 +301,28 @@ const MessagesContainer = (): JSX.Element => {
                 ml={`${message.user._id === userData?.userId ? '100px' : '18px'}`}
                 mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
                 width="fit-content"
+                onContextMenu={event => {
+                  handleContextMenu(event, message);
+                }}
               >
+                {contextMenuMessage?.id === message.id && (
+                  <MessageContextMenu
+                    mousePosition={mousePosition}
+                    onDeleteMessage={handleDeleteMessage}
+                    isDeleteEnabled={
+                      message.user._id === userData?.userId ||
+                      currentChannel?.id === notesChannel.id
+                    }
+                    onEditMessage={handleEditMessage}
+                    isEditEnabled={message.user._id === userData?.userId}
+                    onSendToNotes={handleSendToNotes}
+                    isSendToNotesEnabled={
+                      currentChannel?.id !== notesChannel.id
+                    }
+                    isContextMenuOpen={isContextMenuOpen}
+                    onCloseContextMenu={() => setIsContextMenuOpen(false)}
+                  />
+                )}
                 <VStack mb={'8px'} spacing={0}>
                   <HStack alignSelf={'start'}>
                     {message.user._id === userData?.userId ? null : (

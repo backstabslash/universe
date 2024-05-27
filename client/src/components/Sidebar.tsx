@@ -28,6 +28,7 @@ const Sidebar = (): JSX.Element => {
     channelGroups,
     dmsWithUsers,
     currentChannel,
+    notesChannel,
     setCurrentChannel,
     updateChannelGroupsOrder: updateChannelGroups,
   } = useMessengerStore(state => state);
@@ -240,7 +241,9 @@ const Sidebar = (): JSX.Element => {
               onItemClick={onChannelClick}
               setGroupsChanged={setGroupsChanged}
               onDeleteList={onDeleteGroup}
-              activeChannel={activeChannel}
+              activeChannel={
+                currentChannel?.id !== notesChannel?.id ? activeChannel : null
+              }
             />
 
             <Heading mb="2" mt="2" fontSize="lg" width="100%" ml={'30px'}>
@@ -252,14 +255,21 @@ const Sidebar = (): JSX.Element => {
                 p="2"
                 borderRadius="md"
                 background={
+                  currentChannel?.id !== notesChannel?.id &&
                   activeChannel === dm.channel
                     ? 'rgba(0, 0, 0, 0.3)'
                     : 'rgba(0, 0, 0, 0.1)'
                 }
-                color={activeChannel === dm.channel ? 'white' : 'zinc400'}
+                color={
+                  currentChannel?.id !== notesChannel?.id &&
+                  activeChannel === dm.channel
+                    ? 'white'
+                    : 'zinc400'
+                }
                 _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 width="92%"
+                minH="44px"
                 pr="15px"
                 pl="15px"
                 overflow="hidden"
