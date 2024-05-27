@@ -232,12 +232,12 @@ const Header = (): JSX.Element => {
                       </Flex>
                     </ListItem>
                   ))}
-                  {searchResults.channels.length > 0 && (
+                  {searchResults?.channels?.length > 0 && (
                     <Text fontWeight="bold" mt="4" mb="2">
                       Channels
                     </Text>
                   )}
-                  {searchResults.channels.map((channel: any) => (
+                  {searchResults?.channels?.map((channel: any) => (
                     <ListItem key={channel._id}>
                       <Flex
                         align="center"

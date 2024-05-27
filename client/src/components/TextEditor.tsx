@@ -137,8 +137,8 @@ interface TextEditorProps {
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const { userData } = useAuthStore(state => state);
-  const { editingMessage } = useMessengerStore(state => state);
-
+  const { editingMessage, setEditingMessage, editMessage, currentChannel } =
+    useMessengerStore(state => state);
   const [editorKey, setEditorKey] = useState(0);
   const [content, setContent] = useState<Descendant[]>(initialValue);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -157,15 +157,20 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     };
     return withPlugins(withReact(withHistory(createEditor())));
   }, []);
-
+  const editor2 = useMemo(() => {
+    const withPlugins = (editor: BaseEditor): BaseEditor => {
+      withInlines(editor);
+      // withMentions(editor)
+      return editor;
+    };
+    return withPlugins(withReact(withHistory(createEditor())));
+  }, []);
   useEffect(() => {
     if (editingMessage) {
-      resetEditor();
+      resetEditor(false);
       setContent(editingMessage.textContent);
-      setEditorKey(key => key + 1);
-    } else {
-      setContent(initialValue);
     }
+    setEditorKey(key => key + 1);
   }, [editingMessage]);
 
   const handleContentChange = (newContent: Descendant[]): void => {
@@ -196,7 +201,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     });
   };
 
-  const resetEditor = (): void => {
+  const resetEditor = (boolka: boolean): void => {
     const hasText = (node: any): boolean => {
       if (!node.children || node.children.length === 0) {
         return false;
@@ -211,7 +216,6 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         return false;
       });
     };
-
     const filteredContent = (content as MessageTextContent[]).filter(item => {
       if (item.type === 'numbered-list' || item.type === 'bulleted-list') {
         return hasText(item);
@@ -219,17 +223,18 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         return item.children[0].text.trim() !== '';
       }
     });
+    Transforms.deselect(editor);
 
-    if (filteredContent) {
-      const newContent = initialValue;
+    if (filteredContent && boolka) {
       Transforms.delete(editor, {
         at: {
           anchor: Editor.start(editor, []),
           focus: Editor.end(editor, []),
         },
+        voids: true,
+        hanging: false,
       });
-
-      setContent(newContent);
+      setContent(initialValue);
     }
   };
 
@@ -272,7 +277,51 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         user: { _id: userData?.userId, name: userData?.name },
       });
     }
-    resetEditor();
+
+    resetEditor(true);
+  };
+
+  const handleEditMessage = (): void => {
+    const hasText = (node: any): boolean => {
+      if (!node.children || node.children.length === 0) {
+        return false;
+      }
+
+      return node.children.some((child: any) => {
+        if (child.text) {
+          return child.text.trim() !== '';
+        } else if (child.children) {
+          return hasText(child);
+        }
+        return false;
+      });
+    };
+
+    const filteredContent = (content as MessageTextContent[]).filter(item => {
+      if (item.type === 'numbered-list' || item.type === 'bulleted-list') {
+        return hasText(item);
+      } else {
+        return item.children.some((child: any) => {
+          if (child.text) {
+            return child.text.trim() !== '';
+          } else if (child.children) {
+            return hasText(child);
+          }
+          return false;
+        });
+      }
+    });
+    if (filteredContent.length > 0 && currentChannel) {
+      setFiles([]);
+      editMessage(
+        {
+          ...editingMessage,
+          textContent: filteredContent,
+        },
+        currentChannel?.id
+      );
+    }
+    resetEditor(true);
   };
 
   return (
@@ -328,6 +377,51 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
           ))}
         </HStack>
       )}
+      {editingMessage && (
+        <HStack
+          borderRadius="md"
+          whiteSpace="nowrap"
+          maxWidth="calc(100vw - 765px)"
+          mb="5px"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          minH="15px"
+          bg="zinc800"
+          w={'fit-content'}
+        >
+          <Slate
+            key={editorKey}
+            editor={editor2 as ReactEditor}
+            initialValue={[editingMessage.textContent[0]]}
+          >
+            <Editable
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                height: '25px',
+                lineHeight: '25px',
+                maxWidth: '100%',
+                marginLeft: '10px',
+              }}
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              readOnly
+            />
+          </Slate>
+          <IconButton
+            label={<SmallCloseIcon color="zinc300" />}
+            onClick={() => {
+              setEditingMessage(null);
+              resetEditor(true);
+            }}
+          />
+        </HStack>
+      )}
+
       <Flex
         background="rgba(0, 0, 0, 0.2)"
         border="1px"
@@ -337,7 +431,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
         _focusVisible={{ borderColor: 'zinc600' }}
         width="100%"
         height={'100%'}
-        maxH={files.length !== 0 ? '138px' : '100%'}
+        maxH={files.length !== 0 || editingMessage?.id ? '138px' : '100%'}
         alignItems="center"
         justifyContent="center"
         flexDirection={'column'}
@@ -346,7 +440,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
           key={editorKey}
           editor={editor as ReactEditor}
           initialValue={content}
-          onChange={handleContentChange}
+          onValueChange={handleContentChange}
         >
           <Flex
             mt="5px"
@@ -429,7 +523,11 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
 
               if (event.shiftKey && event.key === 'Enter') {
                 event.preventDefault();
-                handleSendMessage();
+                if (!editingMessage) {
+                  handleSendMessage();
+                } else {
+                  handleEditMessage();
+                }
               }
             }}
           />
@@ -486,7 +584,11 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
                 mr="30px"
                 mt="5px"
                 onClick={() => {
-                  handleSendMessage();
+                  if (!editingMessage) {
+                    handleSendMessage();
+                  } else {
+                    handleEditMessage();
+                  }
                 }}
               />
             </Box>
