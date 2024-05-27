@@ -63,6 +63,12 @@ class DriveService {
   async downloadFile(fileId: string, destPath: string): Promise<void> {
     try {
       const drive = google.drive({ version: "v3", auth: this.jwtClient });
+
+      const folderPath = path.dirname(destPath);
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+      }
+
       const dest = fs.createWriteStream(destPath);
 
       const res = await drive.files.get({ fileId, alt: "media" }, { responseType: "stream" });

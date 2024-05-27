@@ -86,6 +86,25 @@ class MessagesHandler {
     }
   }
 
+  async editMessage(
+    socket: Socket,
+    data: { editedMessage: Message; channelId: string },
+    callback: Function
+  ) {
+    try {
+      await Message.updateOne(
+        { _id: data.editedMessage.id }, // Условие выбора сообщения для обновления
+        { $set: { textContent: data.editedMessage.textContent } } // Обновляем только поле textContent
+      );
+
+      callback({ status: "success" });
+      socket.broadcast.to(data.channelId).emit("on-edited-message", data);
+    } catch (error) {
+      callback({ status: "error", message: "Error deleting message" });
+      console.error(error);
+    }
+  }
+
   private async uploadAttachments(attachments: any[]) {
     try {
       const uploadAttachments = async (attachments: any[]) => {

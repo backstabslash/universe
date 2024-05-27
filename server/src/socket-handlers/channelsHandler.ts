@@ -37,10 +37,10 @@ class ChannelsHandler {
 
       const skip = data.page * data.limit;
       const messages = await Message.find({ channel: data.channelId })
-        .populate({ path: "user", select: "name id" })
+        .populate({ path: 'user', select: 'name id' })
         .populate({
-          path: "attachments",
-          select: "name type url",
+          path: 'attachments',
+          select: 'name type url',
         })
         .sort({ sendAt: -1 })
         .skip(skip)
@@ -257,35 +257,37 @@ class ChannelsHandler {
     socket: Socket,
     data: {
       channelId: string;
-      id: string;
+      ids: string[];
     },
     callback: Function
   ) {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const channelUser = new ChannelUser({
-        user: data.id,
+      const channelUsers = data.ids.map((id) => ({
+        user: id,
         channel: data.channelId,
-      });
-      await channelUser.save({ session });
+      }));
 
-      const user = await User.findById(data.id).populate('groupsOrder').exec();
-      if (!user) {
-        console.error('User not found');
-        return;
+      await ChannelUser.insertMany(channelUsers, { session });
+
+      const users = await User.find({ _id: { $in: data.ids } })
+        .populate('groupsOrder')
+        .exec();
+      if (!users || users.length === 0) {
+        console.error('Users not found');
+        return callback({ status: 'error', message: 'Users not found' });
       }
 
-      const userGroup = user.groupsOrder.find(
-        (group) => group.name === 'General'
-      );
-      if (!userGroup) {
-        console.error('Group not found');
-        return;
-      }
+      const generalGroupIds = users
+        .map(
+          (user) =>
+            user.groupsOrder.find((group) => group.name === 'General')?._id
+        )
+        .filter(Boolean);
 
-      await UserGroup.findOneAndUpdate(
-        { _id: userGroup._id },
+      await UserGroup.updateMany(
+        { _id: { $in: generalGroupIds } },
         { $addToSet: { channels: data.channelId } },
         { session }
       );
@@ -293,34 +295,36 @@ class ChannelsHandler {
       await session.commitTransaction();
       callback({ status: 'success' });
 
-      let userSocket;
-      for (let [id, socket] of io.of('/').sockets) {
-        if (socket.data.userId === data.id) {
-          userSocket = socket;
+      for (let userId of data.ids) {
+        let userSocket;
+        for (let [id, socket] of io.of('/').sockets) {
+          if (socket.data.userId === userId) {
+            userSocket = socket;
+          }
         }
-      }
-      if (userSocket) {
-        userSocket.join(data.channelId);
+        if (userSocket) {
+          userSocket.join(data.channelId);
+        }
       }
 
       const channel = await Channel.findById(data.channelId)
         .select('name owner')
         .exec();
-      const channelUsers = await ChannelUser.find({
+      const channelUsersList = await ChannelUser.find({
         channel: data.channelId,
       }).populate('user', 'name id');
 
-      socket.broadcast.to(data.channelId).emit('user-joined-channel', {
+      socket.broadcast.to(data.channelId).emit('users-joined-channel', {
         channel: {
           id: data.channelId,
           name: channel?.name,
-          users: channelUsers.map((cu) => cu.user),
+          users: channelUsersList.map((cu) => cu.user),
           owner: channel?.owner,
         },
-        userId: data.id,
+        userIds: data.ids,
       });
     } catch (error) {
-      session.abortTransaction();
+      await session.abortTransaction();
       console.error(error);
       callback({ status: 'error' });
     } finally {

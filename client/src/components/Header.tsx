@@ -98,7 +98,7 @@ const Header = (): JSX.Element => {
 
   const confirmChannelClick = async (): Promise<void> => {
     if (userData?.userId && selectedChannel) {
-      addUserToChannel(userData?.userId, selectedChannel);
+      addUserToChannel([userData?.userId], selectedChannel);
       handleClear();
       onClose();
       onConfirmClose();
@@ -202,12 +202,12 @@ const Header = (): JSX.Element => {
               searchResults?.users?.length > 0 ||
               searchResults?.channels?.length > 0 ? (
                 <List spacing={3} maxH={'70vh'} overflowY={'auto'}>
-                  {searchResults.users.length > 0 && (
+                  {searchResults?.users?.length > 0 && (
                     <Text fontWeight="bold" mb="2">
                       Users
                     </Text>
                   )}
-                  {searchResults.users.map((user: any) => (
+                  {searchResults?.users?.map((user: any) => (
                     <ListItem key={user._id}>
                       <Flex
                         align="center"

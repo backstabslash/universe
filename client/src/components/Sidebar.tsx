@@ -269,6 +269,7 @@ const Sidebar = (): JSX.Element => {
                 _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
                 width="92%"
+                minH="44px"
                 pr="15px"
                 pl="15px"
                 overflow="hidden"

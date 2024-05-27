@@ -50,6 +50,9 @@ io.use(verifySocketJwt).on('connection', (socket: Socket) => {
   socket.on("delete-message", (data, callback) => {
     messagesHandler.deleteMessage(socket, data, callback);
   });
+  socket.on("edit-message", (data, callback) => {
+    messagesHandler.editMessage(socket, data, callback);
+  });
 
   socket.on('disconnect', () => {
     console.info('User disconnected');

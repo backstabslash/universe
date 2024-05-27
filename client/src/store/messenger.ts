@@ -106,7 +106,7 @@ interface MessengerState {
     hasMoreMessages: boolean;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
-  addUserToChannel: (id: string, channelId?: string) => void;
+  addUserToChannel: (id: string[], channelId?: string) => void;
   onUserJoinedChannel: (currentUserId: string) => void;
   createChannel: (data: {
     name: string;
@@ -120,6 +120,8 @@ interface MessengerState {
   deleteMessage: (messageId: string, channelId: string) => void;
   createDM: (data: any) => void;
   onDeletedMessage: () => void;
+  editMessage: (editedMessage: any, channelId: string) => void;
+  onEditedMessage: () => void;
 }
 
 const useMessengerStore = create<MessengerState>((set, get) => ({
@@ -257,7 +259,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
 
       FileSaver.saveAs(blob, filename);
-    } catch (error) {}
+    } catch (error) { }
   },
 
   sendMessage: (filesData: any, message: UserMessage) => {
@@ -618,7 +620,82 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  addUserToChannel: (id: string, channel?: any) => {
+  editMessage: (editedMessage: UserMessage, channelId: string) => {
+    const { socket } = get();
+
+    if (!socket) return;
+
+    socket.emit(
+      'edit-message',
+      {
+        editedMessage,
+        channelId,
+      },
+      (response: MessageResponse) => {
+        if (response.status === 'success') {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.map(
+                  message => {
+                    if (message.id === editedMessage.id) {
+                      return editedMessage
+                    }
+                    return message
+                  }
+                ),
+              };
+            }
+            return channel;
+          });
+          set({ channels: [...updatedChannels], editingMessage: null, lastEditedMessage: { message: editedMessage, channelId } });
+        } else {
+          throw new Error('Error editing message');
+        }
+      }
+    );
+  },
+
+  onEditedMessage: () => {
+    try {
+      const { socket } = get();
+
+      if (!socket) return;
+
+      socket.on(
+        'on-edited-message',
+        (data: { editedMessage: UserMessage; channelId: string }): void => {
+          const { channels } = get();
+
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === data.channelId) {
+              return {
+                ...channel,
+                messages: channel.messages.map(
+                  message => {
+                    if (message.id === data.editedMessage.id) {
+                      return data.editedMessage
+                    }
+                    return message
+                  }
+                ),
+              };
+            }
+            return channel;
+          });
+
+          set({ channels: [...updatedChannels], lastEditedMessage: { message: data.editedMessage, channelId: data.channelId } });
+        }
+      );
+    } catch (error: any) {
+      set({ error });
+    }
+  },
+
+  addUserToChannel: (ids: string[], channel?: any) => {
     const { socket, channels, currentChannel, channelGroups } = get();
 
     if (!socket) return;
@@ -635,7 +712,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       'add-user-to-channel',
       {
         channelId: chlId,
-        id,
+        ids,
       },
       (response: any) => {
         if (response.status === 'success') {
@@ -643,7 +720,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             if (channel.id === chlId) {
               return {
                 ...channel,
-                users: [...channel.users, { _id: id }],
+                users: [...channel.users, ...ids.map(id => ({ _id: id }))],
               };
             }
             return channel;
@@ -654,7 +731,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
               id: channel.id,
               messages: [],
               page: 0,
-              users: channel.users,
+              users: [...channel.users, ...ids.map(id => ({ _id: id }))],
               name: channel.name,
               ownerId: channel.owner,
               hasMoreMessages: channel.hasMoreMessages,
