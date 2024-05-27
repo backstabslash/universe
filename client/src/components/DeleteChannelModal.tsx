@@ -50,7 +50,7 @@ const DeleteChannelModal = (): any => {
       onClose();
     } catch (error: any) {
       setformError(error);
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -60,7 +60,7 @@ const DeleteChannelModal = (): any => {
       onClose();
     } catch (error: any) {
       setformError(error);
-      console.log(error);
+      console.error(error);
     }
   };
 

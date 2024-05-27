@@ -55,7 +55,7 @@ const CreateChannelModal = (): any => {
       onClose();
     } catch (error: any) {
       setformError(error);
-      console.log(error);
+      console.error(error);
     }
   };
 

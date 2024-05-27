@@ -1,8 +1,5 @@
 import useMessengerStore from '../store/messenger';
-import CottageIcon from '@mui/icons-material/Cottage';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import AddMuiIcon from '@mui/icons-material/Add';
+import { Cottage, Bookmark, Add } from '@mui/icons-material';
 import TextEditor from '../components/TextEditor';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -141,7 +138,7 @@ const MainContent = (): JSX.Element => {
       await updateAvatar(formData);
       onClose();
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
       setError(error?.response?.data?.message || 'Failed to update user info');
     }
   };
@@ -173,7 +170,6 @@ const MainContent = (): JSX.Element => {
       axiosPrivate,
       message.attachments
     );
-    console.log('fileId', filesData);
     sendMessage(filesData, message);
   };
 
@@ -220,7 +216,7 @@ const MainContent = (): JSX.Element => {
                 _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 onClick={handleClickHome}
               >
-                <CottageIcon fontSize="medium" />
+                <Cottage fontSize="medium" />
               </Button>
               <Text fontSize={'xs'}>Home</Text>
             </Flex>
@@ -237,25 +233,9 @@ const MainContent = (): JSX.Element => {
                 _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
                 onClick={openNotes}
               >
-                <EditNoteIcon fontSize="medium" />
+                <Bookmark fontSize="medium" />
               </Button>
               <Text fontSize={'xs'}>Notes</Text>
-            </Flex>
-            <Flex
-              flexDirection={'column'}
-              justifyContent={'center'}
-              alignItems={'center'}
-            >
-              <Button
-                p="1"
-                color={'zinc300'}
-                bg="transparent"
-                _hover={{ background: 'rgba(0, 0, 0, 0.2)' }}
-                _active={{ background: 'rgba(0, 0, 0, 0.2)' }}
-              >
-                <BookmarkIcon fontSize="medium" />
-              </Button>
-              <Text fontSize={'xs'}>Later</Text>
             </Flex>
           </Flex>
           <Flex pb="15px" pl="4px" flexDirection={'column'} gap="10px">
@@ -269,7 +249,7 @@ const MainContent = (): JSX.Element => {
                 handleLogout();
               }}
             >
-              <AddMuiIcon fontSize="medium" />
+              <Add fontSize="medium" />
             </Button>
             <Button
               p="1px"
@@ -357,6 +337,9 @@ const MainContent = (): JSX.Element => {
                         openProfileOnClick(currentChannel?.user?._id);
                       }}
                     >
+                      {currentChannel?.id === notesChannel.id && (
+                        <Bookmark fontSize="small" />
+                      )}
                       {currentChannel && `${currentChannel?.name}`}
                     </Button>
                   </HStack>

@@ -50,11 +50,14 @@ const MessagesContainer = (): JSX.Element => {
     currentChannel,
     lastSentMessage,
     lastEditedMessage,
+    lastDeletedMessage,
+    notesChannel,
     setEditingMessage,
     loadChannelMessages,
     onRecieveChannelMessages,
     processDownloadingAttachment,
     deleteMessage,
+    sendMessageToNotes,
   } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const { axios } = useUserStore(state => state);
@@ -236,6 +239,13 @@ const MessagesContainer = (): JSX.Element => {
     setEditingMessage(contextMenuMessage);
   };
 
+  const handleSendToNotes = (): void => {
+    setIsContextMenuOpen(false);
+    if (!contextMenuMessage) return;
+
+    sendMessageToNotes(contextMenuMessage, contextMenuMessage.user._id);
+  };
+
   return (
     <Flex
       ref={containerRef}
@@ -280,16 +290,23 @@ const MessagesContainer = (): JSX.Element => {
                 mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
                 width="fit-content"
                 onContextMenu={event => {
-                  if (message.user._id === userData?.userId) {
-                    handleContextMenu(event, message);
-                  }
+                  handleContextMenu(event, message);
                 }}
               >
                 {contextMenuMessage?.id === message.id && (
                   <MessageContextMenu
                     mousePosition={mousePosition}
                     onDeleteMessage={handleDeleteMessage}
+                    isDeleteEnabled={
+                      message.user._id === userData?.userId ||
+                      currentChannel?.id === notesChannel.id
+                    }
                     onEditMessage={handleEditMessage}
+                    isEditEnabled={message.user._id === userData?.userId}
+                    onSendToNotes={handleSendToNotes}
+                    isSendToNotesEnabled={
+                      currentChannel?.id !== notesChannel.id
+                    }
                     isContextMenuOpen={isContextMenuOpen}
                     onCloseContextMenu={() => setIsContextMenuOpen(false)}
                   />
