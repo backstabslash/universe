@@ -22,6 +22,8 @@ import { AddIcon } from '@chakra-ui/icons';
 import { css } from '@emotion/react';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { api } from '../config/config';
+import CreateRoleModal from './CreateRoleModal';
+import useAuthStore from '../store/auth';
 
 const Sidebar = (): JSX.Element => {
   const {
@@ -40,6 +42,7 @@ const Sidebar = (): JSX.Element => {
   const [activeChannel, setActiveChannel] = useState<string | null>(null);
   const { workSpaceData } = useWorkSpaceStore(state => state);
   const axiosPrivate = useAxiosPrivate();
+  const { userData } = useAuthStore(state => state);
 
   const changeGroupstimeoutRef = useRef<any>(null);
 
@@ -172,7 +175,12 @@ const Sidebar = (): JSX.Element => {
                 ⋮
               </MenuButton>
               <MenuList bg="zinc800" border="none" minWidth="auto">
-                <CreateChannelModal />
+                <VStack>
+                  <CreateChannelModal />
+                  {!userData?.userRole?.includes('student') && (
+                    <CreateRoleModal />
+                  )}
+                </VStack>
               </MenuList>
             </Menu>
           </HStack>
