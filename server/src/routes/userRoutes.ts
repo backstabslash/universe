@@ -8,5 +8,6 @@ router.get('/get-by-email', rateLimiter(), userController.getByEmail);
 router.get('/get-by-id/:userId', rateLimiter(), userController.getById);
 router.get('/roles', rateLimiter(), userController.getRoles);
 router.put('/user', rateLimiter(), userController.updateUserInfo);
+// router.post('/add-roles', rateLimiter(), userController.addRoles);
 
 export default router;

@@ -23,6 +23,8 @@ import {
   FormLabel,
   Input,
   useDisclosure,
+  List,
+  ListItem,
 } from '@chakra-ui/react';
 import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import IconButton from './IconButton';
@@ -389,29 +391,13 @@ const UserProfile = (): JSX.Element => {
             pb="14px"
           >
             <HStack width="100%" justifyContent="space-between">
-              <Text fontWeight="bold">About me</Text>
-              <Button
-                size="md"
-                bg="transparent"
-                color="#23bdff"
-                fontSize={'sm'}
-                onClick={handleOpenModal}
-                _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-              >
-                Edit
-              </Button>
+              <Text fontWeight="bold">My roles</Text>
+              <List spacing={3}>
+                {userData?.userRole?.map((role: any) => (
+                  <ListItem key={role}>{role}</ListItem>
+                ))}
+              </List>
             </HStack>
-            <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-              <Button
-                size="md"
-                bg="zinc800"
-                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                color="zinc300"
-                onClick={handleOpenModal}
-              >
-                <AddIcon fontSize="13px" /> &nbsp; Add start date
-              </Button>
-            </Link>
           </VStack>
         </VStack>
       </VStack>
@@ -608,7 +594,12 @@ const UserProfile = (): JSX.Element => {
             pb="14px"
           >
             <HStack width="100%" justifyContent="space-between">
-              <Text fontWeight="bold">About me</Text>
+              <Text fontWeight="bold">User roles</Text>
+              <List spacing={3}>
+                {userData?.userRole?.map((role: any) => (
+                  <ListItem key={role}>{role}</ListItem>
+                ))}
+              </List>
             </HStack>
           </VStack>
         </VStack>

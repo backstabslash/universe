@@ -25,6 +25,7 @@ import { api } from '../config/config';
 import CreateRoleModal from './CreateRoleModal';
 import useAuthStore from '../store/auth';
 import ChangeEmailTemplatesModal from './ChangeEmailTemplatesModal';
+import ManageUserRolesModal from './ChangeUserRoleModal';
 
 const Sidebar = (): JSX.Element => {
   const {
@@ -183,6 +184,9 @@ const Sidebar = (): JSX.Element => {
                   )}
                   {userData?.userRole?.includes('administration') && (
                     <ChangeEmailTemplatesModal />
+                  )}
+                  {!userData?.userRole?.includes('student') && (
+                    <ManageUserRolesModal />
                   )}
                 </VStack>
               </MenuList>

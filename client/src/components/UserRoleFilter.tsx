@@ -17,7 +17,7 @@ const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
   const [filters, setFilters] = useState<any>([]);
   const [newFilter, setNewFilter] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<any>();
 
   useEffect(() => {
     if (workSpaceData?.workSpaceName) {
@@ -34,8 +34,8 @@ const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
   useEffect(() => {
     if (newFilter) {
       const filteredSuggestions = availableRoles.filter(
-        (role: string) =>
-          role.toLowerCase().includes(newFilter.toLowerCase()) &&
+        (role: any) =>
+          role?.name?.toLowerCase().includes(newFilter.toLowerCase()) &&
           !filters.includes(role)
       );
       setSuggestions(filteredSuggestions);

@@ -26,7 +26,7 @@ const CreateRoleModal = (): any => {
   const [formError, setFormError] = useState<string>('');
   const [newRole, setNewRole] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<any>();
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
       setFormData({ roles: [] });
@@ -60,9 +60,9 @@ const CreateRoleModal = (): any => {
     setNewRole(value);
 
     if (value) {
-      const filteredSuggestions = availableRoles.filter(
+      const filteredSuggestions = availableRoles?.name?.filter(
         (role: string) =>
-          role.toLowerCase().includes(value.toLowerCase()) &&
+          role?.name?.toLowerCase().includes(value.toLowerCase()) &&
           !formData.roles.includes(role)
       );
       setSuggestions(filteredSuggestions);

@@ -259,7 +259,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       }
 
       FileSaver.saveAs(blob, filename);
-    } catch (error) { }
+    } catch (error) {}
   },
 
   sendMessage: (filesData: any, message: UserMessage) => {
@@ -639,19 +639,21 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             if (channel.id === channelId) {
               return {
                 ...channel,
-                messages: channel.messages.map(
-                  message => {
-                    if (message.id === editedMessage.id) {
-                      return editedMessage
-                    }
-                    return message
+                messages: channel.messages.map(message => {
+                  if (message.id === editedMessage.id) {
+                    return editedMessage;
                   }
-                ),
+                  return message;
+                }),
               };
             }
             return channel;
           });
-          set({ channels: [...updatedChannels], editingMessage: null, lastEditedMessage: { message: editedMessage, channelId } });
+          set({
+            channels: [...updatedChannels],
+            editingMessage: null,
+            lastEditedMessage: { message: editedMessage, channelId },
+          });
         } else {
           throw new Error('Error editing message');
         }
@@ -674,20 +676,24 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             if (channel.id === data.channelId) {
               return {
                 ...channel,
-                messages: channel.messages.map(
-                  message => {
-                    if (message.id === data.editedMessage.id) {
-                      return data.editedMessage
-                    }
-                    return message
+                messages: channel.messages.map(message => {
+                  if (message.id === data.editedMessage.id) {
+                    return data.editedMessage;
                   }
-                ),
+                  return message;
+                }),
               };
             }
             return channel;
           });
 
-          set({ channels: [...updatedChannels], lastEditedMessage: { message: data.editedMessage, channelId: data.channelId } });
+          set({
+            channels: [...updatedChannels],
+            lastEditedMessage: {
+              message: data.editedMessage,
+              channelId: data.channelId,
+            },
+          });
         }
       );
     } catch (error: any) {
@@ -842,7 +848,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           id: response.data._id,
           messages: [],
           page: 0,
-          users: response.data.owner,
+          users: [{ _id: response.data.owner, name: response.data.name }],
           name: response.data.name,
           ownerId: response.data.owner,
           hasMoreMessages: false,

@@ -44,7 +44,6 @@ const ChangeEmailTemplatesModal = (): any => {
     if (workSpaceData?.emailTemplates) {
       setAvailableEmailTemplates(workSpaceData.emailTemplates);
     }
-    console.log(111);
   }, [workSpaceData?.emailTemplates]);
 
   const handleOpen = async (): Promise<void> => {
@@ -130,7 +129,7 @@ const ChangeEmailTemplatesModal = (): any => {
         w={'100%'}
         justifyContent={'start'}
       >
-        Change Email Templates
+        Change email templates
       </Button>
 
       <Modal isOpen={isOpen} onClose={onClose}>
