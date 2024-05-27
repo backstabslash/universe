@@ -37,4 +37,10 @@ router.post(
   workSpaceController.getWorkSpaceRoles
 );
 
+router.post(
+  '/change-workspace-emailtemplates',
+  rateLimiter(),
+  workSpaceController.changeWorkSpaceEmailTemplates
+);
+
 export default router;
