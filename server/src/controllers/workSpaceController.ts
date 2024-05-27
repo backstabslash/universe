@@ -19,6 +19,7 @@ import bcrypt from 'bcrypt';
 import Channel, { ChannelType } from '../models/channel/channelModel';
 import ChannelUser from '../models/channel/channelUserModel';
 import WorkspaceChannel from '../models/workspace/workspaceChannelModel';
+import WorkspaceRole from '../models/workspace/workspaceRoleModel';
 
 interface PopulatedWorkspaceChannel {
   channel: {
@@ -121,13 +122,13 @@ class WorkSpacerController {
       });
       const savedUser = await newUser.save({ session });
 
-      const userRole = await Role.findOne({ name: 'administration' }).session(
-        session
-      );
+      const roleNames = ['administration', 'headman', 'worker', 'student'];
+
+      const roles = await Role.find({ name: { $in: roleNames } }).session(session);
 
       const newUserRole = new UserRole({
         user: savedUser?._id,
-        role: userRole?._id,
+        role: roles?.find(role => role.name === "administration")?.id,
       });
       await newUserRole.save({ session });
 
@@ -161,6 +162,13 @@ class WorkSpacerController {
       });
       await newWorkSpaceUser.save({ session });
 
+      const workspaceRoles = roles.map(role => ({
+        role: role._id,
+        workspace: workspace.id
+      }));
+
+      await WorkspaceRole.insertMany(workspaceRoles, { session });
+
       await session.commitTransaction();
       return res.status(200).json({});
     } catch (error) {
@@ -169,9 +177,8 @@ class WorkSpacerController {
       if ((error as any).code === 11000) {
         console.error((error as any).keyValue);
         return res.status(409).json({
-          message: `This email template exists ${
-            (error as any).keyValue?.emailTemplates
-          }`,
+          message: `This email template exists ${(error as any).keyValue?.emailTemplates
+            }`,
         });
       }
 
@@ -352,6 +359,74 @@ class WorkSpacerController {
         });
       }
       return res.status(200).json();
+    } catch (error) {
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+  async addWorkSpaceRoles(req: Request, res: Response) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const { workSpaceName, roleNames } = req.body;
+      const workSpace = await WorkSpace.findOne({ workSpaceName });
+
+      if (!workSpace) {
+        return res.status(404).json({
+          message: 'Workspace not found.',
+        });
+      }
+
+      const existingWorkspaceRoles = await WorkspaceRole.find({ workspace: workSpace.id }).populate('role');
+      const existingRoleNames = existingWorkspaceRoles.map(workspaceRole => workspaceRole.role.name);
+
+      const newRoles = [];
+
+      for (const roleName of roleNames) {
+        if (!existingRoleNames.includes(roleName)) {
+          const newRole = new Role({ name: roleName });
+          const savedRole = await newRole.save({ session });
+
+          const newWorkSpaceRole = new WorkspaceRole({
+            role: savedRole.id,
+            workspace: workSpace.id
+          });
+          await newWorkSpaceRole.save({ session });
+          newRoles.push(roleName);
+        }
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return res.status(201).json({ addedRoles: newRoles });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
+
+  async getWorkSpaceRoles(req: Request, res: Response) {
+    try {
+      const { workSpaceName } = req.body;
+
+      const workSpace = await WorkSpace.findOne({ workSpaceName });
+      if (!workSpace) {
+        return res.status(404).json({
+          message: 'Workspace not found.',
+        });
+      }
+
+      const workSpaceRoles = await WorkspaceRole.find({ workspace: workSpace.id }).populate('role');
+
+      const roleNames = workSpaceRoles.map(workspaceRole => workspaceRole.role.name);
+
+      return res.status(200).json({ roles: roleNames });
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',

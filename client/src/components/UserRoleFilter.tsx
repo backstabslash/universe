@@ -9,29 +9,28 @@ import {
   List,
   ListItem,
 } from '@chakra-ui/react';
-import { api } from '../config/config';
-import useAxiosPrivate from '../hooks/useAxiosPrivate';
-
+import useWorkSpaceStore from '../store/workSpace';
 const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
-  const axiosPrivate = useAxiosPrivate();
+  const { getAllWorkSpaceRoles, workSpaceData } = useWorkSpaceStore(
+    state => state
+  );
   const [filters, setFilters] = useState<any>([]);
   const [newFilter, setNewFilter] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [availableRoles, setAvailableRoles] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchRoles = async (): Promise<void> => {
-      try {
-        const response = await axiosPrivate?.get(`${api.url}/user/roles`);
-        setAvailableRoles(response.data.map((role: any) => role.name));
-      } catch (error) {
-        console.error('Error fetching roles:', error);
-      }
-    };
-
-    fetchRoles();
+    if (workSpaceData?.workSpaceName) {
+      getAllRolles();
+    }
   }, []);
 
+  const getAllRolles = async (): Promise<void> => {
+    if (workSpaceData?.workSpaceName) {
+      const allRoles = await getAllWorkSpaceRoles(workSpaceData?.workSpaceName);
+      setAvailableRoles(allRoles);
+    }
+  };
   useEffect(() => {
     if (newFilter) {
       const filteredSuggestions = availableRoles.filter(

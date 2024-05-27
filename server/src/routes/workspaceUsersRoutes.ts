@@ -25,4 +25,16 @@ router.get(
   workSpaceController.getWorkspaceChannels
 );
 
+router.post(
+  '/add-workspace-role',
+  rateLimiter(),
+  workSpaceController.addWorkSpaceRoles
+);
+
+router.post(
+  '/get-workspace-roles',
+  rateLimiter(),
+  workSpaceController.getWorkSpaceRoles
+);
+
 export default router;

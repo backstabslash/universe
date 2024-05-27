@@ -35,6 +35,8 @@ interface WorkSpaceState {
   getWorkspaceUsers: () => Promise<void>;
   getWorkspacePublicChannels: () => Promise<void>;
   updateAvatar: (workSpaceData: WorkSpaceData) => Promise<void>;
+  addWorkSpaceRoles: (workSpaceName: string, roleName: string[]) => Promise<void>;
+  getAllWorkSpaceRoles: (workSpaceName: string) => Promise<string[]>;
 }
 
 const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
@@ -122,7 +124,6 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
       throw error;
     }
   },
-  // getting all of the public channels, where user is NOT YET present only
   getWorkspacePublicChannels: async () => {
     try {
       const { axiosPrivate } = get();
@@ -133,6 +134,38 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
     } catch (err: any) {
       const error =
         err.response?.data?.error || err.message || 'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+
+  addWorkSpaceRoles: async (workSpaceName: string, roleNames: string[]) => {
+    try {
+      const { axiosPrivate } = get();
+      await axiosPrivate?.post(`${api.url}/wusers/add-workspace-role`, { workSpaceName, roleNames });
+      set({ error: null });
+    } catch (err: any) {
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+
+  getAllWorkSpaceRoles: async (workSpaceName: string) => {
+    try {
+      const { axiosPrivate } = get();
+      const response = await axiosPrivate?.post(`${api.url}/wusers/get-workspace-roles`, { workSpaceName });
+      set({ error: null });
+
+      return response?.data?.roles;
+    } catch (err: any) {
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
       set({ error });
       throw error;
     }

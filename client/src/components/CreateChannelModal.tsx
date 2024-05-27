@@ -110,12 +110,8 @@ const CreateChannelModal = (): any => {
                 </Checkbox>
               </FormControl>
             </Flex>
+            {formError && <Text color="red.500">{formError}</Text>}
           </ModalBody>
-          {formError && (
-            <Text ml="7" color="red.500">
-              {formError}
-            </Text>
-          )}
           <ModalFooter justifyContent={'flex-start'} pt="0">
             <Button
               background="zinc700"

@@ -111,12 +111,8 @@ const DeleteChannelModal = (): any => {
                 </FormLabel>
               )}
             </FormControl>
+            {formError && <Text color="red.500">{formError}</Text>}
           </ModalBody>
-          {formError && (
-            <Text ml="7" color="red.500">
-              {formError}
-            </Text>
-          )}
           <ModalFooter>
             {checkOwner() ? (
               <Button
