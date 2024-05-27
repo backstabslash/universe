@@ -24,6 +24,7 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { api } from '../config/config';
 import CreateRoleModal from './CreateRoleModal';
 import useAuthStore from '../store/auth';
+import ChangeEmailTemplatesModal from './ChangeEmailTemplatesModal';
 
 const Sidebar = (): JSX.Element => {
   const {
@@ -175,10 +176,13 @@ const Sidebar = (): JSX.Element => {
                 ⋮
               </MenuButton>
               <MenuList bg="zinc800" border="none" minWidth="auto">
-                <VStack>
+                <VStack alignItems={'start'}>
                   <CreateChannelModal />
                   {!userData?.userRole?.includes('student') && (
                     <CreateRoleModal />
+                  )}
+                  {userData?.userRole?.includes('administration') && (
+                    <ChangeEmailTemplatesModal />
                   )}
                 </VStack>
               </MenuList>

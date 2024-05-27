@@ -37,6 +37,7 @@ interface WorkSpaceState {
   updateAvatar: (workSpaceData: WorkSpaceData) => Promise<void>;
   addWorkSpaceRoles: (workSpaceName: string, roleName: string[]) => Promise<void>;
   getAllWorkSpaceRoles: (workSpaceName: string) => Promise<string[]>;
+  changeWorkSpaceEmailTemplates: (workSpaceName: string, emailTemplates: string[]) => Promise<void>;
 }
 
 const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
@@ -143,6 +144,20 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
     try {
       const { axiosPrivate } = get();
       await axiosPrivate?.post(`${api.url}/wusers/add-workspace-role`, { workSpaceName, roleNames });
+      set({ error: null });
+    } catch (err: any) {
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+  changeWorkSpaceEmailTemplates: async (workSpaceName: string, emailTemplates: string[]) => {
+    try {
+      const { axiosPrivate } = get();
+      await axiosPrivate?.post(`${api.url}/wusers/change-workspace-emailtemplates`, { workSpaceName, emailTemplates });
       set({ error: null });
     } catch (err: any) {
       const error =

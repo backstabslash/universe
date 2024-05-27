@@ -323,8 +323,8 @@ class WorkSpacerController {
         return res.status(404).json({ message: 'Workspace not found.' });
       }
 
-      const { owner, workSpaceName, pfp_url } = workspace;
-      return res.status(200).json({ ownerId: owner, workSpaceName, pfp_url });
+      const { owner, workSpaceName, pfp_url, emailTemplates } = workspace;
+      return res.status(200).json({ ownerId: owner, workSpaceName, pfp_url, emailTemplates });
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',
@@ -429,6 +429,39 @@ class WorkSpacerController {
       return res.status(200).json({ roles: roleNames });
     } catch (error) {
       res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async changeWorkSpaceEmailTemplates(req: Request, res: Response) {
+    try {
+      const { emailTemplates, workSpaceName } = req.body;
+
+      if (!emailTemplates || !Array.isArray(emailTemplates)) {
+        return res.status(400).json({ message: 'Invalid email templates data' });
+      }
+
+      const workSpace = await WorkSpace.findOne({ workSpaceName });
+      if (!workSpace) {
+        return res.status(404).json({ message: 'Workspace not found' });
+      }
+
+      workSpace.emailTemplates = emailTemplates;
+      await workSpace.save();
+
+      return res.status(200).json();
+    } catch (error) {
+
+      if ((error as any).code === 11000) {
+        console.error((error as any).keyValue);
+        return res.status(409).json({
+          message: `This email template exists in another workspace ${(error as any).keyValue?.emailTemplates
+            }`,
+        });
+      }
+
+      return res.status(500).json({
         message: 'Internal server error',
       });
     }
