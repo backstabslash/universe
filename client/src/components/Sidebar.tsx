@@ -176,7 +176,7 @@ const Sidebar = (): JSX.Element => {
                 ⋮
               </MenuButton>
               <MenuList bg="zinc800" border="none" minWidth="auto">
-                <VStack alignContent={'start'}>
+                <VStack alignItems={'start'}>
                   <CreateChannelModal />
                   {!userData?.userRole?.includes('student') && (
                     <CreateRoleModal />

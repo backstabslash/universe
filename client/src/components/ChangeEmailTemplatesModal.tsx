@@ -127,6 +127,8 @@ const ChangeEmailTemplatesModal = (): any => {
           handleOpen();
         }}
         _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+        w={'100%'}
+        justifyContent={'start'}
       >
         Change Email Templates
       </Button>

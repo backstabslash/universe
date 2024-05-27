@@ -70,6 +70,8 @@ const CreateChannelModal = (): any => {
           handleOpen();
         }}
         _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+        w={'100%'}
+        justifyContent={'start'}
       >
         Create channel
       </Button>

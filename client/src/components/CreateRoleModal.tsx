@@ -116,6 +116,8 @@ const CreateRoleModal = (): any => {
           handleOpen();
         }}
         _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+        w={'100%'}
+        justifyContent={'start'}
       >
         Create user role
       </Button>
