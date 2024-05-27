@@ -104,7 +104,7 @@ interface MessengerState {
     users: any;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
-  addUserToChannel: (id: string, channelId?: string) => void;
+  addUserToChannel: (id: string[], channelId?: string) => void;
   onUserJoinedChannel: (currentUserId: string) => void;
   createChannel: (data: {
     name: string;
@@ -679,7 +679,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     }
   },
 
-  addUserToChannel: (id: string, channel?: any) => {
+  addUserToChannel: (ids: string[], channel?: any) => {
     const { socket, channels, currentChannel, channelGroups } = get();
 
     if (!socket) return;
@@ -696,7 +696,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
       'add-user-to-channel',
       {
         channelId: chlId,
-        id,
+        ids,
       },
       (response: any) => {
         if (response.status === 'success') {
@@ -704,7 +704,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             if (channel.id === chlId) {
               return {
                 ...channel,
-                users: [...channel.users, { _id: id }],
+                users: [...channel.users, ...ids.map(id => ({ _id: id }))],
               };
             }
             return channel;
@@ -715,7 +715,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
               id: channel.id,
               messages: [],
               page: 0,
-              users: channel.users,
+              users: [...channel.users, ...ids.map(id => ({ _id: id }))],
               name: channel.name,
               ownerId: channel.owner,
             };
