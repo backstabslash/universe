@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import Message from "../models/message/messageModel";
 import DriveService from "../services/driveService";
 import Attachment from "../models/message/attachmentModel";
+import { startSession } from "mongoose";
 
 type Message = {
   id: string;
@@ -59,8 +60,11 @@ class MessagesHandler {
     data: { messageId: string; channelId: string },
     callback: Function
   ) {
+    const session = await startSession();
+    session.startTransaction();
+
     try {
-      const message = await Message.findById(data.messageId);
+      const message = await Message.findById(data.messageId).session(session);
       if (!message) {
         throw new Error("Message not found");
       }
@@ -68,11 +72,11 @@ class MessagesHandler {
       if (message.user.id === socket.data.userId) {
         const attachmentIds = message.attachments.map((attachment) => attachment.toString());
 
-        const attachments = await Attachment.find({ _id: { $in: attachmentIds } });
+        const attachments = await Attachment.find({ _id: { $in: attachmentIds } }).session(session);
 
         const existMessageWithAttachments = await Message.find({
           attachments: { $in: attachmentIds },
-        });
+        }).session(session);
 
         const usedAttachmentIds = new Set();
         for (const message of existMessageWithAttachments) {
@@ -91,14 +95,22 @@ class MessagesHandler {
           await this.driveService.deleteFile(attachment.url);
         }
 
-        await Attachment.deleteMany({ _id: { $in: unusedAttachments.map((a) => a._id) } });
+        await Attachment.deleteMany({ _id: { $in: unusedAttachments.map((a) => a._id) } }).session(
+          session
+        );
       }
 
-      await Message.deleteOne({ _id: data.messageId });
+      await Message.deleteOne({ _id: data.messageId }).session(session);
+
+      await session.commitTransaction();
+      session.endSession();
 
       callback({ status: "success" });
       socket.broadcast.to(data.channelId).emit("on-deleted-message", data);
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
       callback({ status: "error", message: "Error deleting message" });
       console.error(error);
     }
@@ -111,8 +123,8 @@ class MessagesHandler {
   ) {
     try {
       await Message.updateOne(
-        { _id: data.editedMessage.id }, // Условие выбора сообщения для обновления
-        { $set: { textContent: data.editedMessage.textContent } } // Обновляем только поле textContent
+        { _id: data.editedMessage.id },
+        { $set: { textContent: data.editedMessage.textContent } }
       );
 
       callback({ status: "success" });
