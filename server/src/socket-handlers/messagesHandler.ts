@@ -69,11 +69,29 @@ class MessagesHandler {
         const attachmentIds = message.attachments.map((attachment) => attachment.toString());
 
         const attachments = await Attachment.find({ _id: { $in: attachmentIds } });
-        for (const attachment of attachments) {
+
+        const existMessageWithAttachments = await Message.find({
+          attachments: { $in: attachmentIds },
+        });
+
+        const usedAttachmentIds = new Set();
+        for (const message of existMessageWithAttachments) {
+          for (const attachmentId of message.attachments) {
+            if (attachmentIds.includes(attachmentId.toString())) {
+              usedAttachmentIds.add(attachmentId.toString());
+            }
+          }
+        }
+
+        const unusedAttachments = attachments.filter(
+          (attachment) => !usedAttachmentIds.has(attachment.id)
+        );
+
+        for (const attachment of unusedAttachments) {
           await this.driveService.deleteFile(attachment.url);
         }
 
-        await Attachment.deleteMany({ _id: { $in: attachmentIds } });
+        await Attachment.deleteMany({ _id: { $in: unusedAttachments.map((a) => a._id) } });
       }
 
       await Message.deleteOne({ _id: data.messageId });
