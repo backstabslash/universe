@@ -140,6 +140,18 @@ const MessagesContainer = (): JSX.Element => {
     }
   }, [lastSentMessage]);
 
+  useEffect(() => {
+    if (
+      lastDeletedMessage.messageId &&
+      lastDeletedMessage.channelId === currentChannel?.id
+    ) {
+      const filteredMessages = messages.filter(
+        message => message.id !== lastDeletedMessage.messageId
+      );
+      setMessages(filteredMessages);
+    }
+  }, [lastDeletedMessage]);
+
   const [editorsMap, setEditorsMap] = useState(new Map());
 
   useEffect(() => {
