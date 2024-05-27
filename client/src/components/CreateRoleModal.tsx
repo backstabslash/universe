@@ -26,7 +26,7 @@ const CreateRoleModal = (): any => {
   const [formError, setFormError] = useState<string>('');
   const [newRole, setNewRole] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [availableRoles, setAvailableRoles] = useState<any>();
+  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
   const { isOpen, onOpen, onClose } = useDisclosure({
     onClose: () => {
       setFormData({ roles: [] });
@@ -46,7 +46,9 @@ const CreateRoleModal = (): any => {
   const getAllRoles = async (): Promise<void> => {
     if (workSpaceData?.workSpaceName) {
       const allRoles = await getAllWorkSpaceRoles(workSpaceData.workSpaceName);
-      setAvailableRoles(allRoles);
+      const roleNames = allRoles.map(role => role.name);
+
+      setAvailableRoles(roleNames);
     }
   };
 
@@ -60,9 +62,9 @@ const CreateRoleModal = (): any => {
     setNewRole(value);
 
     if (value) {
-      const filteredSuggestions = availableRoles?.name?.filter(
+      const filteredSuggestions = availableRoles.filter(
         (role: string) =>
-          role?.name?.toLowerCase().includes(value.toLowerCase()) &&
+          role.toLowerCase().includes(value.toLowerCase()) &&
           !formData.roles.includes(role)
       );
       setSuggestions(filteredSuggestions);

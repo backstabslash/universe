@@ -179,9 +179,8 @@ class WorkSpacerController {
       if ((error as any).code === 11000) {
         console.error((error as any).keyValue);
         return res.status(409).json({
-          message: `This email template exists ${
-            (error as any).keyValue?.emailTemplates
-          }`,
+          message: `This email template exists ${(error as any).keyValue?.emailTemplates
+            }`,
         });
       }
 
@@ -436,7 +435,7 @@ class WorkSpacerController {
 
       const roles = workSpaceRoles.map((workspaceRole) => workspaceRole.role);
 
-      return res.status(200).json(roles);
+      return res.status(200).json({ roles });
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',
@@ -467,9 +466,8 @@ class WorkSpacerController {
       if ((error as any).code === 11000) {
         console.error((error as any).keyValue);
         return res.status(409).json({
-          message: `This email template exists in another workspace ${
-            (error as any).keyValue?.emailTemplates
-          }`,
+          message: `This email template exists in another workspace ${(error as any).keyValue?.emailTemplates
+            }`,
         });
       }
 

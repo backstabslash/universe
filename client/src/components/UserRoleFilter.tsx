@@ -16,7 +16,7 @@ const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
   );
   const [filters, setFilters] = useState<any>([]);
   const [newFilter, setNewFilter] = useState<string>('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<any>([]);
   const [availableRoles, setAvailableRoles] = useState<any>();
 
   useEffect(() => {
@@ -29,14 +29,15 @@ const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
     if (workSpaceData?.workSpaceName) {
       const allRoles = await getAllWorkSpaceRoles(workSpaceData?.workSpaceName);
       setAvailableRoles(allRoles);
+      console.log(allRoles);
     }
   };
   useEffect(() => {
     if (newFilter) {
-      const filteredSuggestions = availableRoles.filter(
+      const filteredSuggestions = availableRoles?.filter(
         (role: any) =>
           role?.name?.toLowerCase().includes(newFilter.toLowerCase()) &&
-          !filters.includes(role)
+          !filters.includes(role.name)
       );
       setSuggestions(filteredSuggestions);
     } else {
@@ -78,17 +79,17 @@ const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
           _hover={{ borderColor: '', background: 'rgba(0, 0, 0, 0.3)' }}
         />
       </HStack>
-      {suggestions.length > 0 && (
+      {suggestions?.length > 0 && (
         <List background="rgba(0, 0, 0, 0.3)" borderRadius="md" p={2} mb={4}>
-          {suggestions.map((suggestion, index) => (
+          {suggestions.map((suggestion: any, index: any) => (
             <ListItem
               key={index}
               p={2}
               _hover={{ bg: 'rgba(0, 0, 0, 0.4)' }}
               cursor="pointer"
-              onClick={() => addFilter(suggestion)}
+              onClick={() => addFilter(suggestion.name)}
             >
-              {suggestion}
+              {suggestion.name}
             </ListItem>
           ))}
         </List>

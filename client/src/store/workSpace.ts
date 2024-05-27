@@ -36,7 +36,7 @@ interface WorkSpaceState {
   getWorkspacePublicChannels: () => Promise<void>;
   updateAvatar: (workSpaceData: WorkSpaceData) => Promise<void>;
   addWorkSpaceRoles: (workSpaceName: string, roleName: string[]) => Promise<void>;
-  getAllWorkSpaceRoles: (workSpaceName: string) => Promise<string[]>;
+  getAllWorkSpaceRoles: (workSpaceName: string) => Promise<any[]>;
   changeWorkSpaceEmailTemplates: (workSpaceName: string, emailTemplates: string[]) => Promise<void>;
 }
 
