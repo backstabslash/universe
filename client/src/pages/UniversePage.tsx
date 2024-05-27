@@ -63,7 +63,7 @@ const MainContent = (): JSX.Element => {
     onEditedMessage,
   } = useMessengerStore(state => state);
 
-  const { logout, userData } = useAuthStore(state => state);
+  const { userData, logout, setUserData } = useAuthStore(state => state);
   const { getWorkspaceData, workSpaceData, updateAvatar } = useWorkSpaceStore(
     state => state
   );
@@ -92,6 +92,8 @@ const MainContent = (): JSX.Element => {
     }
 
     return () => {
+      setUserData({});
+      socket?.removeAllListeners();
       socket?.disconnect();
     };
   }, []);

@@ -12,7 +12,6 @@ import Joi from "joi";
 import UserRole from "../models/user/userRoleModel";
 import Role from '../models/user/roleModel';
 
-
 class UserController {
   async getByEmail(req: Request, res: Response) {
     const getUserByEmailSchema = Joi.object({

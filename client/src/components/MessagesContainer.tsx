@@ -32,7 +32,6 @@ const MessagesContainer = (): JSX.Element => {
   const firstMessageRef = useRef<HTMLDivElement | null>(null);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
 
@@ -67,11 +66,10 @@ const MessagesContainer = (): JSX.Element => {
     const channelMessages: UserMessage[] | undefined = channels.find(
       channel => channel.id === currentChannel.id
     )?.messages;
-    if (channelMessages && channelMessages.length > 0) {
+    setMessages([]);
+    if (channelMessages) {
       setMessages([...channelMessages]);
     } else {
-      setMessages([]);
-
       setMessagesLoading(true);
       loadChannelMessages();
     }
@@ -83,8 +81,16 @@ const MessagesContainer = (): JSX.Element => {
       hasMoreMessages: boolean;
       users: any;
     }): void => {
-      setHasMoreMessages(data.hasMoreMessages);
-      setMessages(prevMessages => [...prevMessages, ...data.messages]);
+      setMessages(prevMessages => {
+        const existingMessageIds = new Set(
+          prevMessages.map(msg => msg.id) || []
+        );
+        const newMessages = data.messages.filter(
+          msg => !existingMessageIds.has(msg.id)
+        );
+        return [...prevMessages, ...newMessages];
+      });
+
       onRecieveChannelMessages(data);
       setMessagesLoading(false);
     };
@@ -94,12 +100,17 @@ const MessagesContainer = (): JSX.Element => {
     return () => {
       socket?.off('recieve-channel-messages', channelMessagesHandler);
     };
-  }, [socket, channels, currentChannel, onRecieveChannelMessages]);
+  }, [socket, channels, currentChannel]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !messagesLoading && hasMoreMessages) {
+        if (
+          entry.isIntersecting &&
+          channels.find(channel => channel.id === currentChannel?.id)
+            ?.hasMoreMessages &&
+          !messagesLoading
+        ) {
           setMessagesLoading(true);
           loadChannelMessages();
         }
@@ -120,7 +131,7 @@ const MessagesContainer = (): JSX.Element => {
         observer.unobserve(firstMessageRef.current);
       }
     };
-  }, [messagesLoading, loadChannelMessages, messages]);
+  }, [messagesLoading, messages]);
 
   useEffect(() => {
     if (

@@ -85,6 +85,7 @@ class MessagesHandler {
       console.error(error);
     }
   }
+
   async editMessage(
     socket: Socket,
     data: { editedMessage: Message; channelId: string },
@@ -103,6 +104,7 @@ class MessagesHandler {
       console.error(error);
     }
   }
+
   private async uploadAttachments(attachments: any[]) {
     try {
       const uploadAttachments = async (attachments: any[]) => {

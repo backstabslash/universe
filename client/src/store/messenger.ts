@@ -21,6 +21,7 @@ export interface ChannelMessages extends Channel {
   messages: UserMessage[];
   page: number;
   users: any;
+  hasMoreMessages: boolean;
 }
 
 export interface Channel {
@@ -102,6 +103,7 @@ interface MessengerState {
   onRecieveChannelMessages: (data: {
     messages: UserMessage[];
     users: any;
+    hasMoreMessages: boolean;
   }) => void;
   updateChannelGroupsOrder: (newChannelGroups: ChannelGroup[]) => void;
   addUserToChannel: (id: string[], channelId?: string) => void;
@@ -187,6 +189,10 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           })
         );
         channels.push(data.notesChannel);
+
+        channels.forEach((channel: ChannelMessages) => {
+          channel.hasMoreMessages = true;
+        });
 
         set({
           channelGroups: data.channelGroups,
@@ -521,16 +527,26 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
   onRecieveChannelMessages: (data: {
     messages: UserMessage[];
     users: any;
+    hasMoreMessages: boolean;
   }): void => {
     const { channels, currentChannel } = get();
+    if (!currentChannel) return;
 
     const updatedChannels = channels.map(channel => {
-      if (channel.id === currentChannel?.id) {
+      if (channel.id === currentChannel.id) {
+        const existingMessages = channel.messages || [];
+        const existingMessageIds = new Set(existingMessages.map(msg => msg.id));
+
+        const newMessages = data.messages.filter(
+          msg => !existingMessageIds.has(msg.id)
+        );
+
         return {
           ...channel,
-          messages: [...(channel?.messages || []), ...data.messages],
+          messages: [...existingMessages, ...newMessages],
           page: channel.page ? channel.page + 1 : 1,
           users: data.users,
+          hasMoreMessages: data.hasMoreMessages,
         };
       }
       return channel;
@@ -718,6 +734,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
               users: [...channel.users, ...ids.map(id => ({ _id: id }))],
               name: channel.name,
               ownerId: channel.owner,
+              hasMoreMessages: channel.hasMoreMessages,
             };
             const updatedChannelGroups = channelGroups.map(channelGroup => {
               if (channelGroup.name === 'General') {
@@ -772,6 +789,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
             users: data.channel.users,
             name: data.channel.name,
             ownerId: data.channel.owner,
+            hasMoreMessages: true,
           };
           const updatedChannelGroups = channelGroups.map(channelGroup => {
             if (channelGroup.name === 'General') {
@@ -827,6 +845,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           users: response.data.owner,
           name: response.data.name,
           ownerId: response.data.owner,
+          hasMoreMessages: false,
         };
         const updatedChannelGroups = channelGroups.map(channelGroup => {
           if (channelGroup.name === 'General') {
@@ -882,6 +901,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
                 page: 0,
                 users: [],
                 name: data.userName,
+                hasMoreMessages: false,
               },
               ...channels,
             ],
