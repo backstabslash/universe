@@ -13,13 +13,7 @@ import useMessengerStore, {
   UserMessage,
 } from '../store/messenger';
 import useAuthStore from '../store/auth';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Clear, InsertDriveFile, Image } from '@mui/icons-material/';
 import {
   Element as EditorElement,
@@ -55,7 +49,7 @@ const MessagesContainer = (): JSX.Element => {
     socket,
     currentChannel,
     lastSentMessage,
-    lastDeletedMessage,
+    lastEditedMessage,
     setEditingMessage,
     loadChannelMessages,
     onRecieveChannelMessages,
@@ -143,17 +137,44 @@ const MessagesContainer = (): JSX.Element => {
     }
   }, [lastSentMessage]);
 
+  const [editorsMap, setEditorsMap] = useState(new Map());
+
+  useEffect(() => {
+    const updatedEditorsMap = new Map(editorsMap);
+    channels
+      ?.find(channel => channel?.id === currentChannel?.id)
+      ?.messages?.forEach(message => {
+        if (!updatedEditorsMap.has(message.id)) {
+          const editor = withInlines(withReact(createEditor()));
+          editor.children = message.textContent;
+          updatedEditorsMap.set(message.id, editor);
+        }
+      });
+    setEditorsMap(updatedEditorsMap);
+  }, [channels, currentChannel]);
+
   useEffect(() => {
     if (
-      lastDeletedMessage.messageId &&
-      lastDeletedMessage.channelId === currentChannel?.id
+      lastEditedMessage.message &&
+      lastEditedMessage.channelId === currentChannel?.id
     ) {
-      const filteredMessages = messages.filter(
-        message => message.id !== lastDeletedMessage.messageId
-      );
+      const filteredMessages = messages.map(message => {
+        if (message.id === lastEditedMessage?.message?.id) {
+          const editor = editorsMap.get(message.id);
+          if (editor) {
+            editor.children = lastEditedMessage.message.textContent;
+          }
+          return {
+            ...message,
+            textContent: lastEditedMessage.message.textContent,
+          };
+        }
+        return message;
+      });
+
       setMessages(filteredMessages);
     }
-  }, [lastDeletedMessage]);
+  }, [lastEditedMessage]);
 
   const renderElement = useCallback(
     (props: ElementProps) => <EditorElement {...props} />,
@@ -164,15 +185,6 @@ const MessagesContainer = (): JSX.Element => {
     (props: LeafProps) => <EditorLeaf {...props} />,
     []
   );
-
-  const editorsMap = useMemo(() => {
-    const map = new Map();
-    messages.forEach(message => {
-      const editor = withInlines(withReact(createEditor()));
-      map.set(message.id, editor);
-    });
-    return map;
-  }, [messages]);
 
   const handleDownloadFile = async (
     fileId: string,
@@ -245,6 +257,7 @@ const MessagesContainer = (): JSX.Element => {
           <Spinner size={'xl'} thickness="4px" speed="0.5s" />
         </Flex>
       ) : (
+        editorsMap.size > 0 &&
         messages.map((message, index) => {
           return (
             <React.Fragment key={message.id}>
