@@ -61,6 +61,23 @@ const UserProfile = (): JSX.Element => {
 
   const [isOwnProfile, setIsOwnProfile] = useState(true);
 
+  const getCurrentTime = (): string =>
+    new Date().toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(getCurrentTime());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     setIsOwnProfile(authUserId?.toString() === userData?.userId?.toString());
   }, [userData?.userId]);
@@ -158,12 +175,6 @@ const UserProfile = (): JSX.Element => {
       });
     }
   };
-
-  const currentTime = new Date().toLocaleTimeString('en-US', {
-    hour12: false,
-    hour: 'numeric',
-    minute: 'numeric',
-  });
 
   return isOwnProfile ? (
     <Flex flexDirection={'column'} flex="3">
@@ -544,7 +555,7 @@ const UserProfile = (): JSX.Element => {
                   );
                 }}
               >
-                Message
+                Send message
               </Button>
             </Link>
             <VStack align="start" spacing={1}>
