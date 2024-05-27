@@ -19,7 +19,18 @@ import {
   Flex,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import Joi from 'joi';
 import useWorkSpaceStore from '../store/workSpace';
+
+const emailRules = Joi.string()
+  .email({ tlds: { allow: false } })
+  .required()
+  .trim()
+  .messages({
+    'string.email': 'Invalid email format',
+    'any.required': 'Email is required',
+    'string.empty': 'Email cannot be empty',
+  });
 
 const ChangeEmailTemplatesModal = (): any => {
   const [formData, setFormData] = useState<{ emailTemplates: string[] }>({
@@ -27,6 +38,7 @@ const ChangeEmailTemplatesModal = (): any => {
   });
   const [formError, setFormError] = useState<string>('');
   const [newEmailTemplate, setNewEmailTemplate] = useState<string>('');
+  const [newEmailTemplates, setNewEmailTemplates] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [availableEmailTemplates, setAvailableEmailTemplates] = useState<
     string[]
@@ -37,20 +49,19 @@ const ChangeEmailTemplatesModal = (): any => {
 
   const getAllEmailTemplates = async (): Promise<void> => {
     await getWorkspaceData();
-    console.log(workSpaceData);
   };
 
   useEffect(() => {
     if (workSpaceData?.emailTemplates) {
       setAvailableEmailTemplates(workSpaceData.emailTemplates);
     }
-    console.log(111);
   }, [workSpaceData?.emailTemplates]);
 
   const handleOpen = async (): Promise<void> => {
     setFormError('');
     await getAllEmailTemplates();
     setFormData({ emailTemplates: workSpaceData?.emailTemplates ?? [] });
+    setNewEmailTemplates([]);
     setNewEmailTemplate('');
     setSuggestions([]);
     onOpen();
@@ -61,6 +72,13 @@ const ChangeEmailTemplatesModal = (): any => {
     setNewEmailTemplate(value);
 
     if (value) {
+      const validationResult = emailRules.validate(value);
+      if (validationResult.error) {
+        setSuggestions([]);
+        return;
+      }
+      setFormError('');
+
       const filteredSuggestions = availableEmailTemplates.filter(
         (template: string) =>
           template
@@ -81,7 +99,12 @@ const ChangeEmailTemplatesModal = (): any => {
   };
 
   const addEmailTemplate = (template: string): void => {
-    if (template && !formData.emailTemplates.includes(template)) {
+    if (
+      template &&
+      !formData.emailTemplates.includes(template) &&
+      !newEmailTemplates.includes(template)
+    ) {
+      setNewEmailTemplates(prev => [...prev, template]);
       setFormData(prev => ({
         emailTemplates: [...prev.emailTemplates, template],
       }));
@@ -91,7 +114,10 @@ const ChangeEmailTemplatesModal = (): any => {
   };
 
   const removeEmailTemplate = (templateToRemove: string): void => {
-    if (formData.emailTemplates[0] !== templateToRemove) {
+    if (newEmailTemplates.includes(templateToRemove)) {
+      setNewEmailTemplates(prev =>
+        prev.filter(template => template !== templateToRemove)
+      );
       setFormData(prev => ({
         emailTemplates: prev.emailTemplates.filter(
           template => template !== templateToRemove
@@ -109,6 +135,7 @@ const ChangeEmailTemplatesModal = (): any => {
         );
         await getWorkspaceData();
       }
+      setNewEmailTemplates([]);
       onClose();
     } catch (error: any) {
       setFormError(error.message || 'An error occurred');
@@ -130,7 +157,7 @@ const ChangeEmailTemplatesModal = (): any => {
         w={'100%'}
         justifyContent={'start'}
       >
-        Change Email Templates
+        Change email templates
       </Button>
 
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -175,7 +202,7 @@ const ChangeEmailTemplatesModal = (): any => {
                     borderRadius="md"
                   >
                     <Text>{template}</Text>
-                    {index > 0 && (
+                    {newEmailTemplates.includes(template) && (
                       <CloseButton
                         size="sm"
                         onClick={() => removeEmailTemplate(template)}
