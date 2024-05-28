@@ -12,26 +12,39 @@ import {
   ModalFooter,
   Text,
   MenuItem,
+  Input,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useMessengerStore from '../store/messenger';
-import { DeleteIcon, CloseIcon } from '@chakra-ui/icons';
+import { DeleteIcon, CloseIcon, EditIcon } from '@chakra-ui/icons';
 import useAuthStore from '../store/auth';
 
 enum ChannelAction {
   DELETE,
   LEAVE,
+  RENAME,
 }
 
 const DeleteChannelModal = (): any => {
   const [formError, setformError] = useState<string>('');
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { deleteChannel, leaveChannel, currentChannel, channels } =
-    useMessengerStore(state => state);
+  const {
+    deleteChannel,
+    leaveChannel,
+    renameChannel,
+    setCurrentChannel,
+    currentChannel,
+    channels,
+  } = useMessengerStore(state => state);
   const { userData } = useAuthStore(state => state);
   const [channelAction, setChannelAction] = useState<ChannelAction>(
     ChannelAction.LEAVE
   );
+  const [newChannelName, setNewChannelName] = useState<string>('');
+
+  useEffect(() => {
+    setNewChannelName(currentChannel?.name ?? '');
+  }, [isOpen]);
 
   const handleOpen = async (): Promise<void> => {
     setformError('');
@@ -72,10 +85,44 @@ const DeleteChannelModal = (): any => {
     }
   };
 
+  const handleRename = async (): Promise<void> => {
+    try {
+      if (currentChannel) {
+        renameChannel(currentChannel.id, newChannelName);
+        setCurrentChannel(currentChannel.id, newChannelName);
+      }
+      setNewChannelName('');
+      onClose();
+    } catch (error: any) {
+      setformError(error);
+      console.error(error);
+    }
+  };
+
   return (
     <>
+      {checkOwner() && (
+        <MenuItem
+          width={'100%'}
+          background="rgba(0, 0, 0, 0)"
+          _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
+          _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
+          color="zinc300"
+          as={Button}
+          justifyContent={'start'}
+          leftIcon={<EditIcon />}
+          fontWeight={'bold'}
+          fontSize={'md'}
+          borderRadius={0}
+          onClick={() => {
+            setChannelAction(ChannelAction.RENAME);
+            handleOpen();
+          }}
+        >
+          <Text>Reanme channel</Text>
+        </MenuItem>
+      )}
       <MenuItem
-        w="fit-content"
         background="rgba(0, 0, 0, 0)"
         _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
         _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
@@ -97,7 +144,6 @@ const DeleteChannelModal = (): any => {
       {checkOwner() && (
         <MenuItem
           width={'100%'}
-          w="fit-content"
           background="rgba(0, 0, 0, 0)"
           _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
           _active={{ background: 'rgba(0, 0, 0, 0.4)' }}
@@ -124,6 +170,8 @@ const DeleteChannelModal = (): any => {
             <ModalHeader>Delete current channel</ModalHeader>
           ) : channelAction === ChannelAction.LEAVE ? (
             <ModalHeader>Leave current channel</ModalHeader>
+          ) : channelAction === ChannelAction.RENAME ? (
+            <ModalHeader>Channel rename</ModalHeader>
           ) : (
             <></>
           )}
@@ -140,6 +188,15 @@ const DeleteChannelModal = (): any => {
                 <FormLabel>
                   Are you sure you want to leave {currentChannel?.name}?
                 </FormLabel>
+              ) : channelAction === ChannelAction.RENAME ? (
+                <>
+                  <FormLabel>Enter new channel name</FormLabel>
+                  <Input
+                    autoFocus={true}
+                    value={newChannelName}
+                    onChange={e => setNewChannelName(e.target.value)}
+                  />
+                </>
               ) : (
                 <></>
               )}
@@ -170,6 +227,18 @@ const DeleteChannelModal = (): any => {
                 }}
               >
                 Leave
+              </Button>
+            ) : channelAction === ChannelAction.RENAME ? (
+              <Button
+                background="zinc700"
+                _hover={{ background: 'zinc800' }}
+                color="zinc300"
+                mr={3}
+                onClick={() => {
+                  handleRename();
+                }}
+              >
+                Save
               </Button>
             ) : (
               <></>

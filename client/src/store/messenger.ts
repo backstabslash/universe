@@ -115,6 +115,8 @@ interface MessengerState {
     readonly: boolean;
   }) => void;
   deleteChannel: (id: string) => void;
+  renameChannel: (id: string, name: string) => void;
+  onChannelRenamed: () => void;
   leaveChannel: (id: string) => void;
   onUserLeftChannel: () => void;
   onDeletedChannel: () => void;
@@ -967,6 +969,71 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           },
         });
       }
+    });
+  },
+
+  renameChannel: (channelId: string, newName: string): void => {
+    const { socket, channels } = get();
+
+    if (!socket) return;
+    socket.emit(
+      'rename-channel',
+      { id: channelId, name: newName },
+      (response: any) => {
+        if (response.status === 'success') {
+          const updatedChannels = channels.map(channel => {
+            if (channel.id === channelId) {
+              return { ...channel, name: newName };
+            }
+            return channel;
+          });
+          const updatedChannelGroups = get().channelGroups.map(channelGroup => {
+            return {
+              ...channelGroup,
+              items: channelGroup.items.map(item => {
+                if (item.id === channelId) {
+                  return { ...item, name: newName };
+                }
+                return item;
+              }),
+            };
+          });
+
+          set({
+            channels: updatedChannels,
+            channelGroups: updatedChannelGroups,
+          });
+        }
+      }
+    );
+  },
+
+  onChannelRenamed: (): void => {
+    const { socket } = get();
+
+    if (!socket) return;
+    socket.on('channel-renamed', (data: { id: string; name: string }) => {
+      const { channels } = get();
+      const updatedChannels = channels.map(channel => {
+        if (channel.id === data.id) {
+          return { ...channel, name: data.name };
+        }
+        return channel;
+      });
+
+      const updatedChannelGroups = get().channelGroups.map(channelGroup => {
+        return {
+          ...channelGroup,
+          items: channelGroup.items.map(item => {
+            if (item.id === data.id) {
+              return { ...item, name: data.name };
+            }
+            return item;
+          }),
+        };
+      });
+
+      set({ channels: updatedChannels, channelGroups: updatedChannelGroups });
     });
   },
 
