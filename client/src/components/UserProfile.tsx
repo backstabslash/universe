@@ -443,10 +443,15 @@ const UserProfile = (): JSX.Element => {
                     borderRadius="md"
                   >
                     <Text>{role.name}</Text>
-                    <CloseButton
-                      size="sm"
-                      onClick={() => handleOpenAlert(role.id)}
-                    />
+                    {role.name !== 'administration' &&
+                      role.name !== 'headman' &&
+                      role.name !== 'student' &&
+                      role.name !== 'worker' && (
+                        <CloseButton
+                          size="sm"
+                          onClick={() => handleOpenAlert(role.id)}
+                        />
+                      )}
                   </HStack>
                 ))}
               </List>
