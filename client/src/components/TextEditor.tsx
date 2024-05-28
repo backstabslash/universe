@@ -137,7 +137,7 @@ interface TextEditorProps {
 
 const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
   const { userData } = useAuthStore(state => state);
-  const { editingMessage, setEditingMessage, editMessage, currentChannel } =
+  const { editingMessage, currentChannel, setEditingMessage, editMessage } =
     useMessengerStore(state => state);
   const [editorKey, setEditorKey] = useState(0);
   const [content, setContent] = useState<Descendant[]>(initialValue);
@@ -149,6 +149,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     []
   );
   const renderLeaf = useCallback((props: LeafProps) => <Leaf {...props} />, []);
+
   const editor = useMemo(() => {
     const withPlugins = (editor: BaseEditor): BaseEditor => {
       withInlines(editor);
@@ -157,6 +158,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     };
     return withPlugins(withReact(withHistory(createEditor())));
   }, []);
+
   const editor2 = useMemo(() => {
     const withPlugins = (editor: BaseEditor): BaseEditor => {
       withInlines(editor);
@@ -165,6 +167,7 @@ const TextEditor = ({ sendMessage }: TextEditorProps): JSX.Element => {
     };
     return withPlugins(withReact(withHistory(createEditor())));
   }, []);
+
   useEffect(() => {
     if (editingMessage) {
       resetEditor(false);

@@ -69,6 +69,11 @@ const Sidebar = (): JSX.Element => {
     };
   }, [conversationList]);
 
+  useEffect(() => {
+    if (!currentChannel) return;
+    setActiveChannel(currentChannel?.id);
+  }, [currentChannel]);
+
   const onChannelClick = (id: string, name: string, userId: string): void => {
     setCurrentChannel(id, name, userId);
     setActiveChannel(id);

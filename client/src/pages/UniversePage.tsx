@@ -50,6 +50,7 @@ const MainContent = (): JSX.Element => {
     currentChannel,
     notesChannel,
     channelGroups,
+    channels,
     connectSocket,
     getChannelGroups,
     proccessUploadingAttachments,
@@ -69,6 +70,7 @@ const MainContent = (): JSX.Element => {
   );
   const axiosPrivate = useAxiosPrivate();
   const { setAxiosPrivate } = useUserStore(state => state);
+  const [isReadonly, setIsReadonly] = useState<boolean>();
 
   const handleLogout = async (): Promise<void> => {
     try {
@@ -97,6 +99,17 @@ const MainContent = (): JSX.Element => {
       socket?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const channel = channels?.find(
+      channel => channel?.id === currentChannel?.id
+    );
+
+    if (channel) {
+      const { ownerId, readonly } = channel;
+      setIsReadonly(ownerId !== userData?.userId && readonly);
+    }
+  }, [currentChannel, channels, userData]);
 
   useEffect(() => {
     getWorkspaceData();
@@ -347,10 +360,24 @@ const MainContent = (): JSX.Element => {
                   </HStack>
                 )}
               </Flex>
-              <MessagesContainer />
-              <Flex maxH={'168px'} h={'100%'} background="rgba(0, 0, 0, 0.5)">
-                <TextEditor sendMessage={handleSendMessage} />
+              <Flex
+                maxH={
+                  isReadonly ? 'calc(100vh - 102px)' : 'calc(100vh - 270px)'
+                }
+                h={'100%'}
+                background="rgba(0, 0, 0, 0.5)"
+                bgImage="../../chat-bg-pattern-dark.png"
+                bgSize="cover"
+                bgRepeat="no-repeat"
+                bgPosition="center"
+              >
+                <MessagesContainer />
               </Flex>
+              {!isReadonly && (
+                <Flex maxH={'168px'} h={'100%'} background="rgba(0, 0, 0, 0.5)">
+                  <TextEditor sendMessage={handleSendMessage} />
+                </Flex>
+              )}
             </Box>
             {isUserProfileVisible && <UserProfile />}
           </Flex>

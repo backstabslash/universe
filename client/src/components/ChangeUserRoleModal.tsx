@@ -164,6 +164,8 @@ const ManageUserRolesModal = (): any => {
           handleOpen();
         }}
         _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
+        w={'100%'}
+        justifyContent={'start'}
       >
         Manage user roles
       </Button>

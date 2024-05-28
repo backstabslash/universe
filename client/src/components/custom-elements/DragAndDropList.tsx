@@ -14,7 +14,7 @@ interface DragAndDropListProps {
   onItemClick: (id: string, name: string, userId: string) => void;
   setGroupsChanged: (groupsChanged: boolean) => void;
   onDeleteList: (id: string) => void;
-  activeChannel: string | null; // Ensure activeChannel is a string or null
+  activeChannel: string | null;
 }
 
 interface List {
