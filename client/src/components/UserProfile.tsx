@@ -433,27 +433,32 @@ const UserProfile = (): JSX.Element => {
             >
               <Text fontWeight="bold">My roles</Text>
               <List spacing={3}>
-                {userData?.roles?.map((role: any) => (
-                  <HStack
-                    key={role.id}
-                    bg="blue.500"
-                    color="white"
-                    p={2}
-                    m={1}
-                    borderRadius="md"
-                  >
-                    <Text>{role.name}</Text>
-                    {role.name !== 'administration' &&
-                      role.name !== 'headman' &&
-                      role.name !== 'student' &&
-                      role.name !== 'worker' && (
-                        <CloseButton
-                          size="sm"
-                          onClick={() => handleOpenAlert(role.id)}
-                        />
-                      )}
-                  </HStack>
-                ))}
+                {userData?.roles
+                  ?.filter(
+                    (role: any, index: number, self: any[]) =>
+                      index === self.findIndex(r => r.name === role.name)
+                  )
+                  .map((role: any) => (
+                    <HStack
+                      key={role.id}
+                      bg="blue.500"
+                      color="white"
+                      p={2}
+                      m={1}
+                      borderRadius="md"
+                    >
+                      <Text>{role.name}</Text>
+                      {role.name !== 'administration' &&
+                        role.name !== 'headman' &&
+                        role.name !== 'student' &&
+                        role.name !== 'worker' && (
+                          <CloseButton
+                            size="sm"
+                            onClick={() => handleOpenAlert(role.id)}
+                          />
+                        )}
+                    </HStack>
+                  ))}
               </List>
             </VStack>
           </VStack>
