@@ -154,19 +154,33 @@ class UserController {
     session.startTransaction();
     try {
       const { userIds, userRoleIds } = req.body;
+      const roleNames = ['administration', 'headman', 'worker', 'student'];
+
+      const newRoleIds = userRoleIds.map((roleId: string) => new mongoose.Types.ObjectId(roleId));
+
+      const rolesToReplace = await Role.find({ name: { $in: roleNames } });
+      const rolesToReplaceIds = rolesToReplace.map(role => role._id);
 
       const userRoles = userIds
         .map((userId: string) =>
-          userRoleIds.map((roleId: string) => ({
+          newRoleIds.map((roleId: string) => ({
             user: new mongoose.Types.ObjectId(userId),
-            role: new mongoose.Types.ObjectId(roleId),
+            role: roleId,
           }))
         )
         .flat();
 
       const existingUserRoles = await UserRole.find({
-        $or: userRoles,
+        user: { $in: userIds.map((userId: string) => new mongoose.Types.ObjectId(userId)) },
+        role: { $in: rolesToReplaceIds }
       }).session(session);
+
+      if (existingUserRoles.length > 0) {
+        await UserRole.deleteMany({
+          user: { $in: existingUserRoles.map(userRole => userRole.user) },
+          role: { $in: rolesToReplaceIds }
+        }).session(session);
+      }
 
       const existingConnections = new Set(
         existingUserRoles.map(
@@ -174,6 +188,7 @@ class UserController {
             `${userRole.user.toString()}-${userRole.role.toString()}`
         )
       );
+
       const newUserRoles = userRoles.filter(
         (userRole: any) =>
           !existingConnections.has(`${userRole.user}-${userRole.role}`)
@@ -200,6 +215,8 @@ class UserController {
       });
     }
   }
+
+
 
   async removeRole(req: Request, res: Response) {
     const session = await mongoose.startSession();
