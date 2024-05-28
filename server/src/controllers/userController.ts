@@ -156,10 +156,8 @@ class UserController {
       const { userIds, userRoleIds } = req.body;
       const roleNames = ['administration', 'headman', 'worker', 'student'];
 
-      // Convert userRoleIds to ObjectId
       const newRoleIds = userRoleIds.map((roleId: string) => new mongoose.Types.ObjectId(roleId));
 
-      // Find the roles that match roleNames
       const rolesToReplace = await Role.find({ name: { $in: roleNames } });
       const rolesToReplaceIds = rolesToReplace.map(role => role._id);
 
@@ -172,13 +170,11 @@ class UserController {
         )
         .flat();
 
-      // Check for existing roles
       const existingUserRoles = await UserRole.find({
         user: { $in: userIds.map((userId: string) => new mongoose.Types.ObjectId(userId)) },
         role: { $in: rolesToReplaceIds }
       }).session(session);
 
-      // Remove existing roles that match roleNames
       if (existingUserRoles.length > 0) {
         await UserRole.deleteMany({
           user: { $in: existingUserRoles.map(userRole => userRole.user) },
@@ -186,7 +182,6 @@ class UserController {
         }).session(session);
       }
 
-      // Prepare new userRoles, avoiding duplicates
       const existingConnections = new Set(
         existingUserRoles.map(
           (userRole) =>
