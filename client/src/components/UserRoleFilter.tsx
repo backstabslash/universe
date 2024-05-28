@@ -29,7 +29,6 @@ const UserRoleFilter = ({ onFilterChange }: any): JSX.Element => {
     if (workSpaceData?.workSpaceName) {
       const allRoles = await getAllWorkSpaceRoles(workSpaceData?.workSpaceName);
       setAvailableRoles(allRoles);
-      console.log(allRoles);
     }
   };
   useEffect(() => {

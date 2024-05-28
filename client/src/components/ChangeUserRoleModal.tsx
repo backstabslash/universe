@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react';
 import UserRoleFilter from './UserRoleFilter';
 import useWorkSpaceStore from '../store/workSpace';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import useUserStore from '../store/user';
 
 const ManageUserRolesModal = (): any => {
   const axiosPrivate = useAxiosPrivate();
@@ -34,9 +35,9 @@ const ManageUserRolesModal = (): any => {
     getWorkspaceUsers,
     users: workspaceUsers,
     getAllWorkSpaceRoles,
-    // addRolesToUsers,
     workSpaceData,
   } = useWorkSpaceStore();
+  const { addRolesToUsers } = useUserStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoles, setSelectedRoles] = useState<any>([]);
   const [selectedUsers, setSelectedUsers] = useState<any>([]);
@@ -94,8 +95,8 @@ const ManageUserRolesModal = (): any => {
       : workspaceUsers;
 
   const filteredRolesList = roleSearchQuery
-    ? availableRoles.filter((role: string) =>
-        role?.name?.toLowerCase().includes(roleSearchQuery)
+    ? availableRoles.filter((role: any) =>
+        role?.name?.toLowerCase()?.includes(roleSearchQuery)
       )
     : [];
 
@@ -114,15 +115,18 @@ const ManageUserRolesModal = (): any => {
     }
   };
 
-  const addRoleToUser = (role: string): void => {
-    if (role && !selectedRoles.includes(role)) {
+  const addRoleToUser = (role: any): void => {
+    if (
+      role &&
+      !selectedRoles.some((selectedRole: any) => selectedRole._id === role._id)
+    ) {
       setSelectedRoles([...selectedRoles, role]);
     }
   };
 
-  const removeRoleFromUser = (roleToRemove: string): void => {
+  const removeRoleFromUser = (roleToRemove: any): void => {
     setSelectedRoles(
-      selectedRoles.filter((role: any) => role !== roleToRemove)
+      selectedRoles.filter((role: any) => role._id !== roleToRemove._id)
     );
   };
 
@@ -132,10 +136,12 @@ const ManageUserRolesModal = (): any => {
         setRoleError('Please select at least one user and one role.');
         return;
       }
-      // await addRolesToUsers(
-      //   selectedUsers.map(user => user._id),
-      //   selectedRoles
-      // );
+
+      const userIds = selectedUsers.map((user: any) => user._id);
+      const userRoleIds = selectedRoles.map((role: any) => role._id);
+
+      await addRolesToUsers(userIds, userRoleIds);
+
       setSelectedUsers([]);
       setSelectedRoles([]);
       setSearchQuery('');
@@ -290,14 +296,14 @@ const ManageUserRolesModal = (): any => {
                   />
                   {roleSearchQuery && (
                     <List spacing={3} mt="10px">
-                      {filteredRolesList.map((role, index) => (
+                      {filteredRolesList.map((role: any, index: any) => (
                         <ListItem
                           key={index}
                           p={2}
                           onClick={() => addRoleToUser(role)}
                         >
                           <Text cursor="pointer" _hover={{ color: 'blue.500' }}>
-                            {role}
+                            {role.name}
                           </Text>
                         </ListItem>
                       ))}
@@ -314,7 +320,7 @@ const ManageUserRolesModal = (): any => {
                       m={1}
                       borderRadius="md"
                     >
-                      <Text>{role}</Text>
+                      <Text>{role.name}</Text>
                       <CloseButton
                         size="sm"
                         onClick={() => removeRoleFromUser(role)}

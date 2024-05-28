@@ -25,6 +25,7 @@ interface UserState {
   fetchUserByEmail: () => Promise<void>;
   fetchUserById: (userId: string) => Promise<void>;
   updateUserInfo: (updateData: UserData) => Promise<void>;
+  addRolesToUsers: (userIds: string[], userRoleIds: string[]) => Promise<void>;
 }
 
 const useUserStore = create<UserState>((set, get) => ({
@@ -74,6 +75,18 @@ const useUserStore = create<UserState>((set, get) => ({
     } catch (error: any) {
       console.error('Failed to update user:', error);
       set({ error: error.response?.data?.message || 'Failed to update user' });
+      throw Error(error);
+    }
+  },
+  addRolesToUsers: async (userIds: string[], userRoleIds: string[]) => {
+    try {
+      const { axios } = get();
+      await axios?.post(`${api.url}/user/add-roles`, { userIds, userRoleIds });
+    } catch (error: any) {
+      console.error('Failed to add roles to users:', error);
+      set({
+        error: error.response?.data?.message || 'Failed to add roles to users',
+      });
       throw Error(error);
     }
   },

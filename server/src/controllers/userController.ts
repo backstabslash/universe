@@ -1,16 +1,17 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   emailRules,
   phoneRules,
   pfpUrlSchema,
   tagRules,
   nameRules,
-} from "../validation/userDataRules";
-import { uuidRules } from "../validation/commonDataRules";
-import User from "../models/user/userModel";
-import Joi from "joi";
-import UserRole from "../models/user/userRoleModel";
+} from '../validation/userDataRules';
+import { uuidRules } from '../validation/commonDataRules';
+import User from '../models/user/userModel';
+import Joi from 'joi';
+import UserRole from '../models/user/userRoleModel';
 import Role from '../models/user/roleModel';
+import mongoose from 'mongoose';
 
 class UserController {
   async getByEmail(req: Request, res: Response) {
@@ -31,10 +32,10 @@ class UserController {
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({
-          message: "User not found",
+          message: 'User not found',
         });
       }
-      const userRoles = await UserRole.find({ user: user.id }).populate("role");
+      const userRoles = await UserRole.find({ user: user.id }).populate('role');
 
       const roles = userRoles.map((userRole) => userRole.role.name);
       return res.status(200).json({
@@ -48,7 +49,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }
@@ -59,10 +60,10 @@ class UserController {
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
-          message: "User not found",
+          message: 'User not found',
         });
       }
-      const userRoles = await UserRole.find({ user: user.id }).populate("role");
+      const userRoles = await UserRole.find({ user: user.id }).populate('role');
       const roles = userRoles.map((userRole) => userRole.role.name);
 
       return res.status(200).json({
@@ -76,7 +77,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
       });
     }
   }
@@ -122,7 +123,7 @@ class UserController {
 
       if (!updatedUser) {
         return res.status(404).json({
-          message: "User not found",
+          message: 'User not found',
         });
       }
 
@@ -135,7 +136,39 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: "Internal server error",
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async addRoles(req: Request, res: Response) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const { userIds, userRoleIds } = req.body;
+
+      const userRoles = userIds
+        .map((userId: string) =>
+          userRoleIds.map((roleId: string) => ({
+            user: userId,
+            role: roleId,
+          }))
+        )
+        .flat();
+
+      await UserRole.insertMany(userRoles, { session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return res.status(200).json({
+        message: 'Roles added successfully',
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(500).json({
+        message: 'Internal server error',
       });
     }
   }
