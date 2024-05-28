@@ -176,8 +176,10 @@ class UserController {
       }).session(session);
 
       const hasRolesToReplace = userRoleIds.some((roleId: string) =>
-        rolesToReplaceIds.some((id) => id === roleId)
+        rolesToReplaceIds.some((id) => (id as any).toString() === roleId)
       );
+
+
 
       if (existingUserRoles.length > 0 && hasRolesToReplace) {
         await UserRole.deleteMany({

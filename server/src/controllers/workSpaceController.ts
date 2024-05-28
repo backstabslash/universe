@@ -172,7 +172,7 @@ class WorkSpacerController {
       await WorkspaceRole.insertMany(workspaceRoles, { session });
 
       await session.commitTransaction();
-      return res.status(200).json({});
+      return res.status(200).json({ workSpaceName: workspace.workSpaceName, ownerId: savedUser?.id });
     } catch (error) {
       await session.abortTransaction();
 
