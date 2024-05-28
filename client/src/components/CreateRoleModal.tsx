@@ -46,7 +46,9 @@ const CreateRoleModal = (): any => {
   const getAllRoles = async (): Promise<void> => {
     if (workSpaceData?.workSpaceName) {
       const allRoles = await getAllWorkSpaceRoles(workSpaceData.workSpaceName);
-      setAvailableRoles(allRoles);
+      const roleNames = allRoles.map(role => role.name);
+
+      setAvailableRoles(roleNames);
     }
   };
 

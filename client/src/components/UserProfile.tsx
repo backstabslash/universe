@@ -22,15 +22,24 @@ import {
   FormControl,
   FormLabel,
   Input,
+  CloseButton,
   useDisclosure,
+  List,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from '@chakra-ui/react';
 import { CloseIcon, AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import IconButton from './IconButton';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
 import useAuthStore from '../store/auth';
 import useMessengerStore from '../store/messenger';
+import { api } from '../config/config';
 
 const UserProfile = (): JSX.Element => {
   const axiosPrivate = useAxiosPrivate();
@@ -135,6 +144,35 @@ const UserProfile = (): JSX.Element => {
     }
   }, [userData]);
 
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [roleToRemove, setRoleToRemove] = useState(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  const handleOpenAlert = (role: any): void => {
+    setRoleToRemove(role);
+    setIsAlertOpen(true);
+  };
+
+  const handleCloseAlert = (): void => {
+    setRoleToRemove(null);
+    setIsAlertOpen(false);
+  };
+
+  const handleRemoveRole = async (): Promise<void> => {
+    try {
+      if (roleToRemove) {
+        await axiosPrivate.delete(`${api.url}/user/remove-role`, {
+          data: { userId: userData?.userId, roleId: roleToRemove },
+        });
+        await fetchUserByEmail();
+      }
+    } catch (error: any) {
+      console.error(error);
+    } finally {
+      handleCloseAlert();
+    }
+  };
+
   const handleInputChange = (e: any): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -147,7 +185,7 @@ const UserProfile = (): JSX.Element => {
     try {
       await updateUserInfo(formData);
       onClose();
-      fetchUserByEmail();
+      await fetchUserByEmail();
     } catch (error: any) {
       console.error(error);
       setError(error?.response?.data?.message || 'Failed to update user info');
@@ -388,30 +426,41 @@ const UserProfile = (): JSX.Element => {
             pl="15px"
             pb="14px"
           >
-            <HStack width="100%" justifyContent="space-between">
-              <Text fontWeight="bold">About me</Text>
-              <Button
-                size="md"
-                bg="transparent"
-                color="#23bdff"
-                fontSize={'sm'}
-                onClick={handleOpenModal}
-                _hover={{ background: 'rgba(0, 0, 0, 0.1)' }}
-              >
-                Edit
-              </Button>
-            </HStack>
-            <Link color="#1d9bd1" _hover={{ color: '#23bdff' }}>
-              <Button
-                size="md"
-                bg="zinc800"
-                _hover={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                color="zinc300"
-                onClick={handleOpenModal}
-              >
-                <AddIcon fontSize="13px" /> &nbsp; Add start date
-              </Button>
-            </Link>
+            <VStack
+              width="100%"
+              justifyContent="flex-start"
+              alignItems={'flex-start'}
+            >
+              <Text fontWeight="bold">My roles</Text>
+              <List spacing={3}>
+                {userData?.roles
+                  ?.filter(
+                    (role: any, index: number, self: any[]) =>
+                      index === self.findIndex(r => r.name === role.name)
+                  )
+                  .map((role: any) => (
+                    <HStack
+                      key={role.id}
+                      bg="blue.500"
+                      color="white"
+                      p={2}
+                      m={1}
+                      borderRadius="md"
+                    >
+                      <Text>{role.name}</Text>
+                      {role.name !== 'administration' &&
+                        role.name !== 'headman' &&
+                        role.name !== 'student' &&
+                        role.name !== 'worker' && (
+                          <CloseButton
+                            size="sm"
+                            onClick={() => handleOpenAlert(role.id)}
+                          />
+                        )}
+                    </HStack>
+                  ))}
+              </List>
+            </VStack>
           </VStack>
         </VStack>
       </VStack>
@@ -475,6 +524,37 @@ const UserProfile = (): JSX.Element => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <AlertDialog
+        isOpen={isAlertOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={handleCloseAlert}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent bg="zinc900" color="zinc200">
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Remove Role
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Are you sure you want to remove this role?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={handleCloseAlert}>
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={() => {
+                  handleRemoveRole();
+                }}
+                ml={3}
+              >
+                Remove
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Flex>
   ) : (
     <Flex flexDirection={'column'} flex="3">
@@ -607,9 +687,27 @@ const UserProfile = (): JSX.Element => {
             pl="15px"
             pb="14px"
           >
-            <HStack width="100%" justifyContent="space-between">
-              <Text fontWeight="bold">About me</Text>
-            </HStack>
+            <VStack
+              width="100%"
+              justifyContent="flex-start"
+              alignItems={'flex-start'}
+            >
+              <Text fontWeight="bold">User roles</Text>
+              <List spacing={3}>
+                {userData?.userRole?.map((role: any) => (
+                  <HStack
+                    key={role}
+                    bg="blue.500"
+                    color="white"
+                    p={2}
+                    m={1}
+                    borderRadius="md"
+                  >
+                    <Text>{role}</Text>
+                  </HStack>
+                ))}
+              </List>
+            </VStack>
           </VStack>
         </VStack>
       </VStack>

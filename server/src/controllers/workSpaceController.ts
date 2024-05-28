@@ -124,11 +124,13 @@ class WorkSpacerController {
 
       const roleNames = ['administration', 'headman', 'worker', 'student'];
 
-      const roles = await Role.find({ name: { $in: roleNames } }).session(session);
+      const roles = await Role.find({ name: { $in: roleNames } }).session(
+        session
+      );
 
       const newUserRole = new UserRole({
         user: savedUser?._id,
-        role: roles?.find(role => role.name === "administration")?.id,
+        role: roles?.find((role) => role.name === 'administration')?.id,
       });
       await newUserRole.save({ session });
 
@@ -162,9 +164,9 @@ class WorkSpacerController {
       });
       await newWorkSpaceUser.save({ session });
 
-      const workspaceRoles = roles.map(role => ({
+      const workspaceRoles = roles.map((role) => ({
         role: role._id,
-        workspace: workspace.id
+        workspace: workspace.id,
       }));
 
       await WorkspaceRole.insertMany(workspaceRoles, { session });
@@ -177,8 +179,9 @@ class WorkSpacerController {
       if ((error as any).code === 11000) {
         console.error((error as any).keyValue);
         return res.status(409).json({
-          message: `This email template exists ${(error as any).keyValue?.emailTemplates
-            }`,
+          message: `This email template exists ${
+            (error as any).keyValue?.emailTemplates
+          }`,
         });
       }
 
@@ -324,7 +327,9 @@ class WorkSpacerController {
       }
 
       const { owner, workSpaceName, pfp_url, emailTemplates } = workspace;
-      return res.status(200).json({ ownerId: owner, workSpaceName, pfp_url, emailTemplates });
+      return res
+        .status(200)
+        .json({ ownerId: owner, workSpaceName, pfp_url, emailTemplates });
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',
@@ -378,8 +383,12 @@ class WorkSpacerController {
         });
       }
 
-      const existingWorkspaceRoles = await WorkspaceRole.find({ workspace: workSpace.id }).populate('role');
-      const existingRoleNames = existingWorkspaceRoles.map(workspaceRole => workspaceRole.role.name);
+      const existingWorkspaceRoles = await WorkspaceRole.find({
+        workspace: workSpace.id,
+      }).populate('role');
+      const existingRoleNames = existingWorkspaceRoles.map(
+        (workspaceRole) => workspaceRole.role.name
+      );
 
       const newRoles = [];
 
@@ -390,7 +399,7 @@ class WorkSpacerController {
 
           const newWorkSpaceRole = new WorkspaceRole({
             role: savedRole.id,
-            workspace: workSpace.id
+            workspace: workSpace.id,
           });
           await newWorkSpaceRole.save({ session });
           newRoles.push(roleName);
@@ -410,7 +419,6 @@ class WorkSpacerController {
     }
   }
 
-
   async getWorkSpaceRoles(req: Request, res: Response) {
     try {
       const { workSpaceName } = req.body;
@@ -422,11 +430,13 @@ class WorkSpacerController {
         });
       }
 
-      const workSpaceRoles = await WorkspaceRole.find({ workspace: workSpace.id }).populate('role');
+      const workSpaceRoles = await WorkspaceRole.find({
+        workspace: workSpace.id,
+      }).populate('role');
 
-      const roleNames = workSpaceRoles.map(workspaceRole => workspaceRole.role.name);
+      const roles = workSpaceRoles.map((workspaceRole) => workspaceRole.role);
 
-      return res.status(200).json({ roles: roleNames });
+      return res.status(200).json({ roles });
     } catch (error) {
       res.status(500).json({
         message: 'Internal server error',
@@ -439,7 +449,9 @@ class WorkSpacerController {
       const { emailTemplates, workSpaceName } = req.body;
 
       if (!emailTemplates || !Array.isArray(emailTemplates)) {
-        return res.status(400).json({ message: 'Invalid email templates data' });
+        return res
+          .status(400)
+          .json({ message: 'Invalid email templates data' });
       }
 
       const workSpace = await WorkSpace.findOne({ workSpaceName });
@@ -452,16 +464,45 @@ class WorkSpacerController {
 
       return res.status(200).json();
     } catch (error) {
-
       if ((error as any).code === 11000) {
         console.error((error as any).keyValue);
         return res.status(409).json({
-          message: `This email template exists in another workspace ${(error as any).keyValue?.emailTemplates
-            }`,
+          message: `This email template exists in another workspace ${
+            (error as any).keyValue?.emailTemplates
+          }`,
         });
       }
 
       return res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async addRoles(req: Request, res: Response) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const { userIds, userRoleIds } = req.body;
+
+      const userRoles = userIds.flatMap((userId: string) =>
+        userRoleIds.map((roleId: string) => ({
+          user: userId,
+          role: roleId,
+        }))
+      );
+
+      await UserRole.insertMany(userRoles, { session });
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return res.status(201).json({ message: 'Roles added successfully' });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error('Error adding roles:', error);
+      res.status(500).json({
         message: 'Internal server error',
       });
     }

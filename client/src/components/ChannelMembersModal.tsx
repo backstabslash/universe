@@ -51,7 +51,7 @@ const ChannelMembersModal = (): any => {
   } = useWorkSpaceStore();
 
   const fetchAllUsers = async (): Promise<void> => {
-    if (currentChannelUsers.length) {
+    if (currentChannelUsers.length > 0) {
       const details: any = await Promise.all(
         currentChannelUsers.map(async (user: any) => {
           const userDetails = await fetchUserDetails(user._id);
