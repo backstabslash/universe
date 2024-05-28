@@ -1,17 +1,17 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 import {
   emailRules,
   phoneRules,
   pfpUrlSchema,
   tagRules,
   nameRules,
-} from '../validation/userDataRules';
-import { uuidRules } from '../validation/commonDataRules';
-import User from '../models/user/userModel';
-import Joi from 'joi';
-import UserRole from '../models/user/userRoleModel';
-import Role from '../models/user/roleModel';
-import mongoose from 'mongoose';
+} from "../validation/userDataRules";
+import { uuidRules } from "../validation/commonDataRules";
+import User from "../models/user/userModel";
+import Joi from "joi";
+import UserRole from "../models/user/userRoleModel";
+import Role from "../models/user/roleModel";
+import mongoose from "mongoose";
 
 class UserController {
   async getByEmail(req: Request, res: Response) {
@@ -32,10 +32,10 @@ class UserController {
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({
-          message: 'User not found',
+          message: "User not found",
         });
       }
-      const userRoles = await UserRole.find({ user: user.id }).populate('role');
+      const userRoles = await UserRole.find({ user: user.id }).populate("role");
       const roles = userRoles.map((userRole) => ({
         id: userRole.role.id,
         name: userRole.role.name,
@@ -53,7 +53,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
@@ -64,10 +64,10 @@ class UserController {
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({
-          message: 'User not found',
+          message: "User not found",
         });
       }
-      const userRoles = await UserRole.find({ user: user.id }).populate('role');
+      const userRoles = await UserRole.find({ user: user.id }).populate("role");
       const roles = userRoles.map((userRole) => ({
         id: userRole.role.id,
         name: userRole.role.name,
@@ -85,19 +85,19 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
 
   async getRoles(req: Request, res: Response) {
     try {
-      const userRoles = await Role.find().select('name -_id');
+      const userRoles = await Role.find().select("name -_id");
 
       return res.status(200).json(userRoles);
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
@@ -131,7 +131,7 @@ class UserController {
 
       if (!updatedUser) {
         return res.status(404).json({
-          message: 'User not found',
+          message: "User not found",
         });
       }
 
@@ -144,7 +144,7 @@ class UserController {
       });
     } catch (error) {
       res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
@@ -154,12 +154,12 @@ class UserController {
     session.startTransaction();
     try {
       const { userIds, userRoleIds } = req.body;
-      const roleNames = ['administration', 'headman', 'worker', 'student'];
+      const roleNames = ["administration", "headman", "worker", "student"];
 
       const newRoleIds = userRoleIds.map((roleId: string) => new mongoose.Types.ObjectId(roleId));
 
       const rolesToReplace = await Role.find({ name: { $in: roleNames } });
-      const rolesToReplaceIds = rolesToReplace.map(role => role._id);
+      const rolesToReplaceIds = rolesToReplace.map((role) => role._id);
 
       const userRoles = userIds
         .map((userId: string) =>
@@ -172,26 +172,30 @@ class UserController {
 
       const existingUserRoles = await UserRole.find({
         user: { $in: userIds.map((userId: string) => new mongoose.Types.ObjectId(userId)) },
-        role: { $in: rolesToReplaceIds }
+        role: { $in: rolesToReplaceIds },
       }).session(session);
 
-      if (existingUserRoles.length > 0) {
+      const hasRolesToReplace = userRoleIds.some((roleId: string) =>
+        rolesToReplaceIds.some((id) => (id as any).toString() === roleId)
+      );
+
+
+
+      if (existingUserRoles.length > 0 && hasRolesToReplace) {
         await UserRole.deleteMany({
-          user: { $in: existingUserRoles.map(userRole => userRole.user) },
-          role: { $in: rolesToReplaceIds }
+          user: { $in: existingUserRoles.map((userRole) => userRole.user) },
+          role: { $in: rolesToReplaceIds },
         }).session(session);
       }
 
       const existingConnections = new Set(
         existingUserRoles.map(
-          (userRole) =>
-            `${userRole.user.toString()}-${userRole.role.toString()}`
+          (userRole) => `${userRole.user.toString()}-${userRole.role.toString()}`
         )
       );
 
       const newUserRoles = userRoles.filter(
-        (userRole: any) =>
-          !existingConnections.has(`${userRole.user}-${userRole.role}`)
+        (userRole: any) => !existingConnections.has(`${userRole.user}-${userRole.role}`)
       );
 
       if (newUserRoles.length > 0) {
@@ -202,21 +206,19 @@ class UserController {
       session.endSession();
 
       return res.status(200).json({
-        message: 'Roles added successfully',
+        message: "Roles added successfully",
         addedRoles: newUserRoles.length,
         skippedRoles: existingUserRoles.length,
       });
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      console.error('Error adding roles:', error);
+      console.error("Error adding roles:", error);
       return res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }
-
-
 
   async removeRole(req: Request, res: Response) {
     const session = await mongoose.startSession();
@@ -234,19 +236,19 @@ class UserController {
 
       if (!userRole) {
         return res.status(404).json({
-          message: 'Role not found for the user',
+          message: "Role not found for the user",
         });
       }
 
       return res.status(200).json({
-        message: 'Role removed successfully',
+        message: "Role removed successfully",
       });
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      console.error('Error removing role:', error);
+      console.error("Error removing role:", error);
       return res.status(500).json({
-        message: 'Internal server error',
+        message: "Internal server error",
       });
     }
   }

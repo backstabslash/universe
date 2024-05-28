@@ -10,7 +10,7 @@ interface WorkSpaceData {
   pfp_url?: string | null;
 }
 
-interface UserData {
+export interface UserData {
   email?: string | null;
   tag?: string | null;
   name?: string | null;
@@ -35,9 +35,17 @@ interface WorkSpaceState {
   getWorkspaceUsers: () => Promise<void>;
   getWorkspacePublicChannels: () => Promise<void>;
   updateAvatar: (workSpaceData: WorkSpaceData) => Promise<void>;
-  addWorkSpaceRoles: (workSpaceName: string, roleName: string[]) => Promise<void>;
+  addWorkSpaceRoles: (
+    workSpaceName: string,
+    roleName: string[]
+  ) => Promise<void>;
   getAllWorkSpaceRoles: (workSpaceName: string) => Promise<any[]>;
-  changeWorkSpaceEmailTemplates: (workSpaceName: string, emailTemplates: string[]) => Promise<void>;
+  changeWorkSpaceEmailTemplates: (
+    workSpaceName: string,
+    emailTemplates: string[]
+  ) => Promise<void>;
+  getWorkspaceTemplates: () => Promise<any[]>;
+  addWorkspaceTemplate: () => Promise<void>;
 }
 
 const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
@@ -55,10 +63,10 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
     set({ axiosPrivate });
   },
 
-  addWorkSpace: async (workSpaceData: WorkSpaceData | UserData) => {
+  addWorkSpace: async (workSpaceData: any) => {
     try {
-      await axios.post(`${api.url}/workspace/add-workspace`, workSpaceData);
-      set({ error: null });
+      const response = await axios.post(`${api.url}/workspace/add-workspace`, workSpaceData);
+      set({ error: null, workSpaceData: { ownerId: response?.data?.ownerId } });
     } catch (err: any) {
       const error =
         err.response?.data?.message ||
@@ -143,7 +151,10 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
   addWorkSpaceRoles: async (workSpaceName: string, roleNames: string[]) => {
     try {
       const { axiosPrivate } = get();
-      await axiosPrivate?.post(`${api.url}/wusers/add-workspace-role`, { workSpaceName, roleNames });
+      await axiosPrivate?.post(`${api.url}/wusers/add-workspace-role`, {
+        workSpaceName,
+        roleNames,
+      });
       set({ error: null });
     } catch (err: any) {
       const error =
@@ -154,10 +165,16 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
       throw error;
     }
   },
-  changeWorkSpaceEmailTemplates: async (workSpaceName: string, emailTemplates: string[]) => {
+  changeWorkSpaceEmailTemplates: async (
+    workSpaceName: string,
+    emailTemplates: string[]
+  ) => {
     try {
       const { axiosPrivate } = get();
-      await axiosPrivate?.post(`${api.url}/wusers/change-workspace-emailtemplates`, { workSpaceName, emailTemplates });
+      await axiosPrivate?.post(
+        `${api.url}/wusers/change-workspace-emailtemplates`,
+        { workSpaceName, emailTemplates }
+      );
       set({ error: null });
     } catch (err: any) {
       const error =
@@ -172,7 +189,10 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
   getAllWorkSpaceRoles: async (workSpaceName: string) => {
     try {
       const { axiosPrivate } = get();
-      const response = await axiosPrivate?.post(`${api.url}/wusers/get-workspace-roles`, { workSpaceName });
+      const response = await axiosPrivate?.post(
+        `${api.url}/wusers/get-workspace-roles`,
+        { workSpaceName }
+      );
       set({ error: null });
 
       return response?.data?.roles;
@@ -185,6 +205,39 @@ const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
       throw error;
     }
   },
+  getWorkspaceTemplates: async () => {
+    try {
+      const response = await axios.get(
+        `${api.url}/workspace-templates/get-workspace-templates`);
+      set({ error: null });
+      return response?.data?.universeTemplate;
+    } catch (err: any) {
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+  addWorkspaceTemplate: async () => {
+    try {
+      const { workSpaceData } = get();
+      console.log(workSpaceData?.ownerId);
+
+      await axios.post(
+        `${api.url}/workspace-templates/add-workspace-template`, { ownerId: workSpaceData?.ownerId });
+      set({ error: null });
+    } catch (err: any) {
+      const error =
+        err.response?.data?.message ||
+        err.message ||
+        'An unknown error occurred';
+      set({ error });
+      throw error;
+    }
+  },
+
 }));
 
 export default useWorkSpaceStore;

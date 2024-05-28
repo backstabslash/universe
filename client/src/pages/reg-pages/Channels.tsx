@@ -1,38 +1,11 @@
-import { AtSignIcon } from '@chakra-ui/icons';
-import {
-  Box,
-  Text,
-  Button,
-  Flex,
-  Input,
-  Heading,
-  HStack,
-  Tag,
-  TagLabel,
-  TagCloseButton,
-  TagLeftIcon,
-} from '@chakra-ui/react';
-import { useState } from 'react';
+import { Box, Text, Button, Flex, Heading, HStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/RegSidebar';
+import useWorkSpaceStore from '../../store/workSpace';
 
 const Channels = (): JSX.Element => {
-  const isLoadingMock = false;
-
-  const [tags, setTags] = useState<string[]>([]);
-  const [input, setInput] = useState<string>('');
-
   const navigate = useNavigate();
-
-  const handleKeyDown = (event: any): void => {
-    if (event.key === 'Enter') {
-      setTags([...tags, input]);
-      setInput('');
-    }
-  };
-  const handleDelete = (tagToDelete: any): void => {
-    setTags(tags.filter(tag => tag !== tagToDelete));
-  };
+  const { addWorkspaceTemplate } = useWorkSpaceStore(state => state);
 
   return (
     <Box flexDirection="column" height="100vh" bg="zinc900">
@@ -48,67 +21,41 @@ const Channels = (): JSX.Element => {
             borderColor="zinc600"
             borderRadius="md"
             textAlign="left"
-            mr="50vw"
-            mb="10px"
+            mb="30px"
+            maxW={'400px'}
             color="zinc300"
           >
-            What&apos;s your team <br></br> working on right now?
+            Would you like to use this template or start from scratch? It&apos;s
+            fully customizable.
           </Heading>
-          <Flex
-            wrap="wrap"
-            maxW={'500px'}
-            bg="zinc800"
-            borderRadius="md"
-            borderColor="zinc600"
-            _focusVisible={{ borderColor: 'zinc600' }}
-            w="460px"
-            mb="10px"
-            color="zinc300"
-          >
-            {tags.map((tag, index) => (
-              <Tag key={index} m="2" w="fit-content" color="zinc300">
-                <TagLeftIcon boxSize="12px" as={AtSignIcon} />
-                <TagLabel>{tag}</TagLabel>
-                <TagCloseButton
-                  onClick={() => {
-                    handleDelete(tag);
-                  }}
-                />
-              </Tag>
-            ))}
-            <Input
-              flex="1"
-              placeholder="Enter channel names"
-              fontSize="lg"
-              bg="zinc800"
-              borderRadius="md"
-              border={'0'}
-              _focusVisible={{ borderColor: 'zinc600' }}
-              w="400px"
-              minH="50px"
-              color="zinc300"
-              value={input}
-              onChange={e => {
-                setInput(e.target.value);
-              }}
-              onKeyDown={handleKeyDown}
-            />
-          </Flex>
 
-          <Flex align="start" gap="md" mt="lg">
+          <HStack align="start" spacing={'10px'} mt="lg">
             <Button
               bg="zinc800"
               color="zinc300"
               _hover={{ bg: 'zinc700' }}
               w="100px"
               onClick={() => {
-                navigate('/');
+                addWorkspaceTemplate();
+                navigate('/main');
               }}
               type="submit"
             >
-              {isLoadingMock ? '' : 'Continue'}
+              Accept
             </Button>
-          </Flex>
+            <Button
+              bg="zinc800"
+              color="zinc300"
+              _hover={{ bg: 'zinc700' }}
+              w="100px"
+              onClick={() => {
+                navigate('/main');
+              }}
+              type="submit"
+            >
+              Decline
+            </Button>
+          </HStack>
         </Flex>
       </HStack>
     </Box>

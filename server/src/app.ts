@@ -11,6 +11,7 @@ import rateLimiter from "./middleware/rateLimiter";
 import workSpaceRoutes from "./routes/workSpaceRoutes";
 import workspaceUserRoutes from "./routes/workspaceUsersRoutes";
 import fileRoutes from "./routes/fileRoutes";
+import workSpaceTemplateRoutes from "./routes/workspaceTemplateRoutes";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRoutes);
 app.use("/workspace", workSpaceRoutes);
+app.use("/workspace-templates", workSpaceTemplateRoutes);
 app.use(rateLimiter(), verifyJWT);
 app.use("/wusers", workspaceUserRoutes);
 app.use("/user", userRoutes);
