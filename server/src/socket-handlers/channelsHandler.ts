@@ -65,6 +65,7 @@ class ChannelsHandler {
       console.error(error);
     }
   }
+
   async createChannel(
     socket: Socket,
     data: { name: string; private: boolean; readonly: boolean },
@@ -140,6 +141,7 @@ class ChannelsHandler {
       session.endSession();
     }
   }
+
   async createDMChannel(
     socket: Socket,
     data: { user1Id: string; user2Id: string },
@@ -180,6 +182,7 @@ class ChannelsHandler {
       session.endSession();
     }
   }
+
   async deleteChannel(id: string, callback: Function, io: Server, socket: Socket) {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -204,6 +207,26 @@ class ChannelsHandler {
       session.endSession();
     }
   }
+
+  async renameChannel(socket: Socket, data: { id: string; name: string }, callback: Function) {
+    try {
+      const updatedChannel = await Channel.findByIdAndUpdate(
+        data.id,
+        { name: data.name },
+        { new: true }
+      );
+      callback({ status: "success" });
+
+      socket.broadcast.to(data.id).emit("channel-renamed", {
+        id: updatedChannel?.id,
+        name: updatedChannel?.name,
+      });
+    } catch (error) {
+      console.error(error);
+      callback({ status: "error" });
+    }
+  }
+
   async leaveChannel(socket: Socket, id: string, callback: Function) {
     const session = await mongoose.startSession();
     session.startTransaction();

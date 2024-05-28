@@ -136,7 +136,14 @@ const DragAndDropList = ({
                                 justifyContent={'space-between'}
                                 mb={'10px'}
                               >
-                                <Heading size="sm" ml={'10px'} color="zinc300">
+                                <Heading
+                                  overflow="hidden"
+                                  textOverflow="ellipsis"
+                                  whiteSpace="nowrap"
+                                  size="sm"
+                                  ml={'10px'}
+                                  color="zinc300"
+                                >
                                   {list.name}
                                 </Heading>
                                 {list.name !== 'General' &&
@@ -195,7 +202,13 @@ const DragAndDropList = ({
                                         fontSize="small"
                                         style={{ marginRight: '8px' }}
                                       />
-                                      <Text>{item.name}</Text>
+                                      <Text
+                                        overflow="hidden"
+                                        textOverflow="ellipsis"
+                                        whiteSpace="nowrap"
+                                      >
+                                        {item.name}
+                                      </Text>
                                     </Flex>
                                   )}
                                 </Draggable>

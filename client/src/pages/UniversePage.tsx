@@ -62,6 +62,7 @@ const MainContent = (): JSX.Element => {
     onDeletedChannel,
     onDeletedMessage,
     onEditedMessage,
+    onChannelRenamed,
   } = useMessengerStore(state => state);
 
   const { userData, logout, setUserData } = useAuthStore(state => state);
@@ -91,6 +92,7 @@ const MainContent = (): JSX.Element => {
       onDeletedChannel();
       onDeletedMessage();
       onEditedMessage();
+      onChannelRenamed();
     }
 
     return () => {
@@ -315,7 +317,15 @@ const MainContent = (): JSX.Element => {
                 {!currentChannel?.user?._id &&
                 currentChannel?.id !== notesChannel.id ? (
                   <>
-                    <Text fontWeight={'bold'}>#{currentChannel?.name}</Text>
+                    <Text
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                      fontWeight={'bold'}
+                      maxW={'calc(100vw - 1000px)'}
+                    >
+                      #{currentChannel?.name}
+                    </Text>
                     <HStack>
                       <ChannelMembersModal />
                       <Menu placement="bottom-end">
