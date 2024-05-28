@@ -9,7 +9,6 @@ import {
   ModalFooter,
   Box,
   Button,
-  HStack,
   Modal,
   ModalHeader,
   ModalOverlay,
@@ -51,72 +50,53 @@ const MessageContextMenu = ({
           left={`${mousePosition?.x}px`}
           zIndex="tooltip"
         >
-          <VStack bg="zinc900" borderRadius="md" boxShadow="md" p="2">
+          <VStack bg="zinc900" borderRadius="md" boxShadow="md" p={2}>
             {isSendToNotesEnabled && (
-              <HStack
-                bg="zinc900"
-                _hover={{ background: 'zinc800' }}
-                w={'100%'}
-                borderRadius={'md'}
-              >
-                <Button
-                  leftIcon={<Bookmark />}
-                  onClick={() => onSendToNotes()}
-                  color="white"
-                  bg="none"
-                  pl={'11px'}
-                  _hover={{ background: 'none' }}
-                  _active={{ background: 'none' }}
-                  alignSelf={'start'}
-                >
-                  Save
-                </Button>
-              </HStack>
-            )}
-            {isEditEnabled && (
-              <HStack
-                bg="zinc900"
+              <Button
+                leftIcon={<Bookmark />}
+                onClick={() => onSendToNotes()}
+                color="white"
+                bg="none"
+                pl={'11px'}
                 _hover={{ background: 'zinc800' }}
                 _active={{ background: 'zinc800' }}
                 w={'100%'}
-                borderRadius={'md'}
+                justifyContent={'start'}
               >
-                <Button
-                  leftIcon={<EditIcon />}
-                  onClick={() => onEditMessage()}
-                  color="white"
-                  bg="none"
-                  _hover={{ background: 'none' }}
-                  _active={{ background: 'none' }}
-                  alignSelf={'start'}
-                >
-                  Edit
-                </Button>
-              </HStack>
+                Save
+              </Button>
+            )}
+            {isEditEnabled && (
+              <Button
+                leftIcon={<EditIcon />}
+                onClick={() => onEditMessage()}
+                color="white"
+                bg="none"
+                _hover={{ background: 'zinc800' }}
+                _active={{ background: 'zinc800' }}
+                w={'100%'}
+                justifyContent={'start'}
+              >
+                Edit
+              </Button>
             )}
 
             {isDeleteEnabled && (
-              <HStack
-                bg="zinc900"
+              <Button
+                leftIcon={<DeleteIcon color="red.500" />}
+                onClick={() => {
+                  onCloseContextMenu();
+                  onOpen();
+                }}
+                color="red.500"
+                bg="none"
                 _hover={{ background: 'zinc800' }}
+                _active={{ background: 'zinc800' }}
                 w={'100%'}
-                borderRadius={'md'}
+                justifyContent={'start'}
               >
-                <Button
-                  leftIcon={<DeleteIcon color="red.500" />}
-                  onClick={() => {
-                    onCloseContextMenu();
-                    onOpen();
-                  }}
-                  color="red.500"
-                  bg="none"
-                  _hover={{ background: 'none' }}
-                  _active={{ background: 'none' }}
-                  alignSelf={'start'}
-                >
-                  Delete
-                </Button>
-              </HStack>
+                Delete
+              </Button>
             )}
           </VStack>
         </Box>

@@ -21,6 +21,7 @@ export interface ChannelMessages extends Channel {
   messages: UserMessage[];
   page: number;
   users: any;
+  readonly: boolean;
   hasMoreMessages: boolean;
 }
 
@@ -734,13 +735,10 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           set({ channels: updatedChannels });
           if (itsMe) {
             const newChannel = {
-              id: channel.id,
+              ...channel,
               messages: [],
               page: 0,
               users: [...channel.users, ...ids.map(id => ({ _id: id }))],
-              name: channel.name,
-              ownerId: channel.owner,
-              hasMoreMessages: channel.hasMoreMessages,
             };
             const updatedChannelGroups = channelGroups.map(channelGroup => {
               if (channelGroup.name === 'General') {
@@ -770,43 +768,44 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
           name: string;
           users: { _id: string; name: string };
           owner: string;
+          readonly: boolean;
         };
-        userId: string;
+        userIds: string[];
       }) => {
         const { channels, channelGroups } = get();
 
-        if (currentUserId !== data.userId) {
-          const updatedChannels = channels.map(channel => {
-            if (channel.id === data.channel.id) {
-              return {
-                ...channel,
-                users: data.channel.users,
-              };
-            }
-            return channel;
-          });
+        for (const userId of data.userIds) {
+          if (currentUserId !== userId) {
+            const updatedChannels = channels.map(channel => {
+              if (channel.id === data.channel.id) {
+                return {
+                  ...channel,
+                  users: data.channel.users,
+                };
+              }
+              return channel;
+            });
 
-          set({ channels: [...updatedChannels] });
-        } else {
-          const newChannel = {
-            id: data.channel.id,
-            messages: [],
-            page: 0,
-            users: data.channel.users,
-            name: data.channel.name,
-            ownerId: data.channel.owner,
-            hasMoreMessages: true,
-          };
-          const updatedChannelGroups = channelGroups.map(channelGroup => {
-            if (channelGroup.name === 'General') {
-              channelGroup.items.push(data.channel);
-            }
-            return channelGroup;
-          });
-          set({
-            channels: [newChannel, ...channels],
-            channelGroups: updatedChannelGroups,
-          });
+            set({ channels: [...updatedChannels] });
+          } else {
+            const newChannel = {
+              ...data.channel,
+              messages: [],
+              page: 0,
+              hasMoreMessages: true,
+            };
+            const updatedChannelGroups = channelGroups.map(channelGroup => {
+              if (channelGroup.name === 'General') {
+                channelGroup.items.push(data.channel);
+              }
+              return channelGroup;
+            });
+
+            set({
+              channels: [newChannel, ...channels],
+              channelGroups: updatedChannelGroups,
+            });
+          }
         }
       }
     );
@@ -845,14 +844,14 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
     socket.emit('create-channel', data, (response: any) => {
       if (response.status === 'success') {
         const updatedChannel = {
+          ...response.data,
           id: response.data._id,
           messages: [],
           page: 0,
           users: [{ _id: response.data.owner, name: response.data.name }],
-          name: response.data.name,
-          ownerId: response.data.owner,
           hasMoreMessages: false,
         };
+
         const updatedChannelGroups = channelGroups.map(channelGroup => {
           if (channelGroup.name === 'General') {
             channelGroup.items.push({
@@ -907,6 +906,7 @@ const useMessengerStore = create<MessengerState>((set, get) => ({
                 page: 0,
                 users: [],
                 name: data.userName,
+                readonly: false,
                 hasMoreMessages: false,
               },
               ...channels,

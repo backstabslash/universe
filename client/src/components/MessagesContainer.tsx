@@ -271,18 +271,12 @@ const MessagesContainer = (): JSX.Element => {
 
   return (
     <Flex
-      ref={containerRef}
-      background="rgba(0, 0, 0, 0.5)"
-      maxH="calc(100vh - 270px)"
-      height={'100%'}
-      overflowY="auto"
-      bgImage="../../chat-bg-pattern-dark.png"
-      bgSize="cover"
-      bgRepeat="no-repeat"
-      bgPosition="center"
+      flexDirection="column-reverse"
+      flex={1}
       pt={'15px'}
       pb={'10px'}
-      flexDirection="column-reverse"
+      overflowY="auto"
+      ref={containerRef}
       onClick={() => setIsContextMenuOpen(false)}
     >
       {messagesLoading && messages.length === 0 ? (
@@ -310,7 +304,7 @@ const MessagesContainer = (): JSX.Element => {
                 color="zinc300"
                 mt="18px"
                 ml={`${message.user._id === userData?.userId ? '100px' : '18px'}`}
-                mr={`${message.user._id === userData?.userId ? '18px' : '100px'}`}
+                mr={`${message.user._id === userData?.userId ? '13px' : '100px'}`}
                 width="fit-content"
                 onContextMenu={event => {
                   handleContextMenu(event, message);
