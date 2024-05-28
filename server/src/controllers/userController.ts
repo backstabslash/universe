@@ -36,8 +36,11 @@ class UserController {
         });
       }
       const userRoles = await UserRole.find({ user: user.id }).populate('role');
+      const roles = userRoles.map((userRole) => ({
+        id: userRole.role.id,
+        name: userRole.role.name,
+      }));
 
-      const roles = userRoles.map((userRole) => userRole.role.name);
       return res.status(200).json({
         tag: user.tag,
         name: user.name,
@@ -45,7 +48,8 @@ class UserController {
         phone: user.phone,
         email: user.email,
         userId: user.id,
-        userRole: roles,
+        userRole: roles.map((role) => role.name),
+        roles,
       });
     } catch (error) {
       res.status(500).json({
@@ -64,7 +68,10 @@ class UserController {
         });
       }
       const userRoles = await UserRole.find({ user: user.id }).populate('role');
-      const roles = userRoles.map((userRole) => userRole.role.name);
+      const roles = userRoles.map((userRole) => ({
+        id: userRole.role.id,
+        name: userRole.role.name,
+      }));
 
       return res.status(200).json({
         userId: user.id,
@@ -73,7 +80,8 @@ class UserController {
         email: user.email,
         pfp_url: user.pfp_url,
         phone: user.phone,
-        userRole: roles,
+        userRole: roles.map((role) => role.name),
+        roles,
       });
     } catch (error) {
       res.status(500).json({
@@ -150,23 +158,76 @@ class UserController {
       const userRoles = userIds
         .map((userId: string) =>
           userRoleIds.map((roleId: string) => ({
-            user: userId,
-            role: roleId,
+            user: new mongoose.Types.ObjectId(userId),
+            role: new mongoose.Types.ObjectId(roleId),
           }))
         )
         .flat();
 
-      await UserRole.insertMany(userRoles, { session });
+      const existingUserRoles = await UserRole.find({
+        $or: userRoles,
+      }).session(session);
+
+      const existingConnections = new Set(
+        existingUserRoles.map(
+          (userRole) =>
+            `${userRole.user.toString()}-${userRole.role.toString()}`
+        )
+      );
+      const newUserRoles = userRoles.filter(
+        (userRole: any) =>
+          !existingConnections.has(`${userRole.user}-${userRole.role}`)
+      );
+
+      if (newUserRoles.length > 0) {
+        await UserRole.insertMany(newUserRoles, { session });
+      }
 
       await session.commitTransaction();
       session.endSession();
 
       return res.status(200).json({
         message: 'Roles added successfully',
+        addedRoles: newUserRoles.length,
+        skippedRoles: existingUserRoles.length,
       });
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
+      console.error('Error adding roles:', error);
+      return res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
+  async removeRole(req: Request, res: Response) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const { userId, roleId } = req.body;
+
+      const userRole = await UserRole.findOneAndDelete({
+        user: new mongoose.Types.ObjectId(userId),
+        role: new mongoose.Types.ObjectId(roleId),
+      }).session(session);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      if (!userRole) {
+        return res.status(404).json({
+          message: 'Role not found for the user',
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Role removed successfully',
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error('Error removing role:', error);
       return res.status(500).json({
         message: 'Internal server error',
       });

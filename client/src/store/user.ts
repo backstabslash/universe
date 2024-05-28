@@ -13,6 +13,7 @@ interface UserData {
   pfp_url?: string | null;
   phone?: string | null;
   userRole?: string[] | null;
+  roles?: Array<{ _id: string; name: string }> | null;
 }
 
 interface UserState {
