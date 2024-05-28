@@ -23,9 +23,10 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import UserRoleFilter from './UserRoleFilter';
-import useWorkSpaceStore from '../store/workSpace';
+import useWorkSpaceStore, { UserData } from '../store/workSpace';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useUserStore from '../store/user';
+import useAuthStore from '../store/auth';
 
 const ManageUserRolesModal = (): any => {
   const axiosPrivate = useAxiosPrivate();
@@ -37,6 +38,7 @@ const ManageUserRolesModal = (): any => {
     getAllWorkSpaceRoles,
     workSpaceData,
   } = useWorkSpaceStore();
+  const { userData } = useAuthStore();
   const { addRolesToUsers } = useUserStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoles, setSelectedRoles] = useState<any>([]);
@@ -45,6 +47,8 @@ const ManageUserRolesModal = (): any => {
   const [roleSearchQuery, setRoleSearchQuery] = useState('');
   const [dataFetched, setDataFetched] = useState(false);
   const [roleError, setRoleError] = useState<string>('');
+  const [targetWorkspaceUsers, setTargetWorkspaceUsers] =
+    useState<UserData[]>();
 
   const [filterRoles, setFilterRoles] = useState([]);
 
@@ -59,10 +63,39 @@ const ManageUserRolesModal = (): any => {
     setDataFetched(true);
   };
 
+  const getMainRole = (roles: string[]): string => {
+    if (roles.includes('administration')) return 'administration';
+    if (roles.includes('worker')) return 'worker';
+    if (roles.includes('headman')) return 'headman';
+    return 'unknown';
+  };
+
   const fetchAvailableRoles = async (): Promise<void> => {
     if (workSpaceData?.workSpaceName) {
       const roles = await getAllWorkSpaceRoles(workSpaceData.workSpaceName);
-      setAvailableRoles(roles);
+
+      const role = getMainRole(userData?.userRole ?? []);
+
+      switch (role) {
+        case 'administration':
+          setAvailableRoles(roles);
+          break;
+        case 'worker':
+        case 'headman':
+          setAvailableRoles(
+            roles.filter(
+              (role: any) =>
+                role.name !== 'administration' &&
+                role.name !== 'worker' &&
+                role.name !== 'headman' &&
+                role.name !== 'student'
+            )
+          );
+          break;
+        default:
+          setAvailableRoles(roles);
+          break;
+      }
     }
   };
 
@@ -78,8 +111,40 @@ const ManageUserRolesModal = (): any => {
     setFilterRoles(filters);
   };
 
+  useEffect(() => {
+    const role = getMainRole(userData?.userRole ?? []);
+    if (workspaceUsers) {
+      switch (role) {
+        case 'administration':
+          setTargetWorkspaceUsers(workspaceUsers);
+          break;
+        case 'worker':
+          setTargetWorkspaceUsers(
+            workspaceUsers.filter(
+              (user: any) =>
+                !user.userRole.includes('administration') &&
+                !user.userRole.includes('worker')
+            )
+          );
+          break;
+        case 'headman':
+          setTargetWorkspaceUsers(
+            workspaceUsers.filter(
+              (user: any) =>
+                !user.userRole.includes('administration') &&
+                !user.userRole.includes('headman') &&
+                !user.userRole.includes('worker')
+            )
+          );
+          break;
+        default:
+          break;
+      }
+    }
+  }, [workspaceUsers]);
+
   const filteredUsersList = searchQuery
-    ? workspaceUsers?.filter((user: any) => {
+    ? targetWorkspaceUsers?.filter((user: any) => {
         const matchesSearch =
           user?.name?.toLowerCase().includes(searchQuery) ||
           user?.tag?.toLowerCase()?.includes(searchQuery);
@@ -89,10 +154,10 @@ const ManageUserRolesModal = (): any => {
         return matchesSearch && matchesRoleFilter;
       })
     : filterRoles.length > 0
-      ? workspaceUsers?.filter((user: any) =>
+      ? targetWorkspaceUsers?.filter((user: any) =>
           filterRoles.every(role => user.userRole.includes(role))
         )
-      : workspaceUsers;
+      : targetWorkspaceUsers;
 
   const filteredRolesList = roleSearchQuery
     ? availableRoles.filter((role: any) =>
