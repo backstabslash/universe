@@ -32,7 +32,7 @@ interface UserState {
 const useUserStore = create<UserState>((set, get) => ({
   userData: null,
   axios: null,
-  isUserProfileVisible: true,
+  isUserProfileVisible: false,
   error: null,
 
   setAxiosPrivate: async axiosPrivate => {
