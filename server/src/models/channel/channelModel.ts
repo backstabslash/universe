@@ -1,6 +1,5 @@
 import { Schema, model, Document } from "mongoose";
 import { IUser } from "../user/userModel";
-import { boolean } from "joi";
 
 export interface IChannel extends Document {
   name: string;
