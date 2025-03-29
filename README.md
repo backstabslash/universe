@@ -63,7 +63,7 @@ docker-compose up --build
 ```
 /universe
 │── /server          # ⚙️ Server side (Node.js, Express)
-│── /client          # 🎨 Client side (React, Vue, Angular)
+│── /client          # 🎨 Client side (React)
 │── docker-compose.yml
 │── README.md
 ```
