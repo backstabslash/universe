@@ -37,13 +37,16 @@ The University Messaging System provides an efficient and user-friendly platform
 - User authentication and role-based permissions
 - Mobile-responsive design for access on various devices
 
-## Implementation Plan
+## Interface Showcase
 
-1. Research and requirements gathering
-2. System architecture design
-3. Database schema development
-4. Backend API implementation
-5. Frontend user interface development
-6. Real-time communication integration
-7. Testing and quality assurance
-8. Deployment and documentation
+### Login page
+![Login page](/assets/login_page.png)
+
+### Main view
+![Main view](/assets/main_view.png)
+
+### Message rich text editor
+![Message rich text editor](/assets/message_rich_text_editor.png)
+
+### Formatted message
+![Formatted message](/assets/formatted_message.png)
